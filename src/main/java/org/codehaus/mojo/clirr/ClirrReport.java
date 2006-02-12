@@ -18,7 +18,7 @@ package org.codehaus.mojo.clirr;
 
 import net.sf.clirr.core.Checker;
 import net.sf.clirr.core.CheckerException;
-import net.sf.clirr.core.ClassSelector;
+import net.sf.clirr.core.ClassFilter;
 import net.sf.clirr.core.PlainDiffListener;
 import net.sf.clirr.core.Severity;
 import net.sf.clirr.core.XmlDiffListener;
@@ -167,6 +167,22 @@ public class ClirrReport
      */
     private File xmlOutputFile;
 
+    /**
+     * A list of classes to include. Anything not included is excluded. If omitted, all are assumed to be included.
+     * Values are specified in path pattern notation, e.g. <code>org/codehaus/mojo/**</code>.
+     *
+     * @parameter
+     */
+    private String[] includes;
+
+    /**
+     * A list of classes to exclude. These classes are excluded from the list of classes that are included.
+     * Values are specified in path pattern notation, e.g. <code>org/codehaus/mojo/**</code>.
+     *
+     * @parameter
+     */
+    private String[] excludes;
+
     protected SiteRenderer getSiteRenderer()
     {
         return siteRenderer;
@@ -223,13 +239,12 @@ public class ClirrReport
             ClassLoader currentDepCL = createClassLoader( project.getArtifacts(), null );
 
             // a selector that selects everything
-            // TODO: filter classes?
-            ClassSelector classSelector = new ClassSelector( ClassSelector.MODE_UNLESS );
+            ClassFilter classFilter = new ClirrClassFilter( includes, excludes );
 
             File file = new File( localRepository.getBasedir(), localRepository.pathOf( previousArtifact ) );
-            JavaType[] origClasses = BcelTypeArrayBuilder.createClassSet( new File[]{file}, origDepCL, classSelector );
+            JavaType[] origClasses = BcelTypeArrayBuilder.createClassSet( new File[]{file}, origDepCL, classFilter );
 
-            JavaType[] currentClasses = createClassSet( classesDirectory, currentDepCL, classSelector );
+            JavaType[] currentClasses = createClassSet( classesDirectory, currentDepCL, classFilter );
 
             // Create a Clirr checker and execute
             Checker checker = new Checker();
@@ -313,7 +328,7 @@ public class ClirrReport
         }
     }
 
-    public static JavaType[] createClassSet( File classes, ClassLoader thirdPartyClasses, ClassSelector classSelector )
+    public static JavaType[] createClassSet( File classes, ClassLoader thirdPartyClasses, ClassFilter classFilter )
         throws MalformedURLException
     {
         ClassLoader classLoader = new URLClassLoader( new URL[]{classes.toURL()}, thirdPartyClasses );
@@ -333,7 +348,7 @@ public class ClirrReport
         {
             File f = new File( classes, files[i] );
             JavaClass clazz = extractClass( f, repository );
-            if ( classSelector.isSelected( clazz ) )
+            if ( classFilter.isSelected( clazz ) )
             {
                 selected.add( new BcelJavaType( clazz ) );
                 repository.storeClass( clazz );

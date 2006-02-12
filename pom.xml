@@ -1,0 +1,58 @@
+<project 
+  xmlns="http://maven.apache.org/POM/4.0.0" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>mojo-sandbox</artifactId>
+    <groupId>org.codehaus.mojo</groupId>
+    <version>2-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>clirr-maven-plugin</artifactId>
+  <packaging>maven-plugin</packaging>
+  <name>Maven Clirr Plugin</name>
+  <version>2.0-SNAPSHOT</version>
+  <issueManagement>
+    <system>JIRA</system>
+    <url>http://jira.codehaus.org/browse/MOJO</url>
+  </issueManagement>
+  <inceptionYear>2005</inceptionYear>
+  <developers>
+    <developer>
+      <id>brett</id>
+      <name>Brett Porter</name>
+      <email>brett@apache.org</email>
+      <organization>Mergere</organization>
+      <roles>
+        <role>Java Developer</role>
+      </roles>
+      <timezone>+10</timezone>
+    </developer>
+  </developers>
+  <dependencies>
+    <dependency>
+      <groupId>net.sf.clirr</groupId>
+      <artifactId>clirr-core</artifactId>
+      <version>0.6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.reporting</groupId>
+      <artifactId>maven-reporting-impl</artifactId>
+      <version>2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-artifact-manager</artifactId>
+      <version>2.0</version>
+    </dependency>
+<!--
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-utils</artifactId>
+      <version>1.0.4</version>
+    </dependency>
+-->
+  </dependencies>
+</project>

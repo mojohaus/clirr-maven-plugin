@@ -96,25 +96,4 @@ public class ClirrDiffListener
         return getCount( counts, severity );
     }
 
-    public static Severity convertSeverity( String minSeverity )
-    {
-        Severity s;
-        if ( "info".equals( minSeverity ) )
-        {
-            s = Severity.INFO;
-        }
-        else if ( "warning".equals( minSeverity ) )
-        {
-            s = Severity.WARNING;
-        }
-        else if ( "error".equals( minSeverity ) )
-        {
-            s = Severity.ERROR;
-        }
-        else
-        {
-            s = null;
-        }
-        return s;
-    }
 }

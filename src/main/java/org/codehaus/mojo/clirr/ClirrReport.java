@@ -19,6 +19,9 @@ package org.codehaus.mojo.clirr;
 import net.sf.clirr.core.Checker;
 import net.sf.clirr.core.CheckerException;
 import net.sf.clirr.core.ClassSelector;
+import net.sf.clirr.core.PlainDiffListener;
+import net.sf.clirr.core.Severity;
+import net.sf.clirr.core.XmlDiffListener;
 import net.sf.clirr.core.internal.bcel.BcelJavaType;
 import net.sf.clirr.core.internal.bcel.BcelTypeArrayBuilder;
 import net.sf.clirr.core.spi.JavaType;
@@ -116,19 +119,53 @@ public class ClirrReport
     private static final URL[] EMPTY_URL_ARRAY = new URL[0];
 
     /**
+     * The classes of this project to compare the last release against.
+     *
      * @parameter default-value="${project.build.outputDirectory}
      */
     private File classesDirectory;
 
     /**
+     * Version to compare the current code against.
+     *
      * @parameter expression="${comparisonVersion}" default-value="(,${project.version})"
      */
     private String comparisonVersion;
 
     /**
+     * Show only messages of this severity or higher. Valid values are <code>info</code>, <code>warning</code> and <code>error</code>.
+     *
      * @parameter expression="${minSeverity}" default-value="warning"
      */
     private String minSeverity;
+
+    /**
+     * Whether to show the summary of the number of errors, warnings and informational messages.
+     *
+     * @parameter expression="${showSummary}" default-value="true"
+     */
+    private boolean showSummary;
+
+    /**
+     * Whether to render the HTML report or not.
+     *
+     * @parameter expression="${htmlReport}" default-value="true"
+     */
+    private boolean htmlReport;
+
+    /**
+     * A text output file to render to. If omitted, no output is rendered to a text file.
+     *
+     * @parameter expression="${textOutputFile}"
+     */
+    private File textOutputFile;
+
+    /**
+     * An XML file to render to. If omitted, no output is rendered to an XML file.
+     *
+     * @parameter expression="${xmlOutputFile}"
+     */
+    private File xmlOutputFile;
 
     protected SiteRenderer getSiteRenderer()
     {
@@ -197,18 +234,53 @@ public class ClirrReport
             // Create a Clirr checker and execute
             Checker checker = new Checker();
 
-            ClirrDiffListener listener = new ClirrDiffListener();
+            List listeners = new ArrayList();
 
-            checker.addDiffListener( listener );
+            ClirrDiffListener listener = null;
+            if ( htmlReport )
+            {
+                listener = new ClirrDiffListener();
 
-            // TODO: what about text, xml outputs?
+                listeners.add( listener );
+            }
 
-            checker.reportDiffs( origClasses, currentClasses );
+            if ( xmlOutputFile != null )
+            {
+                listeners.add( new XmlDiffListener( xmlOutputFile.getAbsolutePath() ) );
+            }
 
-            ClirrReportGenerator generator = new ClirrReportGenerator( getSink(), getBundle( locale ), locale );
-            // TODO: severity summary?
-            generator.setMinSeverity( minSeverity );
-            generator.generateReport( listener );
+            if ( textOutputFile != null )
+            {
+                listeners.add( new PlainDiffListener( textOutputFile.getAbsolutePath() ) );
+            }
+
+            if ( listeners.isEmpty() )
+            {
+                getLog().error( "No listeners were configured!" );
+            }
+            else
+            {
+                Severity minSeverity = ClirrDiffListener.convertSeverity( this.minSeverity );
+                if ( minSeverity == null )
+                {
+                    getLog().warn( "Invalid minimum severity: '" + this.minSeverity + "', ignoring." );
+                }
+
+                checker.addDiffListener( new DelegatingListener( listeners, minSeverity ) );
+
+                checker.reportDiffs( origClasses, currentClasses );
+
+                if ( htmlReport )
+                {
+                    ClirrReportGenerator generator = new ClirrReportGenerator( getSink(), getBundle( locale ), locale );
+
+                    generator.setEnableSeveritySummary( showSummary );
+
+                    generator.setMinSeverity( minSeverity );
+
+                    generator.generateReport( listener );
+                }
+            }
         }
         catch ( ArtifactResolutionException e )
         {

@@ -30,7 +30,6 @@ import java.util.ResourceBundle;
  * Generate the Clirr report.
  *
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
- * @todo filter by severity
  */
 public class ClirrReportGenerator
 {
@@ -159,7 +158,7 @@ public class ClirrReportGenerator
         sink.tableCell_();
         sink.tableRow_();
 
-        if ( minSeverity.compareTo( Severity.WARNING ) <= 0 )
+        if ( minSeverity == null || minSeverity.compareTo( Severity.WARNING ) <= 0 )
         {
             sink.tableRow();
             sink.tableCell();
@@ -173,7 +172,7 @@ public class ClirrReportGenerator
             sink.tableRow_();
         }
 
-        if ( minSeverity.compareTo( Severity.INFO ) <= 0 )
+        if ( minSeverity == null || minSeverity.compareTo( Severity.INFO ) <= 0 )
         {
             sink.tableRow();
             sink.tableCell();
@@ -189,7 +188,7 @@ public class ClirrReportGenerator
 
         sink.table_();
 
-        if ( minSeverity.compareTo( Severity.INFO ) > 0 )
+        if ( minSeverity == null || minSeverity.compareTo( Severity.INFO ) > 0 )
         {
             sink.paragraph();
             sink.italic();
@@ -249,10 +248,10 @@ public class ClirrReportGenerator
         {
             ApiDifference difference = (ApiDifference) events.next();
 
-            // TODO: differentiate source and binary?
+            // TODO: differentiate source and binary? The only difference seems to be MSG_CONSTANT_REMOVED at this point
             Severity maximumSeverity = difference.getMaximumSeverity();
 
-            if ( minSeverity.compareTo( maximumSeverity ) <= 0 )
+            if ( minSeverity == null || minSeverity.compareTo( maximumSeverity ) <= 0 )
             {
                 sink.tableRow();
 
@@ -303,24 +302,9 @@ public class ClirrReportGenerator
         this.enableSeveritySummary = enableSeveritySummary;
     }
 
-    public void setMinSeverity( String minSeverity )
+    public void setMinSeverity( Severity minSeverity )
     {
-        if ( "info".equals( minSeverity ) )
-        {
-            this.minSeverity = Severity.INFO;
-        }
-        else if ( "warning".equals( minSeverity ) )
-        {
-            this.minSeverity = Severity.WARNING;
-        }
-        else if ( "error".equals( minSeverity ) )
-        {
-            this.minSeverity = Severity.ERROR;
-        }
-        else
-        {
-            // TODO: throw an error or log
-            this.minSeverity = Severity.INFO;
-        }
+        this.minSeverity = minSeverity;
     }
+
 }

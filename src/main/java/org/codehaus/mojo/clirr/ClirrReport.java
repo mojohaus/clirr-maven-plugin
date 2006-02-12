@@ -17,27 +17,39 @@ package org.codehaus.mojo.clirr;
  */
 
 import net.sf.clirr.core.Checker;
+import net.sf.clirr.core.CheckerException;
 import net.sf.clirr.core.ClassSelector;
 import net.sf.clirr.core.PlainDiffListener;
+import net.sf.clirr.core.internal.bcel.BcelJavaType;
 import net.sf.clirr.core.internal.bcel.BcelTypeArrayBuilder;
 import net.sf.clirr.core.spi.JavaType;
+import org.apache.bcel.classfile.ClassParser;
+import org.apache.bcel.classfile.JavaClass;
+import org.apache.bcel.util.ClassLoaderRepository;
+import org.apache.bcel.util.Repository;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.AbstractMavenReport;
 import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.doxia.site.renderer.SiteRenderer;
+import org.codehaus.plexus.util.DirectoryScanner;
+import org.codehaus.plexus.util.IOUtil;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -55,7 +67,7 @@ import java.util.Set;
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  * @goal clirr
  * @requiresDependencyResolution compile
- * @execute phase="package"
+ * @execute phase="compile"
  */
 public class ClirrReport
     extends AbstractMavenReport
@@ -74,13 +86,6 @@ public class ClirrReport
      * @readonly
      */
     private MavenProject project;
-
-    /**
-     * @parameter default-value="${executedProject}"
-     * @required
-     * @readonly
-     */
-    private MavenProject executedProject;
 
     /**
      * @component
@@ -111,6 +116,16 @@ public class ClirrReport
 
     private static final URL[] EMPTY_URL_ARRAY = new URL[0];
 
+    /**
+     * @parameter default-value="${project.build.outputDirectory}
+     */
+    private File classesDirectory;
+
+    /**
+     * @parameter expression="${comparisonVersion}" default-value="(,${project.version})"
+     */
+    private String comparisonVersion;
+
     protected SiteRenderer getSiteRenderer()
     {
         return siteRenderer;
@@ -129,30 +144,65 @@ public class ClirrReport
     protected void executeReport( Locale locale )
         throws MavenReportException
     {
+        if ( !canGenerateReport() )
+        {
+            getLog().info( "Not generating report as there are no sources to compare" );
+            return;
+        }
+
         // Find the previous version JAR and resolve it
-        ClassLoader origDepCL = null;
-        ClassLoader currentDepCL = null;
-        Artifact previousArtifact = null;
         try
         {
-            // TODO: allow this to be specified as "comparisonVersion"
-            // TODO: VersionRange previousVersion = VersionRange.createFromVersionSpec( "(," + project.getVersion() + ")" );
-            VersionRange previousVersion = VersionRange.createFromVersion( "2.0" );
-            previousArtifact = factory.createDependencyArtifact( project.getGroupId(), project.getArtifactId(),
-                                                                 previousVersion, project.getPackaging(), null,
-                                                                 Artifact.SCOPE_COMPILE );
+            VersionRange range = VersionRange.createFromVersionSpec( comparisonVersion );
 
-            getLog().info( "Previous version: " + previousArtifact.getVersion() );
+            Artifact previousArtifact = factory.createDependencyArtifact( project.getGroupId(), project.getArtifactId(),
+                                                                          range, project.getPackaging(), null,
+                                                                          Artifact.SCOPE_COMPILE );
 
-            // TODO: better way?
+            if ( !previousArtifact.getVersionRange().isSelectedVersionKnown( previousArtifact ) )
+            {
+                getLog().debug( "Searching for versions in range: " + previousArtifact.getVersionRange() );
+                List availableVersions = metadataSource.retrieveAvailableVersions( previousArtifact, localRepository,
+                                                                                   project.getRemoteArtifactRepositories() );
+                ArtifactVersion version = range.matchVersion( availableVersions );
+                previousArtifact.selectVersion( version.toString() );
+            }
+
+            getLog().info( "Comparing to version: " + previousArtifact.getVersion() );
+
+            // TODO: better way? Can't use previousArtifact as the originatingArtifact, it culls everything out
+            //  perhaps resolve the artifact itself (not the pom artifact), then load th epom and get dependencies
             Artifact dummy = factory.createProjectArtifact( "dummy", "dummy", "1.0" );
             ArtifactResolutionResult result = resolver.resolveTransitively( Collections.singleton( previousArtifact ),
                                                                             dummy, localRepository,
                                                                             project.getRemoteArtifactRepositories(),
                                                                             metadataSource, null );
 
-            origDepCL = createClassLoader( result.getArtifacts(), previousArtifact );
-            currentDepCL = createClassLoader( project.getArtifacts(), null );
+            ClassLoader origDepCL = createClassLoader( result.getArtifacts(), previousArtifact );
+            ClassLoader currentDepCL = createClassLoader( project.getArtifacts(), null );
+
+            // a selector that selects everything
+            // TODO: filter classes?
+            ClassSelector classSelector = new ClassSelector( ClassSelector.MODE_UNLESS );
+
+            File file = new File( localRepository.getBasedir(), localRepository.pathOf( previousArtifact ) );
+            JavaType[] origClasses = BcelTypeArrayBuilder.createClassSet( new File[]{file}, origDepCL, classSelector );
+
+            JavaType[] currentClasses = createClassSet( classesDirectory, currentDepCL, classSelector );
+
+            // Create a Clirr checker and execute
+            Checker checker = new Checker();
+
+            ClirrDiffListener listener = new ClirrDiffListener();
+
+            checker.addDiffListener( listener );
+
+            // TODO: remove
+            checker.addDiffListener( new PlainDiffListener( "diffs.txt" ) );
+
+            checker.reportDiffs( origClasses, currentClasses );
+
+            // TODO: take the listener and generate report
         }
         catch ( ArtifactResolutionException e )
         {
@@ -169,53 +219,98 @@ public class ClirrReport
             // TODO
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
-
-        // a selector that selects everything
-        // TODO: filter classes?
-        ClassSelector classSelector = new ClassSelector( ClassSelector.MODE_UNLESS );
-
-        File file = new File( localRepository.getBasedir(), localRepository.pathOf( previousArtifact ) );
-        JavaType[] origClasses = BcelTypeArrayBuilder.createClassSet( new File[]{file}, origDepCL, classSelector );
-
-        // TODO: change so we don't need to use execute package, just compile
-        JavaType[] currentClasses = BcelTypeArrayBuilder.createClassSet( new File[]{executedProject.getArtifact().getFile()},
-                                                                         currentDepCL, classSelector );
-
-        // Create a Clirr checker and execute
-        Checker checker = new Checker();
-
-        ClirrDiffListener listener = new ClirrDiffListener();
-
-        checker.addDiffListener( listener );
-
-        // TODO: remove
-        try
-        {
-            checker.addDiffListener( new PlainDiffListener( "diffs.txt" ) );
-        }
         catch ( IOException e )
+        {
+            // TODO
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        catch ( ArtifactMetadataRetrievalException e )
         {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
+        catch ( InvalidVersionSpecificationException e )
+        {
+            // TODO
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+    }
 
-        checker.reportDiffs( origClasses, currentClasses );
+    public static JavaType[] createClassSet( File classes, ClassLoader thirdPartyClasses, ClassSelector classSelector )
+        throws MalformedURLException
+    {
+        ClassLoader classLoader = new URLClassLoader( new URL[]{classes.toURL()}, thirdPartyClasses );
 
-        // TODO: take the listener and generate report
+        Repository repository = new ClassLoaderRepository( classLoader );
+
+        List selected = new ArrayList();
+
+        DirectoryScanner scanner = new DirectoryScanner();
+        scanner.setBasedir( classes );
+        scanner.setIncludes( new String[]{"**/*.class"} );
+        scanner.scan();
+
+        String[] files = scanner.getIncludedFiles();
+
+        for ( int i = 0; i < files.length; i++ )
+        {
+            File f = new File( classes, files[i] );
+            JavaClass clazz = extractClass( f, repository );
+            if ( classSelector.isSelected( clazz ) )
+            {
+                selected.add( new BcelJavaType( clazz ) );
+                repository.storeClass( clazz );
+            }
+        }
+
+        JavaType[] ret = new JavaType[selected.size()];
+        selected.toArray( ret );
+        return ret;
+    }
+
+    private static JavaClass extractClass( File f, Repository repository )
+        throws CheckerException
+    {
+        InputStream is = null;
+        try
+        {
+            is = new FileInputStream( f );
+
+            ClassParser parser = new ClassParser( is, f.getName() );
+            JavaClass clazz = parser.parse();
+            clazz.setRepository( repository );
+            return clazz;
+        }
+        catch ( IOException ex )
+        {
+            throw new CheckerException( "Cannot read " + f, ex );
+        }
+        finally
+        {
+            IOUtil.close( is );
+        }
     }
 
     private static ClassLoader createClassLoader( Set artifacts, Artifact previousArtifact )
         throws MalformedURLException
     {
-        List urls = new ArrayList( artifacts.size() - 1 );
-        for ( Iterator i = artifacts.iterator(); i.hasNext(); )
+        URLClassLoader cl = null;
+        if ( !artifacts.isEmpty() )
         {
-            Artifact artifact = (Artifact) i.next();
-            if ( !artifact.equals( previousArtifact ) )
+            List urls = new ArrayList( artifacts.size() );
+            for ( Iterator i = artifacts.iterator(); i.hasNext(); )
             {
-                urls.add( artifact.getFile().toURL() );
+                Artifact artifact = (Artifact) i.next();
+                if ( !artifact.equals( previousArtifact ) )
+                {
+                    urls.add( artifact.getFile().toURL() );
+                }
+            }
+            if ( !urls.isEmpty() )
+            {
+                cl = new URLClassLoader( (URL[]) urls.toArray( EMPTY_URL_ARRAY ) );
             }
         }
-        return new URLClassLoader( (URL[]) urls.toArray( EMPTY_URL_ARRAY ) );
+        return cl;
     }
 
     public String getDescription( Locale locale )

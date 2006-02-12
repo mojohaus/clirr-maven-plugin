@@ -18,10 +18,14 @@ package org.codehaus.mojo.clirr;
 
 import net.sf.clirr.core.ApiDifference;
 import net.sf.clirr.core.DiffListenerAdapter;
+import net.sf.clirr.core.Severity;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Collections;
+import java.util.Map;
 
 /**
  * Listen to the Clirr events.
@@ -31,17 +35,64 @@ import java.util.Collections;
 public class ClirrDiffListener
     extends DiffListenerAdapter
 {
-    /** The list of differences that occurred. */
+    /**
+     * The list of differences that occurred.
+     */
     private List apiDifferences = new LinkedList();
+
+    /**
+     * The number messages for each severity.
+     */
+    private Map counts = new HashMap( 3 );
 
     public void reportDiff( ApiDifference apiDifference )
     {
-        // TODO: count
+        incrementCount( apiDifference.getMaximumSeverity(), counts );
+
         apiDifferences.add( apiDifference );
+    }
+
+    public void stop()
+    {
+        Collections.sort( apiDifferences, new Comparator()
+        {
+            public int compare( Object o1, Object o2 )
+            {
+                ApiDifference d1 = (ApiDifference) o1;
+                ApiDifference d2 = (ApiDifference) o2;
+
+                // compare maximum severities - order highest to lowest.
+                return d2.getMaximumSeverity().compareTo( d1.getMaximumSeverity() );
+            }
+        } );
+    }
+
+    private void incrementCount( Severity sev, Map counts )
+    {
+        if ( sev != null )
+        {
+            int count = getCount( counts, sev );
+            counts.put( sev, new Integer( count + 1 ) );
+        }
+    }
+
+    private int getCount( Map counts, Severity sev )
+    {
+        Integer count = (Integer) counts.get( sev );
+        if ( count == null )
+        {
+            count = new Integer( 0 );
+        }
+        return count.intValue();
     }
 
     public List getApiDifferences()
     {
         return Collections.unmodifiableList( apiDifferences );
+    }
+
+    public int getSeverityCount( Severity severity )
+    {
+        return getCount( counts, severity );
     }
 }

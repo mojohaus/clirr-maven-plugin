@@ -19,7 +19,6 @@ package org.codehaus.mojo.clirr;
 import net.sf.clirr.core.Checker;
 import net.sf.clirr.core.CheckerException;
 import net.sf.clirr.core.ClassSelector;
-import net.sf.clirr.core.PlainDiffListener;
 import net.sf.clirr.core.internal.bcel.BcelJavaType;
 import net.sf.clirr.core.internal.bcel.BcelTypeArrayBuilder;
 import net.sf.clirr.core.spi.JavaType;
@@ -197,12 +196,13 @@ public class ClirrReport
 
             checker.addDiffListener( listener );
 
-            // TODO: remove
-            checker.addDiffListener( new PlainDiffListener( "diffs.txt" ) );
+            // TODO: what about text, xml outputs?
 
             checker.reportDiffs( origClasses, currentClasses );
 
-            // TODO: take the listener and generate report
+            ClirrReportGenerator generator = new ClirrReportGenerator( getSink(), getBundle( locale ), locale );
+            // TODO: severity summary?
+            generator.generateReport( listener );
         }
         catch ( ArtifactResolutionException e )
         {

@@ -42,6 +42,8 @@ public class ClirrReportGenerator
 
     private final Locale locale;
 
+    private Severity minSeverity;
+
     public ClirrReportGenerator( Sink sink, ResourceBundle bundle, Locale locale )
     {
         this.bundle = bundle;
@@ -157,29 +159,44 @@ public class ClirrReportGenerator
         sink.tableCell_();
         sink.tableRow_();
 
-        sink.tableRow();
-        sink.tableCell();
-        iconWarning();
-        sink.nonBreakingSpace();
-        sink.text( bundle.getString( "report.clirr.level.warning" ) );
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( String.valueOf( listener.getSeverityCount( Severity.WARNING ) ) );
-        sink.tableCell_();
-        sink.tableRow_();
+        if ( minSeverity.compareTo( Severity.WARNING ) <= 0 )
+        {
+            sink.tableRow();
+            sink.tableCell();
+            iconWarning();
+            sink.nonBreakingSpace();
+            sink.text( bundle.getString( "report.clirr.level.warning" ) );
+            sink.tableCell_();
+            sink.tableCell();
+            sink.text( String.valueOf( listener.getSeverityCount( Severity.WARNING ) ) );
+            sink.tableCell_();
+            sink.tableRow_();
+        }
 
-        sink.tableRow();
-        sink.tableCell();
-        iconInfo();
-        sink.nonBreakingSpace();
-        sink.text( bundle.getString( "report.clirr.level.info" ) );
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( String.valueOf( listener.getSeverityCount( Severity.INFO ) ) );
-        sink.tableCell_();
-        sink.tableRow_();
+        if ( minSeverity.compareTo( Severity.INFO ) <= 0 )
+        {
+            sink.tableRow();
+            sink.tableCell();
+            iconInfo();
+            sink.nonBreakingSpace();
+            sink.text( bundle.getString( "report.clirr.level.info" ) );
+            sink.tableCell_();
+            sink.tableCell();
+            sink.text( String.valueOf( listener.getSeverityCount( Severity.INFO ) ) );
+            sink.tableCell_();
+            sink.tableRow_();
+        }
 
         sink.table_();
+
+        if ( minSeverity.compareTo( Severity.INFO ) > 0 )
+        {
+            sink.paragraph();
+            sink.italic();
+            sink.text( bundle.getString( "report.clirr.filtered" ) );
+            sink.italic_();
+            sink.paragraph_();
+        }
 
         sink.section1_();
     }
@@ -196,6 +213,12 @@ public class ClirrReportGenerator
         if ( !differences.isEmpty() )
         {
             doTable( differences );
+        }
+        else
+        {
+            sink.paragraph();
+            sink.text( bundle.getString( "report.clirr.noresults" ) );
+            sink.paragraph_();
         }
 
         sink.section1_();
@@ -226,30 +249,34 @@ public class ClirrReportGenerator
         {
             ApiDifference difference = (ApiDifference) events.next();
 
-            sink.tableRow();
-
             // TODO: differentiate source and binary?
+            Severity maximumSeverity = difference.getMaximumSeverity();
 
-            sink.tableCell();
-            levelIcon( difference.getMaximumSeverity() );
-            sink.tableCell_();
+            if ( minSeverity.compareTo( maximumSeverity ) <= 0 )
+            {
+                sink.tableRow();
 
-            sink.tableCell();
-            sink.text( difference.getReport( translator ) );
-            sink.tableCell_();
+                sink.tableCell();
+                levelIcon( maximumSeverity );
+                sink.tableCell_();
 
-            // TODO: link to file/class/method?
+                sink.tableCell();
+                sink.text( difference.getReport( translator ) );
+                sink.tableCell_();
 
-            sink.tableCell();
-            sink.text( difference.getAffectedClass() );
-            sink.tableCell_();
+                // TODO: link to file/class/method via JXR?
 
-            sink.tableCell();
-            sink.text( difference.getAffectedMethod() != null ? difference.getAffectedMethod()
-                : difference.getAffectedField() );
-            sink.tableCell_();
+                sink.tableCell();
+                sink.text( difference.getAffectedClass() );
+                sink.tableCell_();
 
-            sink.tableRow_();
+                sink.tableCell();
+                sink.text( difference.getAffectedMethod() != null ? difference.getAffectedMethod()
+                    : difference.getAffectedField() );
+                sink.tableCell_();
+
+                sink.tableRow_();
+            }
         }
 
         sink.table_();
@@ -274,5 +301,26 @@ public class ClirrReportGenerator
     public void setEnableSeveritySummary( boolean enableSeveritySummary )
     {
         this.enableSeveritySummary = enableSeveritySummary;
+    }
+
+    public void setMinSeverity( String minSeverity )
+    {
+        if ( "info".equals( minSeverity ) )
+        {
+            this.minSeverity = Severity.INFO;
+        }
+        else if ( "warning".equals( minSeverity ) )
+        {
+            this.minSeverity = Severity.WARNING;
+        }
+        else if ( "error".equals( minSeverity ) )
+        {
+            this.minSeverity = Severity.ERROR;
+        }
+        else
+        {
+            // TODO: throw an error or log
+            this.minSeverity = Severity.INFO;
+        }
     }
 }

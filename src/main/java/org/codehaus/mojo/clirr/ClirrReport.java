@@ -183,6 +183,13 @@ public class ClirrReport
      */
     private String[] excludes;
 
+    /**
+     * Whether to log the results to the console or not.
+     *
+     * @parameter expression="${logResults}" default-value="false"
+     */
+    private boolean logResults;
+
     protected SiteRenderer getSiteRenderer()
     {
         return siteRenderer;
@@ -267,6 +274,11 @@ public class ClirrReport
             if ( textOutputFile != null )
             {
                 listeners.add( new PlainDiffListener( textOutputFile.getAbsolutePath() ) );
+            }
+
+            if ( logResults )
+            {
+                listeners.add( new LogDiffListener( getLog() ) );
             }
 
             if ( listeners.isEmpty() )

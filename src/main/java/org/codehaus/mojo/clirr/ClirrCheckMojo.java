@@ -26,9 +26,11 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.i18n.I18N;
 
 import java.io.File;
 import java.util.Iterator;
+import java.util.Locale;
 
 /**
  * Perform a violation check against the last checkstyle run to see if there are any violations.
@@ -38,7 +40,6 @@ import java.util.Iterator;
  * @phase verify
  * @execute phase="compile"
  * @requiresDependencyResolution compile
- * @todo i18n
  */
 public class ClirrCheckMojo
     extends AbstractMojo
@@ -137,6 +138,11 @@ public class ClirrCheckMojo
      */
     private boolean failOnWarning;
 
+    /**
+     * @component
+     */
+    private I18N i18n;
+
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
@@ -153,24 +159,47 @@ public class ClirrCheckMojo
         executor.setClassesDirectory( classesDirectory );
         executor.execute( project, resolver, metadataSource, localRepository, factory, getLog() );
 
+        Locale locale = Locale.getDefault();
+
         ClirrDiffListener listener = executor.getListener();
         int errorCount = listener.getSeverityCount( Severity.ERROR );
         if ( failOnError && errorCount > 0 )
         {
             log( listener, Severity.ERROR );
-            throw new MojoFailureException( "There were " + errorCount + " errors" );
+            String message;
+            if ( errorCount > 1 )
+            {
+                String[] args = new String[]{String.valueOf( errorCount )};
+                message = i18n.format( "clirr-report", locale, "check.clirr.failure.errors", args );
+            }
+            else
+            {
+                message = i18n.getString( "clirr-report", locale, "check.clirr.failure.error" );
+            }
+            throw new MojoFailureException( message );
         }
 
         int warningCount = listener.getSeverityCount( Severity.WARNING );
         if ( failOnWarning && errorCount > 0 )
         {
             log( listener, Severity.WARNING );
-            throw new MojoFailureException( "There were " + warningCount + " errors" );
+            String message;
+            if ( errorCount > 1 )
+            {
+                String[] args = new String[]{String.valueOf( errorCount )};
+                message = i18n.format( "clirr-report", locale, "check.clirr.failure.warnings", args );
+            }
+            else
+            {
+                message = i18n.getString( "clirr-report", locale, "check.clirr.failure.warning" );
+            }
+            throw new MojoFailureException( message );
         }
 
         int infoCount = listener.getSeverityCount( Severity.INFO );
-        getLog().info( "Succeeded with " + errorCount + " errors; " + warningCount + " warnings; and " + infoCount +
-            " other changes" );
+        String[] args =
+            new String[]{String.valueOf( errorCount ), String.valueOf( warningCount ), String.valueOf( infoCount )};
+        getLog().info( i18n.format( "clirr-report", locale, "check.clirr.success", args ) );
     }
 
     private void log( ClirrDiffListener listener, Severity severity )
@@ -188,4 +217,5 @@ public class ClirrCheckMojo
             }
         }
     }
+
 }

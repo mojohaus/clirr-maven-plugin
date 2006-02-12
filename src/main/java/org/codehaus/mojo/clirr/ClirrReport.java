@@ -125,6 +125,11 @@ public class ClirrReport
      */
     private String comparisonVersion;
 
+    /**
+     * @parameter expression="${minSeverity}" default-value="warning"
+     */
+    private String minSeverity;
+
     protected SiteRenderer getSiteRenderer()
     {
         return siteRenderer;
@@ -202,6 +207,7 @@ public class ClirrReport
 
             ClirrReportGenerator generator = new ClirrReportGenerator( getSink(), getBundle( locale ), locale );
             // TODO: severity summary?
+            generator.setMinSeverity( minSeverity );
             generator.generateReport( listener );
         }
         catch ( ArtifactResolutionException e )

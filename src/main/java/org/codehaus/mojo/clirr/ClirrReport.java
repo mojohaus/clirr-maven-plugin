@@ -17,16 +17,14 @@ package org.codehaus.mojo.clirr;
  */
 
 import net.sf.clirr.core.Severity;
-import org.apache.maven.artifact.factory.ArtifactFactory;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.project.MavenProject;
-import org.apache.maven.reporting.AbstractMavenReport;
+import org.apache.maven.reporting.MavenReport;
 import org.apache.maven.reporting.MavenReportException;
+import org.codehaus.doxia.module.xhtml.XhtmlSink;
+import org.codehaus.doxia.sink.Sink;
 import org.codehaus.doxia.site.renderer.SiteRenderer;
+import org.codehaus.plexus.util.StringInputStream;
 
 import java.io.File;
 import java.util.Locale;
@@ -37,11 +35,10 @@ import java.util.ResourceBundle;
  *
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  * @goal clirr
- * @requiresDependencyResolution compile
- * @execute phase="compile"
  */
 public class ClirrReport
-    extends AbstractMavenReport
+    extends AbstractClirrMojo
+    implements MavenReport
 {
     /**
      * Specifies the directory where the report will be generated
@@ -52,52 +49,9 @@ public class ClirrReport
     private File outputDirectory;
 
     /**
-     * @parameter default-value="${project}"
-     * @required
-     * @readonly
-     */
-    private MavenProject project;
-
-    /**
      * @component
      */
     private SiteRenderer siteRenderer;
-
-    /**
-     * @component
-     */
-    private ArtifactResolver resolver;
-
-    /**
-     * @component
-     */
-    private ArtifactFactory factory;
-
-    /**
-     * @parameter default-value="${localRepository}"
-     * @required
-     * @readonly
-     */
-    private ArtifactRepository localRepository;
-
-    /**
-     * @component
-     */
-    private ArtifactMetadataSource metadataSource;
-
-    /**
-     * The classes of this project to compare the last release against.
-     *
-     * @parameter default-value="${project.build.outputDirectory}
-     */
-    private File classesDirectory;
-
-    /**
-     * Version to compare the current code against.
-     *
-     * @parameter expression="${comparisonVersion}" default-value="(,${project.version})"
-     */
-    private String comparisonVersion;
 
     /**
      * Show only messages of this severity or higher. Valid values are <code>info</code>, <code>warning</code> and <code>error</code>.
@@ -120,59 +74,54 @@ public class ClirrReport
      */
     private boolean htmlReport;
 
-    /**
-     * A text output file to render to. If omitted, no output is rendered to a text file.
-     *
-     * @parameter expression="${textOutputFile}"
-     */
-    private File textOutputFile;
-
-    /**
-     * An XML file to render to. If omitted, no output is rendered to an XML file.
-     *
-     * @parameter expression="${xmlOutputFile}"
-     */
-    private File xmlOutputFile;
-
-    /**
-     * A list of classes to include. Anything not included is excluded. If omitted, all are assumed to be included.
-     * Values are specified in path pattern notation, e.g. <code>org/codehaus/mojo/**</code>.
-     *
-     * @parameter
-     */
-    private String[] includes;
-
-    /**
-     * A list of classes to exclude. These classes are excluded from the list of classes that are included.
-     * Values are specified in path pattern notation, e.g. <code>org/codehaus/mojo/**</code>.
-     *
-     * @parameter
-     */
-    private String[] excludes;
-
-    /**
-     * Whether to log the results to the console or not.
-     *
-     * @parameter expression="${logResults}" default-value="false"
-     */
-    private boolean logResults;
-
-    protected SiteRenderer getSiteRenderer()
+    public String getCategoryName()
     {
-        return siteRenderer;
+        return MavenReport.CATEGORY_PROJECT_REPORTS;
     }
 
-    protected String getOutputDirectory()
+    public void setReportOutputDirectory( File file )
     {
-        return outputDirectory.getAbsolutePath();
+        outputDirectory = file;
     }
 
-    protected MavenProject getProject()
+    public File getReportOutputDirectory()
     {
-        return project;
+        return outputDirectory;
     }
 
-    protected void executeReport( Locale locale )
+    public boolean isExternalReport()
+    {
+        return false;
+    }
+
+    public void execute()
+        throws MojoExecutionException, MojoFailureException
+    {
+        // TODO: push to a helper?
+        Locale locale = Locale.getDefault();
+        try
+        {
+            StringInputStream dummySiteDescriptor = new StringInputStream( "<project><body></body></project>" );
+            XhtmlSink sink = siteRenderer.createSink( outputDirectory, getOutputName() + ".html",
+                                                      outputDirectory.getAbsolutePath(), dummySiteDescriptor, "maven" );
+
+            generate( sink, locale );
+
+            siteRenderer.copyResources( outputDirectory.getAbsolutePath(), "maven" );
+        }
+        catch ( MavenReportException e )
+        {
+            throw new MojoExecutionException( "An error has occurred in " + getName( locale ) + " report generation.",
+                                              e );
+        }
+        catch ( Exception e )
+        {
+            throw new MojoExecutionException( "An error has occurred in " + getName( locale ) + " report generation.",
+                                              e );
+        }
+    }
+
+    public void generate( Sink sink, Locale locale )
         throws MavenReportException
     {
         if ( !canGenerateReport() )
@@ -181,35 +130,19 @@ public class ClirrReport
         }
         else
         {
-            doReport( locale );
+            doReport( sink, locale );
         }
     }
 
-    private void doReport( Locale locale )
+    private void doReport( Sink sink, Locale locale )
         throws MavenReportException
     {
-        ClirrExecutor executor = new ClirrExecutor();
-        if ( logResults )
-        {
-            executor.setLog( getLog() );
-        }
-        executor.setTextOutputFile( textOutputFile );
-        executor.setXmlOutputFile( xmlOutputFile );
-        executor.setIncludes( includes );
-        executor.setExcludes( excludes );
-        executor.setComparisonVersion( comparisonVersion );
-        executor.setClassesDirectory( classesDirectory );
-
         Severity minSeverity = convertSeverity( this.minSeverity );
         ResourceBundle bundle = getBundle( locale );
         if ( minSeverity == null )
         {
             getLog().warn( bundle.getString( "report.clirr.error.invalid.minseverity" ) + ": '" + this
                 .minSeverity + "'." );
-        }
-        else
-        {
-            executor.setMinSeverity( minSeverity );
         }
 
         if ( !htmlReport && xmlOutputFile == null && textOutputFile == null && !logResults )
@@ -218,9 +151,10 @@ public class ClirrReport
         }
         else
         {
+            ClirrDiffListener listener;
             try
             {
-                executor.execute( project, resolver, metadataSource, localRepository, factory, getLog() );
+                listener = executeClirr( minSeverity );
             }
             catch ( MojoExecutionException e )
             {
@@ -230,17 +164,17 @@ public class ClirrReport
             {
                 throw new MavenReportException( e.getMessage() );
             }
-        }
 
-        if ( htmlReport )
-        {
-            ClirrReportGenerator generator = new ClirrReportGenerator( getSink(), bundle, locale );
+            if ( htmlReport )
+            {
+                ClirrReportGenerator generator = new ClirrReportGenerator( sink, bundle, locale );
 
-            generator.setEnableSeveritySummary( showSummary );
+                generator.setEnableSeveritySummary( showSummary );
 
-            generator.setMinSeverity( minSeverity );
+                generator.setMinSeverity( minSeverity );
 
-            generator.generateReport( executor.getListener() );
+                generator.generateReport( listener );
+            }
         }
     }
 

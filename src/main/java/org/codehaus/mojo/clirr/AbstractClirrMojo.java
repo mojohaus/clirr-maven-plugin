@@ -1,7 +1,7 @@
 package org.codehaus.mojo.clirr;
 
 /*
- * Copyright 2006 The Codehaus
+ * Copyright 2006 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,9 +42,9 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.OverConstrainedVersionException;
 import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.codehaus.plexus.util.IOUtil;
@@ -63,43 +63,114 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Execute Clirr.
+ * Base parameters for Clirr check and report.
  *
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
- * @todo i18n exceptions
+ * @todo i18n exceptions, log messages
+ * @requiresDependencyResolution compile
+ * @execute phase="compile"
  */
-public class ClirrExecutor
+public abstract class AbstractClirrMojo
+    extends AbstractMojo
 {
+    /**
+     * @parameter default-value="${project}"
+     * @required
+     * @readonly
+     */
+    protected MavenProject project;
+
+    /**
+     * @component
+     */
+    protected ArtifactResolver resolver;
+
+    /**
+     * @component
+     */
+    protected ArtifactFactory factory;
+
+    /**
+     * @parameter default-value="${localRepository}"
+     * @required
+     * @readonly
+     */
+    protected ArtifactRepository localRepository;
+
+    /**
+     * @component
+     */
+    protected ArtifactMetadataSource metadataSource;
+
+    /**
+     * The classes of this project to compare the last release against.
+     *
+     * @parameter default-value="${project.build.outputDirectory}
+     */
+    protected File classesDirectory;
+
+    /**
+     * Version to compare the current code against.
+     *
+     * @parameter expression="${comparisonVersion}" default-value="(,${project.version})"
+     */
+    protected String comparisonVersion;
+
+    /**
+     * A text output file to render to. If omitted, no output is rendered to a text file.
+     *
+     * @parameter expression="${textOutputFile}"
+     */
+    protected File textOutputFile;
+
+    /**
+     * An XML file to render to. If omitted, no output is rendered to an XML file.
+     *
+     * @parameter expression="${xmlOutputFile}"
+     */
+    protected File xmlOutputFile;
+
+    /**
+     * A list of classes to include. Anything not included is excluded. If omitted, all are assumed to be included.
+     * Values are specified in path pattern notation, e.g. <code>org/codehaus/mojo/**</code>.
+     *
+     * @parameter
+     */
+    protected String[] includes;
+
+    /**
+     * A list of classes to exclude. These classes are excluded from the list of classes that are included.
+     * Values are specified in path pattern notation, e.g. <code>org/codehaus/mojo/**</code>.
+     *
+     * @parameter
+     */
+    protected String[] excludes;
+
+    /**
+     * Whether to log the results to the console or not.
+     *
+     * @parameter expression="${logResults}" default-value="false"
+     */
+    protected boolean logResults;
+
     private static final URL[] EMPTY_URL_ARRAY = new URL[0];
 
-    private final ClirrDiffListener listener = new ClirrDiffListener();
-
-    private File xmlOutputFile;
-
-    private File textOutputFile;
-
-    private Log log;
-
-    private String[] includes;
-
-    private String[] excludes;
-
-    private Severity minSeverity;
-
-    private String comparisonVersion;
-
-    private File classesDirectory;
-
-    public void execute( MavenProject project, ArtifactResolver resolver, ArtifactMetadataSource metadatasource,
-                         ArtifactRepository localRepository, ArtifactFactory factory, Log log )
+    public ClirrDiffListener executeClirr()
         throws MojoExecutionException, MojoFailureException
     {
+        return executeClirr( null );
+    }
+
+    protected ClirrDiffListener executeClirr( Severity minSeverity )
+        throws MojoExecutionException, MojoFailureException
+    {
+        ClirrDiffListener listener = new ClirrDiffListener();
+
         ClassFilter classFilter = new ClirrClassFilter( includes, excludes );
 
-        JavaType[] origClasses = resolvePreviousReleaseClasses( project, resolver, metadatasource, localRepository,
-                                                                factory, classFilter, log );
+        JavaType[] origClasses = resolvePreviousReleaseClasses( classFilter );
 
-        JavaType[] currentClasses = resolveCurrentClasses( classesDirectory, project.getArtifacts(), classFilter );
+        JavaType[] currentClasses = resolveCurrentClasses( classFilter );
 
         // Create a Clirr checker and execute
         Checker checker = new Checker();
@@ -134,22 +205,24 @@ public class ClirrExecutor
             }
         }
 
-        if ( this.log != null )
+        if ( logResults )
         {
-            listeners.add( new LogDiffListener( this.log ) );
+            listeners.add( new LogDiffListener( getLog() ) );
         }
 
         checker.addDiffListener( new DelegatingListener( listeners, minSeverity ) );
 
         checker.reportDiffs( origClasses, currentClasses );
+
+        return listener;
     }
 
-    private JavaType[] resolveCurrentClasses( File classesDirectory, Set artifacts, ClassFilter classFilter )
+    private JavaType[] resolveCurrentClasses( ClassFilter classFilter )
         throws MojoExecutionException
     {
         try
         {
-            ClassLoader currentDepCL = createClassLoader( artifacts, null );
+            ClassLoader currentDepCL = createClassLoader( project.getArtifacts(), null );
             return createClassSet( classesDirectory, currentDepCL, classFilter );
         }
         catch ( MalformedURLException e )
@@ -158,14 +231,11 @@ public class ClirrExecutor
         }
     }
 
-    private JavaType[] resolvePreviousReleaseClasses( MavenProject project, ArtifactResolver resolver,
-                                                      ArtifactMetadataSource metadataSource,
-                                                      ArtifactRepository localRepository, ArtifactFactory factory,
-                                                      ClassFilter classFilter, Log log )
+    private JavaType[] resolvePreviousReleaseClasses( ClassFilter classFilter )
         throws MojoFailureException, MojoExecutionException
     {
         // Find the previous version JAR and resolve it, and it's dependencies
-        VersionRange range = null;
+        VersionRange range;
         try
         {
             range = VersionRange.createFromVersionSpec( comparisonVersion );
@@ -183,14 +253,14 @@ public class ClirrExecutor
         {
             if ( !previousArtifact.getVersionRange().isSelectedVersionKnown( previousArtifact ) )
             {
-                log.debug( "Searching for versions in range: " + previousArtifact.getVersionRange() );
+                getLog().debug( "Searching for versions in range: " + previousArtifact.getVersionRange() );
                 List availableVersions = metadataSource.retrieveAvailableVersions( previousArtifact, localRepository,
                                                                                    project.getRemoteArtifactRepositories() );
                 ArtifactVersion version = range.matchVersion( availableVersions );
                 previousArtifact.selectVersion( version.toString() );
             }
 
-            log.info( "Comparing to version: " + previousArtifact.getVersion() );
+            getLog().info( "Comparing to version: " + previousArtifact.getVersion() );
 
             // TODO: better way? Can't use previousArtifact as the originatingArtifact, it culls everything out
             //  perhaps resolve the artifact itself (not the pom artifact), then load th epom and get dependencies
@@ -304,48 +374,4 @@ public class ClirrExecutor
         return cl;
     }
 
-    public ClirrDiffListener getListener()
-    {
-        return listener;
-    }
-
-    public void setXmlOutputFile( File xmlOutputFile )
-    {
-        this.xmlOutputFile = xmlOutputFile;
-    }
-
-    public void setTextOutputFile( File textOutputFile )
-    {
-        this.textOutputFile = textOutputFile;
-    }
-
-    public void setLog( Log log )
-    {
-        this.log = log;
-    }
-
-    public void setIncludes( String[] includes )
-    {
-        this.includes = includes;
-    }
-
-    public void setExcludes( String[] excludes )
-    {
-        this.excludes = excludes;
-    }
-
-    public void setMinSeverity( Severity minSeverity )
-    {
-        this.minSeverity = minSeverity;
-    }
-
-    public void setComparisonVersion( String comparisonVersion )
-    {
-        this.comparisonVersion = comparisonVersion;
-    }
-
-    public void setClassesDirectory( File classesDirectory )
-    {
-        this.classesDirectory = classesDirectory;
-    }
 }

@@ -200,6 +200,7 @@ public class ClirrReport
 
     public boolean canGenerateReport()
     {
+        // TODO: improve - needs to at least check generated sources
         return new File( project.getBuild().getSourceDirectory() ).exists();
     }
 

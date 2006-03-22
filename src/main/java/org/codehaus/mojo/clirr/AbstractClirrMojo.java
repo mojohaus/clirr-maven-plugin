@@ -257,7 +257,16 @@ public abstract class AbstractClirrMojo
                 List availableVersions = metadataSource.retrieveAvailableVersions( previousArtifact, localRepository,
                                                                                    project.getRemoteArtifactRepositories() );
                 ArtifactVersion version = range.matchVersion( availableVersions );
-                previousArtifact.selectVersion( version.toString() );
+                if ( version != null )
+                {
+                    previousArtifact.selectVersion( version.toString() );
+                }
+            }
+
+            if ( previousArtifact.getVersion() == null )
+            {
+                throw new MojoFailureException(
+                    "Unable to resolve version in the range " + previousArtifact.getVersionRange() );
             }
 
             getLog().info( "Comparing to version: " + previousArtifact.getVersion() );

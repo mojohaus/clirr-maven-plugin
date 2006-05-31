@@ -22,7 +22,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.i18n.I18N;
 
-import java.io.File;
 import java.util.Iterator;
 import java.util.Locale;
 
@@ -58,9 +57,8 @@ public class ClirrCheckMojo
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
-        if ( !new File( project.getBuild().getSourceDirectory() ).exists() )
+        if ( !canGenerate() )
         {
-            // TODO: improve - needs to at least check generated sources
             return;
         }
 

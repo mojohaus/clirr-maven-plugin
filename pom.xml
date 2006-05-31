@@ -1,24 +1,23 @@
-<project
-    xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>mojo-sandbox</artifactId>
+    <artifactId>mojo</artifactId>
     <groupId>org.codehaus.mojo</groupId>
-    <version>2-SNAPSHOT</version>
+    <version>7</version>
   </parent>
+
+  <prerequisites>
+    <maven>2.0.4</maven>
+  </prerequisites>
 
   <artifactId>clirr-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <name>Maven Clirr Plugin</name>
   <version>2.0-SNAPSHOT</version>
-  <issueManagement>
-    <system>JIRA</system>
-    <url>http://jira.codehaus.org/browse/MOJO</url>
-  </issueManagement>
-  <inceptionYear>2005</inceptionYear>
+
+  <inceptionYear>2006</inceptionYear>
+
   <developers>
     <developer>
       <id>brett</id>
@@ -38,14 +37,19 @@
       <version>0.6</version>
     </dependency>
     <dependency>
+      <groupId>org.apache.maven.doxia</groupId>
+      <artifactId>doxia-site-renderer</artifactId>
+      <version>1.0-alpha-8</version>
+    </dependency>
+    <dependency>
       <groupId>org.apache.maven.reporting</groupId>
       <artifactId>maven-reporting-impl</artifactId>
-      <version>2.0</version>
+      <version>2.0.4</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-artifact-manager</artifactId>
-      <version>2.0</version>
+      <version>2.0.4</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>

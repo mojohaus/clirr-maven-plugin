@@ -17,17 +17,36 @@ package org.codehaus.mojo.clirr;
  */
 
 import net.sf.clirr.core.Severity;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
+import org.apache.maven.artifact.resolver.ArtifactResolutionException;
+import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
+import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.doxia.module.xhtml.decoration.render.RenderingContext;
+import org.apache.maven.doxia.sink.Sink;
+import org.apache.maven.doxia.site.decoration.Body;
+import org.apache.maven.doxia.site.decoration.DecorationModel;
+import org.apache.maven.doxia.site.decoration.Skin;
+import org.apache.maven.doxia.siterenderer.Renderer;
+import org.apache.maven.doxia.siterenderer.RendererException;
+import org.apache.maven.doxia.siterenderer.SiteRenderingContext;
+import org.apache.maven.doxia.siterenderer.sink.SiteRendererSink;
+import org.apache.maven.model.ReportPlugin;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.reporting.MavenReport;
 import org.apache.maven.reporting.MavenReportException;
-import org.codehaus.doxia.module.xhtml.XhtmlSink;
-import org.codehaus.doxia.sink.Sink;
-import org.codehaus.doxia.site.renderer.SiteRenderer;
-import org.codehaus.plexus.util.StringInputStream;
+import org.codehaus.plexus.util.PathTool;
+import org.codehaus.plexus.util.StringUtils;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 /**
@@ -51,7 +70,7 @@ public class ClirrReport
     /**
      * @component
      */
-    private SiteRenderer siteRenderer;
+    private Renderer siteRenderer;
 
     /**
      * Show only messages of this severity or higher. Valid values are <code>info</code>, <code>warning</code> and <code>error</code>.
@@ -74,6 +93,21 @@ public class ClirrReport
      */
     private boolean htmlReport;
 
+    /**
+     * Link the violation line numbers to the source xref. Defaults to true and will link
+     * automatically if jxr plugin is being used.
+     *
+     * @parameter expression="${linkXRef}" default-value="true"
+     */
+    private boolean linkXRef;
+
+    /**
+     * Location of the Xrefs to link to.
+     *
+     * @parameter default-value="${project.build.directory}/site/xref"
+     */
+    private File xrefLocation;
+
     public String getCategoryName()
     {
         return MavenReport.CATEGORY_PROJECT_REPORTS;
@@ -94,30 +128,88 @@ public class ClirrReport
         return false;
     }
 
+    private File getSkinArtifactFile()
+        throws MojoFailureException, MojoExecutionException
+    {
+        Skin skin = Skin.getDefaultSkin();
+
+        String version = skin.getVersion();
+        Artifact artifact;
+        try
+        {
+            if ( version == null )
+            {
+                version = Artifact.RELEASE_VERSION;
+            }
+            VersionRange versionSpec = VersionRange.createFromVersionSpec( version );
+            artifact = factory.createDependencyArtifact( skin.getGroupId(), skin.getArtifactId(), versionSpec, "jar",
+                                                         null, null );
+
+            resolver.resolve( artifact, project.getRemoteArtifactRepositories(), localRepository );
+        }
+        catch ( InvalidVersionSpecificationException e )
+        {
+            throw new MojoFailureException( "The skin version '" + version + "' is not valid: " + e.getMessage() );
+        }
+        catch ( ArtifactResolutionException e )
+        {
+            throw new MojoExecutionException( "Unable to find skin", e );
+        }
+        catch ( ArtifactNotFoundException e )
+        {
+            throw new MojoFailureException( "The skin does not exist: " + e.getMessage() );
+        }
+
+        return artifact.getFile();
+    }
+
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
-        // TODO: push to a helper?
-        Locale locale = Locale.getDefault();
+        if ( !canGenerateReport() )
+        {
+            return;
+        }
+
+        // TODO: push to a helper? Could still be improved by taking more of the site information from the site plugin
         try
         {
-            StringInputStream dummySiteDescriptor = new StringInputStream( "<project><body></body></project>" );
-            XhtmlSink sink = siteRenderer.createSink( outputDirectory, getOutputName() + ".html",
-                                                      outputDirectory.getAbsolutePath(), dummySiteDescriptor, "maven" );
+            DecorationModel model = new DecorationModel();
+            model.setBody( new Body() );
+            Map attributes = new HashMap();
+            attributes.put( "outputEncoding", "UTF-8" );
+            Locale locale = Locale.getDefault();
+            SiteRenderingContext siteContext = siteRenderer.createContextForSkin( getSkinArtifactFile(), attributes,
+                                                                                  model, getName( locale ), locale );
 
+            RenderingContext context = new RenderingContext( outputDirectory, getOutputName() + ".html" );
+
+            SiteRendererSink sink = new SiteRendererSink( context );
             generate( sink, locale );
 
-            siteRenderer.copyResources( outputDirectory.getAbsolutePath(), "maven" );
+            outputDirectory.mkdirs();
+
+            Writer writer = new FileWriter( new File( outputDirectory, getOutputName() + ".html" ) );
+
+            siteRenderer.generateDocument( writer, sink, siteContext );
+
+            siteRenderer.copyResources( siteContext, new File( project.getBasedir(), "src/site/resources" ),
+                                        outputDirectory );
+        }
+        catch ( RendererException e )
+        {
+            throw new MojoExecutionException(
+                "An error has occurred in " + getName( Locale.ENGLISH ) + " report generation.", e );
+        }
+        catch ( IOException e )
+        {
+            throw new MojoExecutionException(
+                "An error has occurred in " + getName( Locale.ENGLISH ) + " report generation.", e );
         }
         catch ( MavenReportException e )
         {
-            throw new MojoExecutionException( "An error has occurred in " + getName( locale ) + " report generation.",
-                                              e );
-        }
-        catch ( Exception e )
-        {
-            throw new MojoExecutionException( "An error has occurred in " + getName( locale ) + " report generation.",
-                                              e );
+            throw new MojoExecutionException(
+                "An error has occurred in " + getName( Locale.ENGLISH ) + " report generation.", e );
         }
     }
 
@@ -173,6 +265,40 @@ public class ClirrReport
 
                 generator.setMinSeverity( minSeverity );
 
+                if ( linkXRef )
+                {
+                    String relativePath =
+                        PathTool.getRelativePath( outputDirectory.getAbsolutePath(), xrefLocation.getAbsolutePath() );
+                    if ( StringUtils.isEmpty( relativePath ) )
+                    {
+                        relativePath = ".";
+                    }
+                    relativePath = relativePath + "/" + xrefLocation.getName();
+                    if ( xrefLocation.exists() )
+                    {
+                        // XRef was already generated by manual execution of a lifecycle binding
+                        generator.setXrefLocation( relativePath );
+                    }
+                    else
+                    {
+                        // Not yet generated - check if the report is on its way
+                        for ( Iterator reports = project.getReportPlugins().iterator(); reports.hasNext(); )
+                        {
+                            ReportPlugin report = (ReportPlugin) reports.next();
+
+                            String artifactId = report.getArtifactId();
+                            if ( "maven-jxr-plugin".equals( artifactId ) || "jxr-maven-plugin".equals( artifactId ) )
+                            {
+                                generator.setXrefLocation( relativePath );
+                            }
+                        }
+                    }
+
+                    if ( generator.getXrefLocation() == null )
+                    {
+                        getLog().warn( "Unable to locate Source XRef to link to - DISABLED" );
+                    }
+                }
                 generator.generateReport( listener );
             }
         }
@@ -200,8 +326,20 @@ public class ClirrReport
 
     public boolean canGenerateReport()
     {
-        // TODO: improve - needs to at least check generated sources
-        return new File( project.getBuild().getSourceDirectory() ).exists();
+        try
+        {
+            return canGenerate();
+        }
+        catch ( MojoFailureException e )
+        {
+            getLog().error( "Can't generate Clirr report: " + e.getMessage() );
+            return false;
+        }
+        catch ( MojoExecutionException e )
+        {
+            getLog().error( "Can't generate Clirr report: " + e.getMessage(), e );
+            return false;
+        }
     }
 
     private static Severity convertSeverity( String minSeverity )
@@ -224,5 +362,13 @@ public class ClirrReport
             s = null;
         }
         return s;
+    }
+
+    // eventually, we must replace this with the o.a.m.d.s.Sink class as a parameter
+    public void generate( org.codehaus.doxia.sink.Sink sink, Locale locale )
+        throws MavenReportException
+    {
+        generate( (Sink) sink, locale );
+
     }
 }

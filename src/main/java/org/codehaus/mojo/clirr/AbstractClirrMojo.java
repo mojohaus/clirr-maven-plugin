@@ -155,6 +155,11 @@ public abstract class AbstractClirrMojo
 
     private static final URL[] EMPTY_URL_ARRAY = new URL[0];
 
+    /**
+     * @parameter expression="${executedProject}"
+     */
+    private MavenProject executedProject;
+
     public ClirrDiffListener executeClirr()
         throws MojoExecutionException, MojoFailureException
     {
@@ -234,41 +239,10 @@ public abstract class AbstractClirrMojo
     private JavaType[] resolvePreviousReleaseClasses( ClassFilter classFilter )
         throws MojoFailureException, MojoExecutionException
     {
-        // Find the previous version JAR and resolve it, and it's dependencies
-        VersionRange range;
-        try
-        {
-            range = VersionRange.createFromVersionSpec( comparisonVersion );
-        }
-        catch ( InvalidVersionSpecificationException e )
-        {
-            throw new MojoFailureException( "Invalid comparision version: " + e.getMessage() );
-        }
-
-        Artifact previousArtifact = factory.createDependencyArtifact( project.getGroupId(), project.getArtifactId(),
-                                                                      range, project.getPackaging(), null,
-                                                                      Artifact.SCOPE_COMPILE );
+        Artifact previousArtifact = getComparisonArtifact();
 
         try
         {
-            if ( !previousArtifact.getVersionRange().isSelectedVersionKnown( previousArtifact ) )
-            {
-                getLog().debug( "Searching for versions in range: " + previousArtifact.getVersionRange() );
-                List availableVersions = metadataSource.retrieveAvailableVersions( previousArtifact, localRepository,
-                                                                                   project.getRemoteArtifactRepositories() );
-                ArtifactVersion version = range.matchVersion( availableVersions );
-                if ( version != null )
-                {
-                    previousArtifact.selectVersion( version.toString() );
-                }
-            }
-
-            if ( previousArtifact.getVersion() == null )
-            {
-                throw new MojoFailureException(
-                    "Unable to resolve version in the range " + previousArtifact.getVersionRange() );
-            }
-
             getLog().info( "Comparing to version: " + previousArtifact.getVersion() );
 
             // TODO: better way? Can't use previousArtifact as the originatingArtifact, it culls everything out
@@ -283,14 +257,6 @@ public abstract class AbstractClirrMojo
             File file = new File( localRepository.getBasedir(), localRepository.pathOf( previousArtifact ) );
             return BcelTypeArrayBuilder.createClassSet( new File[]{file}, origDepCL, classFilter );
         }
-        catch ( OverConstrainedVersionException e )
-        {
-            throw new MojoFailureException( "Invalid comparision version: " + e.getMessage() );
-        }
-        catch ( ArtifactMetadataRetrievalException e )
-        {
-            throw new MojoExecutionException( "Error determining previous version: " + e.getMessage(), e );
-        }
         catch ( ArtifactResolutionException e )
         {
             throw new MojoExecutionException( "Error resolving previous version: " + e.getMessage(), e );
@@ -303,6 +269,59 @@ public abstract class AbstractClirrMojo
         {
             throw new MojoExecutionException( "Error creating classloader for previous version's classes", e );
         }
+    }
+
+    private Artifact getComparisonArtifact()
+        throws MojoFailureException, MojoExecutionException
+    {
+        // Find the previous version JAR and resolve it, and it's dependencies
+        VersionRange range;
+        try
+        {
+            range = VersionRange.createFromVersionSpec( comparisonVersion );
+        }
+        catch ( InvalidVersionSpecificationException e )
+        {
+            throw new MojoFailureException( "Invalid comparision version: " + e.getMessage() );
+        }
+
+        Artifact previousArtifact;
+        try
+        {
+            previousArtifact = factory.createDependencyArtifact( project.getGroupId(), project.getArtifactId(), range,
+                                                                 project.getPackaging(), null, Artifact.SCOPE_COMPILE );
+
+            if ( !previousArtifact.getVersionRange().isSelectedVersionKnown( previousArtifact ) )
+            {
+                getLog().debug( "Searching for versions in range: " + previousArtifact.getVersionRange() );
+                List availableVersions = metadataSource.retrieveAvailableVersions( previousArtifact, localRepository,
+                                                                                   project.getRemoteArtifactRepositories() );
+                ArtifactVersion version = range.matchVersion( availableVersions );
+                if ( version != null )
+                {
+                    previousArtifact.selectVersion( version.toString() );
+                }
+            }
+        }
+        catch ( OverConstrainedVersionException e1 )
+        {
+            throw new MojoFailureException( "Invalid comparision version: " + e1.getMessage() );
+        }
+        catch ( ArtifactMetadataRetrievalException e11 )
+        {
+            throw new MojoExecutionException( "Error determining previous version: " + e11.getMessage(), e11 );
+        }
+        catch ( ArtifactResolutionException e12 )
+        {
+            throw new MojoExecutionException( "Error resolving previous version: " + e12.getMessage(), e12 );
+        }
+
+        if ( previousArtifact.getVersion() == null )
+        {
+            getLog().info( "Unable to find a previous version of the project in the repository" );
+        }
+
+        return previousArtifact;
     }
 
     public static JavaType[] createClassSet( File classes, ClassLoader thirdPartyClasses, ClassFilter classFilter )
@@ -383,4 +402,28 @@ public abstract class AbstractClirrMojo
         return cl;
     }
 
+    protected boolean canGenerate()
+        throws MojoFailureException, MojoExecutionException
+    {
+        boolean sources = false;
+
+        for ( Iterator i = executedProject.getCompileSourceRoots().iterator(); i.hasNext() && !sources; )
+        {
+            String root = (String) i.next();
+            if ( new File( root ).exists() )
+            {
+                sources = true;
+            }
+        }
+
+        if ( !sources )
+        {
+            return false;
+        }
+        else
+        {
+            Artifact previousArtifact = getComparisonArtifact();
+            return previousArtifact.getVersion() != null;
+        }
+    }
 }

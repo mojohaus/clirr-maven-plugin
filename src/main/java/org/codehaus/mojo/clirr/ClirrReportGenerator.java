@@ -19,7 +19,7 @@ package org.codehaus.mojo.clirr;
 import net.sf.clirr.core.ApiDifference;
 import net.sf.clirr.core.MessageTranslator;
 import net.sf.clirr.core.Severity;
-import org.codehaus.doxia.sink.Sink;
+import org.apache.maven.doxia.sink.Sink;
 
 import java.util.Iterator;
 import java.util.List;
@@ -42,6 +42,8 @@ public class ClirrReportGenerator
     private final Locale locale;
 
     private Severity minSeverity;
+
+    private String xrefLocation;
 
     public ClirrReportGenerator( Sink sink, ResourceBundle bundle, Locale locale )
     {
@@ -263,10 +265,16 @@ public class ClirrReportGenerator
                 sink.text( difference.getReport( translator ) );
                 sink.tableCell_();
 
-                // TODO: link to file/class/method via JXR?
-
                 sink.tableCell();
+                if ( xrefLocation != null )
+                {
+                    sink.link( xrefLocation + "/" + difference.getAffectedClass().replace( '.', '/' ) + ".html" );
+                }
                 sink.text( difference.getAffectedClass() );
+                if ( xrefLocation != null )
+                {
+                    sink.link_();
+                }
                 sink.tableCell_();
 
                 sink.tableCell();
@@ -307,4 +315,13 @@ public class ClirrReportGenerator
         this.minSeverity = minSeverity;
     }
 
+    public String getXrefLocation()
+    {
+        return xrefLocation;
+    }
+
+    public void setXrefLocation( String xrefLocation )
+    {
+        this.xrefLocation = xrefLocation;
+    }
 }

@@ -58,6 +58,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -115,6 +116,16 @@ public abstract class AbstractClirrMojo
      * @parameter expression="${comparisonVersion}" default-value="(,${project.version})"
      */
     protected String comparisonVersion;
+
+    /**
+     * List of artifacts to compare the current code against. This
+     * overrides <code>comparisonVersion</code>, if present.
+     * Each comparisonArtifact is made of a groupId, an artifactId,
+     * a version number. Optionally it may have a classifier
+     * (default null) and a type (default "jar").
+     * @parameter
+     */
+    protected ArtifactSpecification[] comparisonArtifacts;
 
     /**
      * A text output file to render to. If omitted, no output is rendered to a text file.
@@ -239,23 +250,47 @@ public abstract class AbstractClirrMojo
     private JavaType[] resolvePreviousReleaseClasses( ClassFilter classFilter )
         throws MojoFailureException, MojoExecutionException
     {
-        Artifact previousArtifact = getComparisonArtifact();
+        final Set previousArtifacts;
+        if ( comparisonArtifacts == null )
+        {
+            Artifact previousArtifact = getComparisonArtifact();
+            getLog().info( "Comparing to version: " + previousArtifact.getVersion() );
+            previousArtifacts = Collections.singleton( previousArtifact );
+        }
+        else
+        {
+            previousArtifacts = resolveArtifacts( comparisonArtifacts );
+            for ( Iterator iter = previousArtifacts.iterator();  iter.hasNext();  )
+            {
+                Artifact artifact = (Artifact) iter.next();
+                getLog().debug( "Comparing to "
+                               + artifact.getGroupId() + ":"
+                               + artifact.getArtifactId() + ":"
+                               + artifact.getVersion() + ":"
+                               + artifact.getClassifier() + ":"
+                               + artifact.getType() );
+            }
+        }
 
         try
         {
-            getLog().info( "Comparing to version: " + previousArtifact.getVersion() );
-
             // TODO: better way? Can't use previousArtifact as the originatingArtifact, it culls everything out
-            //  perhaps resolve the artifact itself (not the pom artifact), then load th epom and get dependencies
+            //  perhaps resolve the artifact itself (not the pom artifact), then load the pom and get dependencies
             Artifact dummy = factory.createProjectArtifact( "dummy", "dummy", "1.0" );
-            ArtifactResolutionResult result = resolver.resolveTransitively( Collections.singleton( previousArtifact ),
+            ArtifactResolutionResult result = resolver.resolveTransitively( previousArtifacts,
                                                                             dummy, localRepository,
                                                                             project.getRemoteArtifactRepositories(),
                                                                             metadataSource, null );
 
-            ClassLoader origDepCL = createClassLoader( result.getArtifacts(), previousArtifact );
-            File file = new File( localRepository.getBasedir(), localRepository.pathOf( previousArtifact ) );
-            return BcelTypeArrayBuilder.createClassSet( new File[]{file}, origDepCL, classFilter );
+            ClassLoader origDepCL = createClassLoader( result.getArtifacts(), previousArtifacts );
+            final File[] files = new File[ previousArtifacts.size() ];
+            int i = 0;
+            for ( Iterator iter = previousArtifacts.iterator();  iter.hasNext();  )
+            {
+                Artifact artifact = (Artifact) iter.next();
+                files[i++] = new File( localRepository.getBasedir(), localRepository.pathOf( artifact ) );
+            }
+            return BcelTypeArrayBuilder.createClassSet( files, origDepCL, classFilter );
         }
         catch ( ArtifactResolutionException e )
         {
@@ -269,6 +304,49 @@ public abstract class AbstractClirrMojo
         {
             throw new MojoExecutionException( "Error creating classloader for previous version's classes", e );
         }
+    }
+
+    private Artifact resolveArtifact( ArtifactSpecification artifactSpec )
+        throws MojoFailureException, MojoExecutionException
+    {
+        final String groupId = artifactSpec.getGroupId();
+        if ( groupId == null )
+        {
+            throw new MojoFailureException( "An artifacts groupId is required." );
+        }
+        final String artifactId = artifactSpec.getArtifactId();
+        if ( artifactId == null )
+        {
+            throw new MojoFailureException( "An artifacts artifactId is required." );
+        }
+        final String version = artifactSpec.getVersion();
+        if ( version == null )
+        {
+            throw new MojoFailureException( "An artifacts version number is required." );
+        }
+        final VersionRange versionRange = VersionRange.createFromVersion( version );
+        String type = artifactSpec.getType();
+        if ( type == null )
+        {
+            type = "jar";
+        }
+
+        Artifact artifact =
+            factory.createDependencyArtifact( groupId, artifactId, versionRange, type, artifactSpec.getClassifier(),
+                                              Artifact.SCOPE_COMPILE );
+        return artifact;
+    }
+
+    private Set resolveArtifacts( ArtifactSpecification[] artifacts )
+        throws MojoFailureException, MojoExecutionException
+    {
+        Set artifactSet = new HashSet();
+        Artifact[] result = new Artifact[artifacts.length];
+        for ( int i = 0; i < result.length; i++ )
+        {   
+            artifactSet.add( resolveArtifact( artifacts[i] ) );
+        }
+        return artifactSet;
     }
 
     private Artifact getComparisonArtifact()
@@ -311,10 +389,6 @@ public abstract class AbstractClirrMojo
         {
             throw new MojoExecutionException( "Error determining previous version: " + e11.getMessage(), e11 );
         }
-        catch ( ArtifactResolutionException e12 )
-        {
-            throw new MojoExecutionException( "Error resolving previous version: " + e12.getMessage(), e12 );
-        }
 
         if ( previousArtifact.getVersion() == null )
         {
@@ -327,7 +401,7 @@ public abstract class AbstractClirrMojo
     public static JavaType[] createClassSet( File classes, ClassLoader thirdPartyClasses, ClassFilter classFilter )
         throws MalformedURLException
     {
-        ClassLoader classLoader = new URLClassLoader( new URL[]{classes.toURL()}, thirdPartyClasses );
+        ClassLoader classLoader = new URLClassLoader( new URL[]{classes.toURI().toURL()}, thirdPartyClasses );
 
         Repository repository = new ClassLoaderRepository( classLoader );
 
@@ -379,7 +453,7 @@ public abstract class AbstractClirrMojo
         }
     }
 
-    private static ClassLoader createClassLoader( Set artifacts, Artifact previousArtifact )
+    private static ClassLoader createClassLoader( Set artifacts, Set previousArtifacts )
         throws MalformedURLException
     {
         URLClassLoader cl = null;
@@ -389,9 +463,9 @@ public abstract class AbstractClirrMojo
             for ( Iterator i = artifacts.iterator(); i.hasNext(); )
             {
                 Artifact artifact = (Artifact) i.next();
-                if ( !artifact.equals( previousArtifact ) )
+                if ( previousArtifacts != null  &&  !previousArtifacts.contains( artifact ) )
                 {
-                    urls.add( artifact.getFile().toURL() );
+                    urls.add( artifact.getFile().toURI().toURL() );
                 }
             }
             if ( !urls.isEmpty() )
@@ -420,10 +494,14 @@ public abstract class AbstractClirrMojo
         {
             return false;
         }
-        else
+        else if ( comparisonArtifacts != null && comparisonArtifacts.length > 0 )
         {
             Artifact previousArtifact = getComparisonArtifact();
             return previousArtifact.getVersion() != null;
+        }
+        else
+        {
+            return true;
         }
     }
 }

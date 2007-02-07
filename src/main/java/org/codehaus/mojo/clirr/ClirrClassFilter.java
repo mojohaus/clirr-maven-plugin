@@ -86,9 +86,4 @@ public class ClirrClassFilter
 
         return result;
     }
-
-    private static boolean isEmpty( String[] strings )
-    {
-        return strings == null || strings.length == 0;
-    }
 }

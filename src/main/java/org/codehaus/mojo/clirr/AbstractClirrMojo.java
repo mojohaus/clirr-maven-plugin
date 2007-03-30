@@ -374,6 +374,7 @@ public abstract class AbstractClirrMojo
                 getLog().debug( "Searching for versions in range: " + previousArtifact.getVersionRange() );
                 List availableVersions = metadataSource.retrieveAvailableVersions( previousArtifact, localRepository,
                                                                                    project.getRemoteArtifactRepositories() );
+                filterSnapshots( availableVersions );
                 ArtifactVersion version = range.matchVersion( availableVersions );
                 if ( version != null )
                 {
@@ -396,6 +397,18 @@ public abstract class AbstractClirrMojo
         }
 
         return previousArtifact;
+    }
+
+    private void filterSnapshots( List versions )
+    {
+        for (Iterator versionIterator = versions.iterator(); versionIterator.hasNext();)
+        {
+            ArtifactVersion version = (ArtifactVersion) versionIterator.next();
+            if ( "SNAPSHOT".equals( version.getQualifier() ) )
+            {
+                versionIterator.remove();
+            }
+        }
     }
 
     public static JavaType[] createClassSet( File classes, ClassLoader thirdPartyClasses, ClassFilter classFilter )

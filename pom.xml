@@ -31,7 +31,24 @@
       </roles>
       <timezone>+10</timezone>
     </developer>
+    <developer>
+      <id>jochen</id>
+      <name>Jochen Wiedmann</name>
+      <email>jochen@apache.org</email>
+      <roles>
+        <role>Java Developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
   </developers>
+
+  <contributors>
+    <contributor>
+      <name>Roland Asmann</name>
+      <email>Roland.Asmann@cfc.at</email>
+    </contributor>
+  </contributors>
+
   <dependencies>
     <dependency>
       <groupId>net.sf.clirr</groupId>

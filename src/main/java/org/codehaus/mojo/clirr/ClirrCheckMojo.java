@@ -62,7 +62,17 @@ public class ClirrCheckMojo
             return;
         }
 
-        ClirrDiffListener listener = executeClirr();
+        ClirrDiffListener listener;
+        try
+        {
+            listener = executeClirr();
+        }
+        catch ( MissingPreviousException e )
+        {
+            getLog().info( "No previous version was found. Use 'comparisonArtifacts'"
+                    + " for explicit configuration if you think this is wrong." );
+            return;
+        }
 
         Locale locale = Locale.getDefault();
 

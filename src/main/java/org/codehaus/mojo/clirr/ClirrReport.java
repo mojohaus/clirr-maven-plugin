@@ -248,6 +248,11 @@ public class ClirrReport
             {
                 listener = executeClirr( minSeverity );
             }
+            catch ( MissingPreviousException e )
+            {
+                getLog().error( bundle.getString( "report.clirr.error.nopredecessor" ) );
+                return;
+            }
             catch ( MojoExecutionException e )
             {
                 throw new MavenReportException( e.getMessage(), e );

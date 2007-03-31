@@ -294,7 +294,7 @@ public abstract class AbstractClirrMojo
         }
         catch ( ArtifactResolutionException e )
         {
-            throw new MojoExecutionException( "Error resolving previous version: " + e.getMessage(), e );
+            throw new MissingPreviousException( "Error resolving previous version: " + e.getMessage(), e );
         }
         catch ( ArtifactNotFoundException e )
         {

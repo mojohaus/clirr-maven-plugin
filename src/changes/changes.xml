@@ -11,6 +11,10 @@
       <action dev="jochen" type="fix" due-to="Roland Asmann" due-to-email="Roland.Asmann@cfc.at" issue="MOJO-723">
         Snapshot builds are now ignored when selecting the predecessor.
       </action>
+      <action dev="jochen" type="fix" due-to="Roland Asmann" due-to-email="Roland.Asmann@cfc.at" issue="MOJO-723">
+        An exception was thrown, if no previous version was found. This made it impossible
+        to configure the plugin in parent projects. An error message is now logged instead.
+      </action>
     </release>
     <release version="2.0" date="11-May-2006">
       <action dev="brett" type="add">

@@ -494,7 +494,7 @@ public abstract class AbstractClirrMojo
     {
         boolean sources = false;
 
-        for ( Iterator i = executedProject.getCompileSourceRoots().iterator(); i.hasNext() && !sources; )
+        for ( Iterator i = project.getCompileSourceRoots().iterator(); i.hasNext() && !sources; )
         {
             String root = (String) i.next();
             if ( new File( root ).exists() )
@@ -505,16 +505,18 @@ public abstract class AbstractClirrMojo
 
         if ( !sources )
         {
+            getLog().debug( "canGenerate: No sources found." );
             return false;
         }
-        else if ( comparisonArtifacts != null && comparisonArtifacts.length > 0 )
+        if ( comparisonArtifacts == null || comparisonArtifacts.length == 0 )
         {
             Artifact previousArtifact = getComparisonArtifact();
-            return previousArtifact.getVersion() != null;
+            if ( previousArtifact.getVersion() == null )
+            {
+                getLog().debug( "camGenerate: No Artifact for comparison found." );
+                return false;
+            }
         }
-        else
-        {
-            return true;
-        }
+        return true;
     }
 }

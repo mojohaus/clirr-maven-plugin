@@ -166,11 +166,6 @@ public abstract class AbstractClirrMojo
 
     private static final URL[] EMPTY_URL_ARRAY = new URL[0];
 
-    /**
-     * @parameter expression="${executedProject}"
-     */
-    private MavenProject executedProject;
-
     public ClirrDiffListener executeClirr()
         throws MojoExecutionException, MojoFailureException
     {

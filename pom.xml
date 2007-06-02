@@ -17,8 +17,24 @@
   <packaging>maven-plugin</packaging>
   <name>Maven Clirr Plugin</name>
   <version>2.1-SNAPSHOT</version>
+  <description>
+    Clirr is a tool that checks Java libraries for binary and source compatibility with older releases.
+    Basically you give it two sets of jar files and Clirr dumps out a list of changes in the public API.
+    The clirr-maven-plugin can be configured to break the build, if it detects incompatible api changes.
+    In a continuous integration process, the clirr-maven-plugin can automatically prevent accidental
+    introduction of binary or source compatibility problems. Additionally, the plugin can generate
+    a report as part of the generated site.
+  </description>
 
   <inceptionYear>2006</inceptionYear>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
 
   <developers>
     <developer>

@@ -15,6 +15,9 @@
         An exception was thrown, if no previous version was found. This made it impossible
         to configure the plugin in parent projects. An error message is now logged instead.
       </action>
+      <action dev="jochen" type="fix" due-to="Vincent Massol" due-to-email="vincent@massol.net" issue="MCLIRR-2">
+        The wrong project was used, when checking, whether the project has sources.
+      </action>
     </release>
     <release version="2.0" date="11-May-2006">
       <action dev="brett" type="add">

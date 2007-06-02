@@ -168,6 +168,7 @@ public class ClirrReport
     {
         if ( !canGenerateReport() )
         {
+            getLog().info( "Not generating report as there are no sources to compare" );
             return;
         }
 

@@ -96,4 +96,13 @@
       <version>1.0-beta-6</version>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-docck-plugin</artifactId>
+        <version>1.0-beta-1</version>
+      </plugin>
+    </plugins>
+  </build>
 </project>

@@ -16,20 +16,18 @@
 ~~
 ~~
 
-           -----
-           Usage
-           -----
+           ------------------------------------
+           Comparing against a specific version
+           ------------------------------------
 
-Usage
+Comparing against a specific version
 
-  The plugin offers goals for checking, whether your project is upwards
-  compatible to previous versions and for generating a report.
-
-* {Compatibility checks}
-
-  The <<<clirr:check>>> goal is used to check for compatibility with
-  previous versions. To use this goal, add a section like the
-  following to your POM:
+  By default, the Maven Clirr Plugin compares the current code against
+  the latest released version, which is lower than the current version.
+  This is, because the parameter <<<comparisonVersion>>> has the
+  default value <<<(,${project.version})>>>. This parameter can be
+  changed, if you want to compare your code against a particular
+  version:
 
 -----------------------------------------------------------------------------------
   <build>
@@ -38,17 +36,17 @@ Usage
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>clirr-maven-plugin</artifactId>
+        <configuration>
+          <!-- Compare the current code against version 1.2 -->
+          <comparisonVersion>1.2</comparisonVersion>
+        </configuration>
       </plugin>
       ...
     </plugins>
   </build>
 -----------------------------------------------------------------------------------
 
-* Generating a report
-
-  The plugin can also be used to add a report to the generated site.
-  If you'd like to have a Clirr report, add a section like this to
-  your POM:
+  Likewise, for generating the report:
   
 -----------------------------------------------------------------------------------
   <reporting>
@@ -57,6 +55,10 @@ Usage
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>clirr-maven-plugin</artifactId>
+        <configuration>
+          <!-- Compare the current code against version 1.2 -->
+          <comparisonVersion>1.2</comparisonVersion>
+        </configuration>
       </plugin>
       ...
     </plugins>

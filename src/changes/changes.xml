@@ -18,6 +18,9 @@
       <action dev="jochen" type="fix" due-to="Vincent Massol" due-to-email="vincent@massol.net" issue="MCLIRR-2">
         The wrong project was used, when checking, whether the project has sources.
       </action>
+      <action dev="jochen" type="fix" due-to="Mathias Br&#246;kelmann" due-to-email="mbroekelmann@googlemail.com" issue="MCLIRR-5">
+        A condition was inverted when checking, whether the user provided an artifact for comparison.
+      </action>
     </release>
     <release version="2.0" date="11-May-2006">
       <action dev="brett" type="add">

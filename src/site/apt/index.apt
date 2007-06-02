@@ -1,0 +1,51 @@
+~~
+~~
+~~  Copyright 2005  The Apache Software Foundation
+~~
+~~  Licensed under the Apache License, Version 2.0 (the "License");
+~~  you may not use this file except in compliance with the License.
+~~  You may obtain a copy of the License at
+~~
+~~  http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~  Unless required by applicable law or agreed to in writing, software
+~~  distributed under the License is distributed on an "AS IS" BASIS,
+~~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~  See the License for the specific language governing permissions and
+~~  limitations under the License.
+~~
+~~
+
+           ------------------
+           Maven Clirr Plugin
+           ------------------
+
+The Maven Clirr Plugin
+
+  {{{http://clirr.sourceforge.net}Clirr}} is an application, which allows
+  you to compare binaries or sources for compatibility. The Maven Clirr
+  Plugin offers to use Clirr from within Maven 2.
+
+* Goals Overview
+
+  The plugin offers the following goals:
+
+  * {{{usage.html#Compatibility Checks}clirr:check}} is used as part of the
+    build to ensure a configurable level of compatibility.
+  
+  * {{{usage.html#Generating a report}clirr:clirr}} generates a report as
+    part of the projects website.
+
+* Usage
+
+  Instructions on how to use the Maven Clirr Plugin can be found {{{usage.html}here}}.
+
+* Examples
+
+  To provide you with better understanding of some usages of the Maven Clirr Plugin,
+  you can take a look into the following examples:
+
+  * Comparing the current version against a {{{examples/specific-version.html}specific version}}.
+
+  * Comparing the current version against an {{{examples/specific-artifacts.html}arbitrary
+    different artifact}}.

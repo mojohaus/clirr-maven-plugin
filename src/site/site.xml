@@ -42,6 +42,8 @@
     </menu>
 
     <menu name="Examples">
+      <item name="Comparing against a specific version" href="examples/specific-version.html"/>
+      <item name="Comparing against a specific artifact" href="examples/specific-artifacts.html"/>
     </menu>
     
     <menu ref="reports"/>

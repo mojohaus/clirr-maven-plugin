@@ -4,6 +4,9 @@
   </properties>
   <body>
     <release version="2.1" date="Not yet released">
+      <action dev="brett" type="fix" issue="MCLIRR-2">
+        Add extra source directories under report generation since Maven does not corretly pass them on.
+      </action>
       <action dev="jochen" type="add">
         Added the "comparisonArtifacts" parameter, which allows to use select arbitrary
         artifacts for comparison.
@@ -14,9 +17,6 @@
       <action dev="jochen" type="fix" due-to="Roland Asmann" due-to-email="Roland.Asmann@cfc.at" issue="MOJO-723">
         An exception was thrown, if no previous version was found. This made it impossible
         to configure the plugin in parent projects. An error message is now logged instead.
-      </action>
-      <action dev="jochen" type="fix" due-to="Vincent Massol" due-to-email="vincent@massol.net" issue="MCLIRR-2">
-        The wrong project was used, when checking, whether the project has sources.
       </action>
       <action dev="jochen" type="fix" due-to="Mathias Br&#246;kelmann" due-to-email="mbroekelmann@googlemail.com" issue="MCLIRR-5">
         A condition was inverted when checking, whether the user provided an artifact for comparison.

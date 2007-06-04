@@ -75,7 +75,7 @@ public abstract class AbstractClirrMojo
     extends AbstractMojo
 {
     /**
-     * @parameter default-value="${project}"
+     * @parameter expression="${project}"
      * @required
      * @readonly
      */
@@ -165,6 +165,12 @@ public abstract class AbstractClirrMojo
     protected boolean logResults;
 
     private static final URL[] EMPTY_URL_ARRAY = new URL[0];
+
+    /**
+     * @parameter expression="${executedProject}"
+     * @readonly
+     */
+    private MavenProject executedProject;
 
     public ClirrDiffListener executeClirr()
         throws MojoExecutionException, MojoFailureException
@@ -471,7 +477,7 @@ public abstract class AbstractClirrMojo
             for ( Iterator i = artifacts.iterator(); i.hasNext(); )
             {
                 Artifact artifact = (Artifact) i.next();
-                if ( previousArtifacts != null  &&  !previousArtifacts.contains( artifact ) )
+                if ( previousArtifacts != null && !previousArtifacts.contains( artifact ) )
                 {
                     urls.add( artifact.getFile().toURI().toURL() );
                 }
@@ -489,18 +495,25 @@ public abstract class AbstractClirrMojo
     {
         boolean sources = false;
 
-        for ( Iterator i = project.getCompileSourceRoots().iterator(); i.hasNext() && !sources; )
+        List roots = new ArrayList( executedProject.getCompileSourceRoots() );
+        roots.addAll( project.getCompileSourceRoots() );
+
+        for ( Iterator i = roots.iterator(); i.hasNext() && !sources; )
         {
             String root = (String) i.next();
             if ( new File( root ).exists() )
             {
                 sources = true;
             }
+            else
+            {
+                getLog().debug( "Source root not found: " + root );
+            }
         }
 
         if ( !sources )
         {
-            getLog().debug( "canGenerate: No sources found." );
+            getLog().info( "Not generating Clirr report as there are no source trees in the project" );
             return false;
         }
         if ( comparisonArtifacts == null || comparisonArtifacts.length == 0 )
@@ -508,7 +521,7 @@ public abstract class AbstractClirrMojo
             Artifact previousArtifact = getComparisonArtifact();
             if ( previousArtifact.getVersion() == null )
             {
-                getLog().debug( "camGenerate: No Artifact for comparison found." );
+                getLog().info( "Not generating Clirr report as there is no previous version of the library to compare against" );
                 return false;
             }
         }

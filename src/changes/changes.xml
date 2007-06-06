@@ -3,7 +3,7 @@
     <title>Changes in the Clirr Maven Plugin</title>
   </properties>
   <body>
-    <release version="2.1" date="Not yet released">
+    <release version="2.1" date="06-Jun-2007">
       <action dev="brett" type="fix" issue="MCLIRR-2">
         Add extra source directories under report generation since Maven does not corretly pass them on.
       </action>

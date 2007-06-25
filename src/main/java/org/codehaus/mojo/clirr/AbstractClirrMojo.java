@@ -57,6 +57,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -461,7 +462,21 @@ public abstract class AbstractClirrMojo
         }
     }
 
-    private static ClassLoader createClassLoader( Set artifacts, Set previousArtifacts )
+    /**
+     * Create a ClassLoader, which includes the artifacts in <code>artifacts</code>,
+     * but excludes the artifacts in <code>previousArtifacts</code>. The intention is,
+     * that we let BCEL inspect the artifacts in the latter set, using a
+     * {@link ClassLoader}, which contains the dependencies. However, the
+     * {@link ClassLoader} must not contain the jar files, which are being inspected.
+     * @param artifacts The artifacts, from which to build a {@link ClassLoader}.
+     * @param previousArtifacts The artifacts being inspected, or null, if te
+     *   returned {@link ClassLoader} should contain all the elements of
+     *   <code>artifacts</code>.
+     * @return A {@link ClassLoader} which may be used to inspect the classes in
+     *   {@link previousArtifacts}.
+     * @throws MalformedURLException Failed to convert a file to an URL.
+     */
+    private static ClassLoader createClassLoader( Collection artifacts, Set previousArtifacts )
         throws MalformedURLException
     {
         URLClassLoader cl = null;
@@ -471,7 +486,7 @@ public abstract class AbstractClirrMojo
             for ( Iterator i = artifacts.iterator(); i.hasNext(); )
             {
                 Artifact artifact = (Artifact) i.next();
-                if ( previousArtifacts != null && !previousArtifacts.contains( artifact ) )
+                if ( previousArtifacts == null || !previousArtifacts.contains( artifact ) )
                 {
                     urls.add( artifact.getFile().toURI().toURL() );
                 }

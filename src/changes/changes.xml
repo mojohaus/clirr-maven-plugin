@@ -3,6 +3,14 @@
     <title>Changes in the Clirr Maven Plugin</title>
   </properties>
   <body>
+    <release version="2.1.1" date="Not yet released">
+      <action dev="jochen" type="fix" due-to="Gr&#233;gory Joseph"
+          due-to-email="joseph.gregory@gmail.com" issue="MCLIRR-6">
+        A class loader with a plugins dependencies wasn't created
+        properly.
+      </action> 
+    </release>
+
     <release version="2.1" date="06-Jun-2007">
       <action dev="brett" type="fix" issue="MCLIRR-2">
         Add extra source directories under report generation since Maven does not corretly pass them on.

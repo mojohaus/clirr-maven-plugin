@@ -397,7 +397,7 @@ public abstract class AbstractClirrMojo
 
     private void filterSnapshots( List versions )
     {
-        for (Iterator versionIterator = versions.iterator(); versionIterator.hasNext();)
+        for ( Iterator versionIterator = versions.iterator(); versionIterator.hasNext(); )
         {
             ArtifactVersion version = (ArtifactVersion) versionIterator.next();
             if ( "SNAPSHOT".equals( version.getQualifier() ) )

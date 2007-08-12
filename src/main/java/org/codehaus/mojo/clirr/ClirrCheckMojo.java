@@ -26,7 +26,7 @@ import java.util.Iterator;
 import java.util.Locale;
 
 /**
- * Perform a violation check against the last checkstyle run to see if there are any violations.
+ * Check for compatibility with previous versions.
  *
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  * @goal check

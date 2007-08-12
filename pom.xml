@@ -2,7 +2,7 @@
   <parent>
     <artifactId>mojo</artifactId>
     <groupId>org.codehaus.mojo</groupId>
-    <version>15</version>
+    <version>16</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -12,7 +12,7 @@
 
   <artifactId>clirr-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <name>Maven Clirr Plugin</name>
+  <name>Clirr Maven Plugin</name>
   <version>2.2-SNAPSHOT</version>
   <description>
     Clirr is a tool that checks Java libraries for binary and source compatibility with older releases.

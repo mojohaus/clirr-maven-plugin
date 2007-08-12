@@ -41,7 +41,7 @@ The Clirr Maven Plugin
 
 * Examples
 
-  To provide you with better understanding of some usages of the Maven Plugin Clirr,
+  To provide you with better understanding of some usages of the Clirr Maven Plugin,
   you can take a look into the following examples:
 
   * Comparing the current version against a {{{examples/specific-version.html}specific version}}.

@@ -60,7 +60,7 @@ public class ClirrReport
     implements MavenReport
 {
     /**
-     * Specifies the directory where the report will be generated
+     * Specifies the directory where the report will be generated.
      *
      * @parameter default-value="${project.reporting.outputDirectory}"
      * @required
@@ -73,7 +73,8 @@ public class ClirrReport
     private Renderer siteRenderer;
 
     /**
-     * Show only messages of this severity or higher. Valid values are <code>info</code>, <code>warning</code> and <code>error</code>.
+     * Show only messages of this severity or higher. Valid values are
+     * <code>info</code>, <code>warning</code> and <code>error</code>.
      *
      * @parameter expression="${minSeverity}" default-value="warning"
      */

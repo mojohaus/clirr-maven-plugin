@@ -44,6 +44,10 @@ public class ClirrReportGenerator
     private Severity minSeverity;
 
     private String xrefLocation;
+    
+    private String currentVersion;
+    
+    private String comparisonVersion;
 
     public ClirrReportGenerator( Sink sink, ResourceBundle bundle, Locale locale )
     {
@@ -94,8 +98,23 @@ public class ClirrReportGenerator
         sink.text( "Clirr" );
         sink.link_();
         sink.text( "." );
-
         sink.paragraph_();
+        
+        sink.list();
+        
+        sink.listItem();
+        sink.text( bundle.getString( "report.clirr.version.current" ) + " " );
+        sink.text( getCurrentVersion() );
+        sink.listItem_();
+        
+        if( getComparisonVersion() != null ) {
+        	sink.listItem();
+        	sink.text( bundle.getString( "report.clirr.version.comparison" ) + " " );
+        	sink.text( getComparisonVersion() );
+        	sink.listItem_();
+        }
+        
+        sink.list_();
     }
 
     private void iconInfo()
@@ -324,4 +343,20 @@ public class ClirrReportGenerator
     {
         this.xrefLocation = xrefLocation;
     }
+
+	public String getCurrentVersion() {
+		return currentVersion;
+	}
+
+	public void setCurrentVersion( String currentVersion ) {
+		this.currentVersion = currentVersion;
+	}
+
+	public String getComparisonVersion() {
+		return comparisonVersion;
+	}
+
+	public void setComparisonVersion( String comparisonVersion ) {
+		this.comparisonVersion = comparisonVersion;
+	}
 }

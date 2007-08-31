@@ -250,7 +250,8 @@ public abstract class AbstractClirrMojo
         if ( comparisonArtifacts == null )
         {
             Artifact previousArtifact = getComparisonArtifact();
-            getLog().info( "Comparing to version: " + previousArtifact.getVersion() );
+            comparisonVersion = previousArtifact.getVersion();
+            getLog().info( "Comparing to version: " + comparisonVersion );
             previousArtifacts = Collections.singleton( previousArtifact );
         }
         else

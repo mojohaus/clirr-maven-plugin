@@ -270,6 +270,11 @@ public class ClirrReport
                 generator.setEnableSeveritySummary( showSummary );
 
                 generator.setMinSeverity( minSeverity );
+                
+                generator.setCurrentVersion( project.getVersion() );
+                
+                if( comparisonVersion != null )
+                	generator.setComparisonVersion( comparisonVersion );
 
                 if ( linkXRef )
                 {

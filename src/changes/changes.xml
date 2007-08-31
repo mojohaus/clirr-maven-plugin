@@ -3,6 +3,14 @@
     <title>Changes in the Clirr Maven Plugin</title>
   </properties>
   <body>
+    <release version="2.2-SNAPSHOT" date="Not yer released">
+      <action dev="jochen" type="fix" due-to="Matthew Beermann"
+          due-to-email="mbeerman@yahoo.com" issue="MCLIRR-9">
+        The previous artifacts version number is now shown in
+        the report.
+      </action>
+    </release>
+
     <release version="2.1.1" date="29-Jun-2007">
       <action dev="jochen" type="fix" due-to="Gr&#233;gory Joseph"
           due-to-email="joseph.gregory@gmail.com" issue="MCLIRR-6">

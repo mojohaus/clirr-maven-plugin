@@ -3,11 +3,15 @@
     <title>Changes in the Clirr Maven Plugin</title>
   </properties>
   <body>
-    <release version="2.2-SNAPSHOT" date="Not yer released">
+    <release version="2.2-SNAPSHOT" date="Not yet released">
       <action dev="jochen" type="fix" due-to="Matthew Beermann"
           due-to-email="mbeerman@yahoo.com" issue="MCLIRR-9">
         The previous artifacts version number is now shown in
         the report.
+      </action>
+      <action dev="jochen" type="fix" due-to="Luc Maisonobe"
+          due-to-email="Luc.Maisonobe@free.fr" issue="MCLIRR-10">
+        Added the french resource bundle.
       </action>
     </release>
 

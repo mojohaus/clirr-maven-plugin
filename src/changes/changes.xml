@@ -13,6 +13,10 @@
           due-to-email="Luc.Maisonobe@free.fr" issue="MCLIRR-10">
         Added the french resource bundle.
       </action>
+      <action dev="jochen" type="fix" due-to="Brian Egge"
+          due-to-email="brianegge@yahoo.com" issue="MCLIRR-11">
+        Fixed a documentation typo.
+      </action>
     </release>
 
     <release version="2.1.1" date="29-Jun-2007">

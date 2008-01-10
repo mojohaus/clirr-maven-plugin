@@ -46,6 +46,9 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.codehaus.plexus.util.IOUtil;
 
@@ -102,8 +105,13 @@ public abstract class AbstractClirrMojo
     /**
      * @component
      */
-    protected ArtifactMetadataSource metadataSource;
+    private ArtifactMetadataSource metadataSource;
 
+    /**
+     * @component
+     */
+    private MavenProjectBuilder mavenProjectBuilder;
+    
     /**
      * The classes of this project to compare the last release against.
      *
@@ -247,19 +255,25 @@ public abstract class AbstractClirrMojo
         throws MojoFailureException, MojoExecutionException
     {
         final Set previousArtifacts;
+        final Artifact firstPreviousArtifact;
         if ( comparisonArtifacts == null )
         {
-            Artifact previousArtifact = getComparisonArtifact();
-            comparisonVersion = previousArtifact.getVersion();
+            firstPreviousArtifact = getComparisonArtifact();
+            comparisonVersion = firstPreviousArtifact.getVersion();
             getLog().info( "Comparing to version: " + comparisonVersion );
-            previousArtifacts = Collections.singleton( previousArtifact );
+            previousArtifacts = Collections.singleton( firstPreviousArtifact );
         }
         else
         {
             previousArtifacts = resolveArtifacts( comparisonArtifacts );
+            Artifact a = null;
             for ( Iterator iter = previousArtifacts.iterator();  iter.hasNext();  )
             {
                 Artifact artifact = (Artifact) iter.next();
+                if ( a == null )
+                {
+                    a = artifact;
+                }
                 getLog().debug( "Comparing to "
                                + artifact.getGroupId() + ":"
                                + artifact.getArtifactId() + ":"
@@ -267,19 +281,14 @@ public abstract class AbstractClirrMojo
                                + artifact.getClassifier() + ":"
                                + artifact.getType() );
             }
+            firstPreviousArtifact = a;
         }
 
         try
         {
-            // TODO: better way? Can't use previousArtifact as the originatingArtifact, it culls everything out
-            //  perhaps resolve the artifact itself (not the pom artifact), then load the pom and get dependencies
-            Artifact dummy = factory.createProjectArtifact( "dummy", "dummy", "1.0" );
-            ArtifactResolutionResult result = resolver.resolveTransitively( previousArtifacts,
-                                                                            dummy, localRepository,
-                                                                            project.getRemoteArtifactRepositories(),
-                                                                            metadataSource, null );
-
-            ClassLoader origDepCL = createClassLoader( result.getArtifacts(), previousArtifacts );
+            final List dependencies = getTransitiveDependencies( previousArtifacts );
+            
+            ClassLoader origDepCL = createClassLoader( dependencies, previousArtifacts );
             final File[] files = new File[ previousArtifacts.size() ];
             int i = 0;
             for ( Iterator iter = previousArtifacts.iterator();  iter.hasNext();  )
@@ -288,6 +297,14 @@ public abstract class AbstractClirrMojo
                 files[i++] = new File( localRepository.getBasedir(), localRepository.pathOf( artifact ) );
             }
             return BcelTypeArrayBuilder.createClassSet( files, origDepCL, classFilter );
+        }
+        catch ( ProjectBuildingException e )
+        {
+            throw new MojoExecutionException( "Failed to build project for previous artifact: " + e.getMessage(), e );
+        }
+        catch ( InvalidDependencyVersionException e )
+        {
+            throw new MojoExecutionException( e.getMessage(), e );
         }
         catch ( ArtifactResolutionException e )
         {
@@ -301,6 +318,34 @@ public abstract class AbstractClirrMojo
         {
             throw new MojoExecutionException( "Error creating classloader for previous version's classes", e );
         }
+    }
+
+    private List getTransitiveDependencies( final Set previousArtifacts )
+        throws ProjectBuildingException, InvalidDependencyVersionException, ArtifactResolutionException,
+        ArtifactNotFoundException
+    {
+        final List dependencies = new ArrayList();
+        for ( Iterator iter = previousArtifacts.iterator();  iter.hasNext();  )
+        {
+            final Artifact a = (Artifact) iter.next();
+            final Artifact pomArtifact = factory.createArtifact(
+                    a.getGroupId(),
+                    a.getArtifactId(),
+                    a.getVersion(),
+                    a.getScope(),
+                    "pom");
+            final MavenProject pomProject = mavenProjectBuilder.buildFromRepository(
+                    pomArtifact,
+                    project.getRemoteArtifactRepositories(),
+                    localRepository );
+            final Set pomProjectArtifacts = pomProject.createArtifacts( factory, null, null );
+            final ArtifactResolutionResult result = resolver.resolveTransitively( pomProjectArtifacts,
+                    pomArtifact, localRepository,
+                    project.getRemoteArtifactRepositories(),
+                    metadataSource, null );
+            dependencies.addAll( result.getArtifacts() );
+        }
+        return dependencies;
     }
 
     private Artifact resolveArtifact( ArtifactSpecification artifactSpec )

@@ -17,6 +17,10 @@
           due-to-email="brianegge@yahoo.com" issue="MCLIRR-11">
         Fixed a documentation typo.
       </action>
+      <action dev="jochen" type="fix" issue="MCLIRR-7">
+        Resolving the previous artifacts dependencies didn't actually
+        work.
+      </action>
     </release>
 
     <release version="2.1.1" date="29-Jun-2007">

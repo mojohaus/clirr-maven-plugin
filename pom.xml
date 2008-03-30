@@ -13,7 +13,7 @@
   <artifactId>clirr-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <name>Clirr Maven Plugin</name>
-  <version>2.2-SNAPSHOT</version>
+  <version>2.2</version>
   <description>
     Clirr is a tool that checks Java libraries for binary and source compatibility with older releases.
     Basically you give it two sets of jar files and Clirr dumps out a list of changes in the public API.
@@ -66,7 +66,7 @@
       <email>Roland.Asmann@cfc.at</email>
     </contributor>
     <contributor>
-      <name>Mathias Br&#246;kelmann</name>
+      <name>Mathias Brökelmann</name>
       <email>mbroekelmann@googlemail.com</email>
     </contributor>
     <contributor>
@@ -74,7 +74,7 @@
       <email>brianegge@yahoo.com</email>
     </contributor>
     <contributor>
-      <name>Gr&#233;gory Joseph</name>
+      <name>Grégory Joseph</name>
       <email>joseph.gregory@gmail.com</email>
     </contributor>
     <contributor>
@@ -134,4 +134,10 @@
       </plugin>
     </plugins>
   </reporting>
+
+  <scm>
+    <connection>scm:svn:http://svn.codehaus.org/mojo/tags/clirr-maven-plugin-2.2</connection>
+    <developerConnection>scm:svn:https://svn.codehaus.org/mojo/tags/clirr-maven-plugin-2.2</developerConnection>
+    <url>http://svn.codehaus.org/mojo/tags/clirr-maven-plugin-2.2</url>
+  </scm>
 </project>

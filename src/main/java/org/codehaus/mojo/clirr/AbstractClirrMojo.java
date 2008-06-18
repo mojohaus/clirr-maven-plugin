@@ -25,6 +25,7 @@ import net.sf.clirr.core.XmlDiffListener;
 import net.sf.clirr.core.internal.bcel.BcelJavaType;
 import net.sf.clirr.core.internal.bcel.BcelTypeArrayBuilder;
 import net.sf.clirr.core.spi.JavaType;
+
 import org.apache.bcel.classfile.ClassParser;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.util.ClassLoaderRepository;
@@ -111,7 +112,7 @@ public abstract class AbstractClirrMojo
      * @component
      */
     private MavenProjectBuilder mavenProjectBuilder;
-    
+
     /**
      * The classes of this project to compare the last release against.
      *
@@ -286,8 +287,14 @@ public abstract class AbstractClirrMojo
 
         try
         {
+            for ( Iterator iter = previousArtifacts.iterator();  iter.hasNext();  )
+            {
+                Artifact artifact = (Artifact) iter.next();
+                resolver.resolve( artifact, project.getRemoteArtifactRepositories(), localRepository );
+            }
+
             final List dependencies = getTransitiveDependencies( previousArtifacts );
-            
+
             ClassLoader origDepCL = createClassLoader( dependencies, previousArtifacts );
             final File[] files = new File[ previousArtifacts.size() ];
             int i = 0;
@@ -385,7 +392,7 @@ public abstract class AbstractClirrMojo
         Set artifactSet = new HashSet();
         Artifact[] result = new Artifact[artifacts.length];
         for ( int i = 0; i < result.length; i++ )
-        {   
+        {
             artifactSet.add( resolveArtifact( artifacts[i] ) );
         }
         return artifactSet;

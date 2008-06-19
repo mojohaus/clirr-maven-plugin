@@ -37,6 +37,7 @@ Usage
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>clirr-maven-plugin</artifactId>
+        <version>2.2.1</version>
       </plugin>
       ...
     </plugins>
@@ -56,6 +57,7 @@ Usage
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>clirr-maven-plugin</artifactId>
+        <version>2.2.1</version>
       </plugin>
       ...
     </plugins>

@@ -33,7 +33,7 @@ Comparing against a specific artifact
   of several predecessors, you may choose to specify all the
   predecessor artifacts.
 
-  Here's how you would configure the <clirr:check>>> goal to
+  Here's how you would configure the <<<clirr:check>>> goal to
   compare your project against <<<fooGroup:barProject-1.1.jar>>>:
 
 -----------------------------------------------------------------------------------
@@ -43,6 +43,7 @@ Comparing against a specific artifact
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>clirr-maven-plugin</artifactId>
+        <version>2.2.1</version>
         <configuration>
           <comparisonArtifacts>
             <comparisonArtifact>
@@ -67,6 +68,7 @@ Comparing against a specific artifact
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>clirr-maven-plugin</artifactId>
+        <version>2.2.1</version>
         <configuration>
           <comparisonArtifacts>
             <comparisonArtifact>

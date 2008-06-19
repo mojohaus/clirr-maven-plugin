@@ -3,7 +3,14 @@
     <title>Changes in the Clirr Maven Plugin</title>
   </properties>
   <body>
-    <release version="2.2-SNAPSHOT" date="Not yet released">
+    <release version="2.2.1-SNAPSHOT" date="Not yet released">
+      <action dev="jdcasey" type="fix" issue="MCLIRR-12">
+         Exception if previous version artifact is not in local repo 
+         (previous-version artifact is not resolved).
+      </action>
+    </release>
+    
+    <release version="2.2" date="30-Mar-2008">
       <action dev="jochen" type="fix" due-to="Matthew Beermann"
           due-to-email="mbeerman@yahoo.com" issue="MCLIRR-9">
         The previous artifacts version number is now shown in

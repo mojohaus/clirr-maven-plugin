@@ -74,6 +74,16 @@
       </roles>
       <timezone>-5</timezone>
     </developer>
+    <developer>
+      <id>aheritier</id>
+      <name>Arnaud Heritier</name>
+      <email>aheritier@apache.org</email>
+      <roles>
+        <role>Developer</role>
+        <role>Despot</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
   </developers>
 
   <contributors>

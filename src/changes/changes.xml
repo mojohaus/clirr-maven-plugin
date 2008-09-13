@@ -3,6 +3,12 @@
     <title>Changes in the Clirr Maven Plugin</title>
   </properties>
   <body>
+    <release version="2.2.3" date="In SVN">
+      <action dev="dennisl" type="add" issue="MCLIRR-17">
+        xrefLocation as expression.
+      </action>
+    </release>
+
     <release version="2.2.2" date="21-Jul-2008">
       <action dev="aheritier" type="fix" issue="MCLIRR-14">
         Fail's checking with a ClassNotFoundException followed by a

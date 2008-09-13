@@ -105,7 +105,7 @@ public class ClirrReport
     /**
      * Location of the Xrefs to link to.
      *
-     * @parameter default-value="${project.build.directory}/site/xref"
+     * @parameter expression="${xrefLocation}" default-value="${project.build.directory}/site/xref"
      */
     private File xrefLocation;
 
@@ -270,9 +270,9 @@ public class ClirrReport
                 generator.setEnableSeveritySummary( showSummary );
 
                 generator.setMinSeverity( minSeverity );
-                
+
                 generator.setCurrentVersion( project.getVersion() );
-                
+
                 if( comparisonVersion != null )
                 	generator.setComparisonVersion( comparisonVersion );
 

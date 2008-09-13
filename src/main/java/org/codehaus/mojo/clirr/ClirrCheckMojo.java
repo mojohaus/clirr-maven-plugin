@@ -69,6 +69,7 @@ public class ClirrCheckMojo
         }
         catch ( MissingPreviousException e )
         {
+            getLog().debug(e);
             getLog().info( "No previous version was found. Use 'comparisonArtifacts'"
                     + " for explicit configuration if you think this is wrong." );
             return;

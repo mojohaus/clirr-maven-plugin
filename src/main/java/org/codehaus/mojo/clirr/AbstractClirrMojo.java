@@ -340,7 +340,7 @@ public abstract class AbstractClirrMojo
                     a.getArtifactId(),
                     a.getVersion(),
                     a.getScope(),
-                    "pom");
+                    "pom" );
             final MavenProject pomProject = mavenProjectBuilder.buildFromRepository(
                     pomArtifact,
                     project.getRemoteArtifactRepositories(),

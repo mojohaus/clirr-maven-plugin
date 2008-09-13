@@ -273,8 +273,10 @@ public class ClirrReport
 
                 generator.setCurrentVersion( project.getVersion() );
 
-                if( comparisonVersion != null )
-                	generator.setComparisonVersion( comparisonVersion );
+                if ( comparisonVersion != null )
+                {
+                    generator.setComparisonVersion( comparisonVersion );
+                }
 
                 if ( linkXRef )
                 {

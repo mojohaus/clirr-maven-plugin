@@ -22,7 +22,7 @@
     introduction of binary or source compatibility problems. Additionally, the plugin can generate
     a report as part of the generated site.
   </description>
-  
+
   <scm>
     <connection>scm:svn:http://svn.codehaus.org/mojo/trunk/mojo/clirr-maven-plugin</connection>
     <developerConnection>scm:svn:https://svn.codehaus.org/mojo/trunk/mojo/clirr-maven-plugin</developerConnection>
@@ -150,6 +150,14 @@
   </dependencies>
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>2.0-beta-7</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
         <artifactId>maven-docck-plugin</artifactId>
@@ -168,16 +176,6 @@
         </executions>
       </plugin>
     </plugins>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <artifactId>maven-release-plugin</artifactId>
-          <configuration>
-            <tagBase>https://svn.codehaus.org/mojo/tags</tagBase>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
   </build>
 
   <reporting>

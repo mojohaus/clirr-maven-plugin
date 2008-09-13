@@ -95,8 +95,8 @@ public class ClirrReport
     private boolean htmlReport;
 
     /**
-     * Link the violation line numbers to the source xref. Defaults to true and will link
-     * automatically if jxr plugin is being used.
+     * Link the violation line numbers to the source Xref. This will create links
+     * if the JXR Plugin is being used.
      *
      * @parameter expression="${linkXRef}" default-value="true"
      */

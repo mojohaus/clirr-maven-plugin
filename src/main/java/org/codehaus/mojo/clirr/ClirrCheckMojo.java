@@ -26,7 +26,7 @@ import java.util.Iterator;
 import java.util.Locale;
 
 /**
- * Check for compatibility with previous versions.
+ * Check for compatibility with previous version.
  *
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  * @goal check

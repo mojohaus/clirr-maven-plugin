@@ -15,20 +15,23 @@
  ~~ specific language governing permissions and limitations
  ~~ under the License.
 
- -------------------------------------
+ -----
  Comparing against a specific artifact
- -------------------------------------
+ -----
+ -----
+ 2008-09-13
+ -----
 
 Comparing against a specific artifact
 
   By default, the Clirr Maven Plugin compares the current code against
-  another artifact of the same project. In other words, the comparison
+  another version of the same project. In other words, the comparison
   artifact has the same <<<artifactId>>> and <<<groupId>>> as the
-  project.
+  project, but a different <<<version>>>.
 
-  The configuration parameter <<<comparisonArtifacts>>> allows to
+  The configuration parameter <<<comparisonArtifacts>>> allows you to
   replace this default with a set of specified other artifacts.
-  This allows, for example, to compare your project against another
+  This allows you to, for example, compare your project against another
   implementation of the same API. Or, if your project is a superset
   of several predecessors, you may choose to specify all the
   predecessor artifacts.
@@ -37,13 +40,14 @@ Comparing against a specific artifact
   compare your project against <<<fooGroup:barProject-1.1.jar>>>:
 
 -----------------------------------------------------------------------------------
+<project>
   <build>
     <plugins>
       ...
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>clirr-maven-plugin</artifactId>
-        <version>2.2.1</version>
+        <version>2.2.2</version>
         <configuration>
           <comparisonArtifacts>
             <comparisonArtifact>
@@ -57,18 +61,20 @@ Comparing against a specific artifact
       ...
     </plugins>
   </build>
+</project>
 -----------------------------------------------------------------------------------
 
-  And here's the same configuration for the clirr report:
-  
+  And here's the same configuration for the Clirr report:
+
 -----------------------------------------------------------------------------------
+<project>
   <reporting>
     <plugins>
       ...
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>clirr-maven-plugin</artifactId>
-        <version>2.2.1</version>
+        <version>2.2.2</version>
         <configuration>
           <comparisonArtifacts>
             <comparisonArtifact>
@@ -82,4 +88,5 @@ Comparing against a specific artifact
       ...
     </plugins>
   </reporting>
+</project>
 -----------------------------------------------------------------------------------

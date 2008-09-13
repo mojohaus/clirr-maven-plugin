@@ -130,9 +130,9 @@ public abstract class AbstractClirrMojo
     /**
      * List of artifacts to compare the current code against. This
      * overrides <code>comparisonVersion</code>, if present.
-     * Each comparisonArtifact is made of a groupId, an artifactId,
-     * a version number. Optionally it may have a classifier
-     * (default null) and a type (default "jar").
+     * Each <code>comparisonArtifact</code> is made of a <code>groupId</code>, an <code>artifactId</code> and
+     * a <code>version</code> number. Optionally it may have a <code>classifier</code>
+     * (default null) and a <code>type</code> (default "jar").
      * @parameter
      */
     protected ArtifactSpecification[] comparisonArtifacts;
@@ -409,7 +409,7 @@ public abstract class AbstractClirrMojo
         }
         catch ( InvalidVersionSpecificationException e )
         {
-            throw new MojoFailureException( "Invalid comparision version: " + e.getMessage() );
+            throw new MojoFailureException( "Invalid comparison version: " + e.getMessage() );
         }
 
         Artifact previousArtifact;
@@ -433,7 +433,7 @@ public abstract class AbstractClirrMojo
         }
         catch ( OverConstrainedVersionException e1 )
         {
-            throw new MojoFailureException( "Invalid comparision version: " + e1.getMessage() );
+            throw new MojoFailureException( "Invalid comparison version: " + e1.getMessage() );
         }
         catch ( ArtifactMetadataRetrievalException e11 )
         {
@@ -526,7 +526,7 @@ public abstract class AbstractClirrMojo
      *   returned {@link ClassLoader} should contain all the elements of
      *   <code>artifacts</code>.
      * @return A {@link ClassLoader} which may be used to inspect the classes in
-     *   {@link previousArtifacts}.
+     *   previousArtifacts.
      * @throws MalformedURLException Failed to convert a file to an URL.
      */
     private static ClassLoader createClassLoader( Collection artifacts, Set previousArtifacts )

@@ -18,11 +18,14 @@
  -----
  Usage
  -----
+ -----
+ 2008-09-13
+ -----
 
 Usage
 
-  The plugin offers goals for checking, whether your project is upwards
-  compatible to previous versions and for generating a report.
+  This plugin offers goals for checking whether the current version of your
+  project is binary compatible with previous versions and for generating a report.
 
 * {Compatibility checks}
 
@@ -31,17 +34,19 @@ Usage
   following to your POM:
 
 -----------------------------------------------------------------------------------
+<project>
   <build>
     <plugins>
       ...
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>clirr-maven-plugin</artifactId>
-        <version>2.2.1</version>
+        <version>2.2.2</version>
       </plugin>
       ...
     </plugins>
   </build>
+</project>
 -----------------------------------------------------------------------------------
 
 * Generating a report
@@ -49,17 +54,19 @@ Usage
   The plugin can also be used to add a report to the generated site.
   If you'd like to have a Clirr report, add a section like this to
   your POM:
-  
+
 -----------------------------------------------------------------------------------
+<project>
   <reporting>
     <plugins>
       ...
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>clirr-maven-plugin</artifactId>
-        <version>2.2.1</version>
+        <version>2.2.2</version>
       </plugin>
       ...
     </plugins>
   </reporting>
+</project>
 -----------------------------------------------------------------------------------

@@ -15,9 +15,12 @@
  ~~ specific language governing permissions and limitations
  ~~ under the License.
 
- ------------------------------------
+ -----
  Comparing against a specific version
- ------------------------------------
+ -----
+ -----
+ 2008-09-13
+ -----
 
 Comparing against a specific version
 
@@ -29,13 +32,14 @@ Comparing against a specific version
   version:
 
 -----------------------------------------------------------------------------------
+<project>
   <build>
     <plugins>
       ...
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>clirr-maven-plugin</artifactId>
-        <version>2.2.1</version>
+        <version>2.2.2</version>
         <configuration>
           <!-- Compare the current code against version 1.2 -->
           <comparisonVersion>1.2</comparisonVersion>
@@ -44,18 +48,20 @@ Comparing against a specific version
       ...
     </plugins>
   </build>
+</project>
 -----------------------------------------------------------------------------------
 
   Likewise, for generating the report:
-  
+
 -----------------------------------------------------------------------------------
+<project>
   <reporting>
     <plugins>
       ...
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>clirr-maven-plugin</artifactId>
-        <version>2.2.1</version>
+        <version>2.2.2</version>
         <configuration>
           <!-- Compare the current code against version 1.2 -->
           <comparisonVersion>1.2</comparisonVersion>
@@ -64,4 +70,5 @@ Comparing against a specific version
       ...
     </plugins>
   </reporting>
+</project>
 -----------------------------------------------------------------------------------

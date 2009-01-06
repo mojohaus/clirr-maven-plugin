@@ -327,7 +327,7 @@ public abstract class AbstractClirrMojo
         }
     }
 
-    private List getTransitiveDependencies( final Set previousArtifacts )
+    protected List getTransitiveDependencies( final Set previousArtifacts )
         throws ProjectBuildingException, InvalidDependencyVersionException, ArtifactResolutionException,
         ArtifactNotFoundException
     {
@@ -386,7 +386,7 @@ public abstract class AbstractClirrMojo
         return artifact;
     }
 
-    private Set resolveArtifacts( ArtifactSpecification[] artifacts )
+    protected Set resolveArtifacts( ArtifactSpecification[] artifacts )
         throws MojoFailureException, MojoExecutionException
     {
         Set artifactSet = new HashSet();
@@ -529,7 +529,7 @@ public abstract class AbstractClirrMojo
      *   previousArtifacts.
      * @throws MalformedURLException Failed to convert a file to an URL.
      */
-    private static ClassLoader createClassLoader( Collection artifacts, Set previousArtifacts )
+    protected static ClassLoader createClassLoader( Collection artifacts, Set previousArtifacts )
         throws MalformedURLException
     {
         URLClassLoader cl = null;

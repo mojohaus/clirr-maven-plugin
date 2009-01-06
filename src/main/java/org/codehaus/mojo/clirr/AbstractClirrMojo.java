@@ -61,6 +61,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -233,7 +234,7 @@ public abstract class AbstractClirrMojo
 
         checker.addDiffListener( new DelegatingListener( listeners, minSeverity ) );
 
-        checker.reportDiffs( origClasses, currentClasses );
+        reportDiffs( checker, origClasses, currentClasses );
 
         return listener;
     }
@@ -583,5 +584,47 @@ public abstract class AbstractClirrMojo
         }
 
         return true;
+    }
+
+    /**
+     * Calls {@link Checker#reportDiffs(JavaType[], JavaType[])} and take care of BCEL errors.
+     *
+     * @param checker not null
+     * @param origClasses not null
+     * @param currentClasses not null
+     * @see Checker#reportDiffs(JavaType[], JavaType[])
+     */
+    private void reportDiffs( Checker checker, JavaType[] origClasses, JavaType[] currentClasses )
+    {
+        try
+        {
+            checker.reportDiffs( origClasses, currentClasses );
+        }
+        catch ( CheckerException e )
+        {
+            getLog().error( e.getMessage() );
+
+            // remove class with errors
+            JavaType[] origClasses2 = new JavaType[origClasses.length - 1];
+            int j = 0;
+            for ( int i = 0; i < origClasses.length; i++ )
+            {
+                if ( !e.getMessage().endsWith( origClasses[i].getName() ) )
+                {
+                    origClasses2[j++] = origClasses[i];
+                }
+            }
+            JavaType[] currentClasses2 = new JavaType[currentClasses.length - 1];
+            j = 0;
+            for ( int i = 0; i < currentClasses.length; i++ )
+            {
+                if ( !e.getMessage().endsWith( currentClasses[i].getName() ) )
+                {
+                    currentClasses2[j++] = currentClasses[i];
+                }
+            }
+
+            reportDiffs( checker, origClasses2, currentClasses2 );
+        }
     }
 }

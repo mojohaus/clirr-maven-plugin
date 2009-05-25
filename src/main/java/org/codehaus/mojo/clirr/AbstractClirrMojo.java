@@ -16,6 +16,21 @@ package org.codehaus.mojo.clirr;
  * limitations under the License.
  */
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 import net.sf.clirr.core.Checker;
 import net.sf.clirr.core.CheckerException;
 import net.sf.clirr.core.ClassFilter;
@@ -53,22 +68,6 @@ import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.codehaus.plexus.util.IOUtil;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 /**
  * Base parameters for Clirr check and report.
  *
@@ -80,6 +79,11 @@ import java.util.Set;
 public abstract class AbstractClirrMojo
     extends AbstractMojo
 {
+    /**
+     * @parameter expression="${clirr.skip}" default-value="false"
+     */
+    protected boolean skip;
+
     /**
      * @parameter expression="${project}"
      * @required
@@ -176,6 +180,19 @@ public abstract class AbstractClirrMojo
     protected boolean logResults;
 
     private static final URL[] EMPTY_URL_ARRAY = new URL[0];
+    
+    public void execute()
+        throws MojoExecutionException, MojoFailureException
+    {
+        if ( skip ) {
+            getLog().info( "Skipping execution" );
+        }
+        else {
+            doExecute();
+        }
+    }
+    
+    protected abstract void doExecute() throws MojoExecutionException, MojoFailureException;
 
     public ClirrDiffListener executeClirr()
         throws MojoExecutionException, MojoFailureException

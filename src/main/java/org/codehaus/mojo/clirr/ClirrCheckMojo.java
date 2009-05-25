@@ -54,7 +54,7 @@ public class ClirrCheckMojo
      */
     private I18N i18n;
 
-    public void execute()
+    protected void doExecute()
         throws MojoExecutionException, MojoFailureException
     {
         if ( !canGenerate() )

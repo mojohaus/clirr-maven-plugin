@@ -90,10 +90,9 @@ public class ClirrArbitraryCheckMojo
      */
     protected ArtifactSpecification[] newComparisonArtifacts;
     
-    public void execute()
+    protected void doExecute()
         throws MojoExecutionException, MojoFailureException
-    {
-        
+    {   
         if ( oldComparisonArtifacts == null || oldComparisonArtifacts.length == 0 )
         {
             getLog().info( "Missing required oldComparisonArtifacts" ); 

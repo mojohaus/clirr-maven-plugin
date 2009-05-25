@@ -164,7 +164,7 @@ public class ClirrReport
         return artifact.getFile();
     }
 
-    public void execute()
+    protected void doExecute()
         throws MojoExecutionException, MojoFailureException
     {
         if ( !canGenerateReport() )

@@ -73,6 +73,7 @@ public class ClirrReportGenerator
 
         sink.body_();
         sink.flush();
+        sink.close();
     }
 
     private void doHeading()
@@ -116,6 +117,8 @@ public class ClirrReportGenerator
         }
 
         sink.list_();
+
+        sink.section1_();
     }
 
     private void iconInfo()

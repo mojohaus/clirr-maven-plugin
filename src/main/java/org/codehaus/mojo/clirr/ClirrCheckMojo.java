@@ -95,13 +95,13 @@ public class ClirrCheckMojo
         }
 
         int warningCount = listener.getSeverityCount( Severity.WARNING );
-        if ( failOnWarning && errorCount > 0 )
+        if ( failOnWarning && warningCount > 0 )
         {
             log( listener, Severity.WARNING );
             String message;
-            if ( errorCount > 1 )
+            if ( warningCount > 1 )
             {
-                String[] args = new String[]{String.valueOf( errorCount )};
+                String[] args = new String[]{String.valueOf( warningCount )};
                 message = i18n.format( "clirr-report", locale, "check.clirr.failure.warnings", args );
             }
             else

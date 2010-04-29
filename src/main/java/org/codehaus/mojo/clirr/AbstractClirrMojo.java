@@ -184,17 +184,12 @@ public abstract class AbstractClirrMojo
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
-        if ( mustSkipExecution() ) {
+        if ( skip ) {
             getLog().info( "Skipping execution" );
         }
         else {
             doExecute();
         }
-    }
-
-    protected boolean mustSkipExecution()
-    {
-        return skip || "pom".equals(project.getPackaging());
     }
     
     protected abstract void doExecute() throws MojoExecutionException, MojoFailureException;

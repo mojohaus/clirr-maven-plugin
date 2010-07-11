@@ -50,6 +50,13 @@ public class ClirrCheckMojo
     private boolean failOnWarning;
 
     /**
+     * Whether to fail on info.
+     *
+     * @parameter expression="${failOnInfo}" default-value="false"
+     */
+    private boolean failOnInfo;
+
+    /**
      * @component
      */
     private I18N i18n;
@@ -112,6 +119,22 @@ public class ClirrCheckMojo
         }
 
         int infoCount = listener.getSeverityCount( Severity.INFO );
+        if ( failOnInfo && infoCount > 0)
+        {
+            log( listener, Severity.INFO );
+            String message;
+            if ( infoCount > 1 )
+            {
+                String[] args = new String[]{String.valueOf( infoCount )};
+                message = i18n.format( "clirr-report", locale, "check.clirr.failure.infos", args );
+            }
+            else
+            {
+                message = i18n.getString( "clirr-report", locale, "check.clirr.failure.info" );
+            }
+            throw new MojoFailureException( message );
+        }
+
         String[] args =
             new String[]{String.valueOf( errorCount ), String.valueOf( warningCount ), String.valueOf( infoCount )};
         getLog().info( i18n.format( "clirr-report", locale, "check.clirr.success", args ) );

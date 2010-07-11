@@ -80,6 +80,8 @@ public abstract class AbstractClirrMojo
     extends AbstractMojo
 {
     /**
+     * Flag to easily skip execution.
+     *
      * @parameter expression="${clirr.skip}" default-value="false"
      */
     protected boolean skip;

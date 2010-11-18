@@ -4,6 +4,9 @@
   </properties>
   <body>
     <release version="2.2.3" date="In SVN">
+      <action dev="olamy" type="fix" issue="MCLIRR-28">
+        Mutli Module Projects fail on top pom.
+      </action>    
       <action dev="dennisl" type="add" issue="MCLIRR-17">
         xrefLocation as expression.
       </action>

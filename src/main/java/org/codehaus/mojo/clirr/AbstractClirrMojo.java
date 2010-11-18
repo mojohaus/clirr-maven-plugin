@@ -316,14 +316,16 @@ public abstract class AbstractClirrMojo
             final List dependencies = getTransitiveDependencies( previousArtifacts );
 
             ClassLoader origDepCL = createClassLoader( dependencies, previousArtifacts );
-            final File[] files = new File[ previousArtifacts.size() ];
-            int i = 0;
+            final Set files = new HashSet();
             for ( Iterator iter = previousArtifacts.iterator();  iter.hasNext();  )
             {
                 Artifact artifact = (Artifact) iter.next();
-                files[i++] = new File( localRepository.getBasedir(), localRepository.pathOf( artifact ) );
+                // clirr expects jar files, so let's not pass other artifact files.
+                if ("jar".equals(artifact.getType())) {
+                    files.add( new File( localRepository.getBasedir(), localRepository.pathOf( artifact ) ) );
+                }
             }
-            return BcelTypeArrayBuilder.createClassSet( files, origDepCL, classFilter );
+            return BcelTypeArrayBuilder.createClassSet( (File[]) files.toArray(new File[files.size()]), origDepCL, classFilter );
         }
         catch ( ProjectBuildingException e )
         {

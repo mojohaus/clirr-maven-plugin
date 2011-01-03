@@ -73,14 +73,6 @@ public class ClirrReport
     private Renderer siteRenderer;
 
     /**
-     * Show only messages of this severity or higher. Valid values are
-     * <code>info</code>, <code>warning</code> and <code>error</code>.
-     *
-     * @parameter expression="${minSeverity}" default-value="warning"
-     */
-    private String minSeverity;
-
-    /**
      * Whether to show the summary of the number of errors, warnings and informational messages.
      *
      * @parameter expression="${showSummary}" default-value="true"
@@ -353,28 +345,6 @@ public class ClirrReport
             getLog().error( "Can't generate Clirr report: " + e.getMessage(), e );
             return false;
         }
-    }
-
-    private static Severity convertSeverity( String minSeverity )
-    {
-        Severity s;
-        if ( "info".equals( minSeverity ) )
-        {
-            s = Severity.INFO;
-        }
-        else if ( "warning".equals( minSeverity ) )
-        {
-            s = Severity.WARNING;
-        }
-        else if ( "error".equals( minSeverity ) )
-        {
-            s = Severity.ERROR;
-        }
-        else
-        {
-            s = null;
-        }
-        return s;
     }
 
     // eventually, we must replace this with the o.a.m.d.s.Sink class as a parameter

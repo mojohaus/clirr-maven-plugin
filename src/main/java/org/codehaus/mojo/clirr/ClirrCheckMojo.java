@@ -68,11 +68,13 @@ public class ClirrCheckMojo
         {
             return;
         }
-
+        Severity minSeverity = convertSeverity( this.minSeverity );
+        
+        
         ClirrDiffListener listener;
         try
         {
-            listener = executeClirr();
+            listener = executeClirr(minSeverity);
         }
         catch ( MissingPreviousException e )
         {

@@ -145,6 +145,14 @@ public abstract class AbstractClirrMojo
     protected ArtifactSpecification[] comparisonArtifacts;
 
     /**
+     * Show only messages of this severity or higher. Valid values are
+     * <code>info</code>, <code>warning</code> and <code>error</code>.
+     *
+     * @parameter expression="${minSeverity}" default-value="warning"
+     */
+    protected String minSeverity;
+
+    /**
      * A text output file to render to. If omitted, no output is rendered to a text file.
      *
      * @parameter expression="${textOutputFile}"
@@ -572,6 +580,28 @@ public abstract class AbstractClirrMojo
             }
         }
         return cl;
+    }
+
+    protected static Severity convertSeverity( String minSeverity )
+    {
+        Severity s;
+        if ( "info".equals( minSeverity ) )
+        {
+            s = Severity.INFO;
+        }
+        else if ( "warning".equals( minSeverity ) )
+        {
+            s = Severity.WARNING;
+        }
+        else if ( "error".equals( minSeverity ) )
+        {
+            s = Severity.ERROR;
+        }
+        else
+        {
+            s = null;
+        }
+        return s;
     }
 
     protected boolean canGenerate()

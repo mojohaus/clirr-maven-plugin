@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.codehaus.mojo.clirr</groupId>
-  <artifactId>MCLIRR-34</artifactId>
+  <artifactId>simple-execution-it</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 

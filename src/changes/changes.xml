@@ -4,6 +4,9 @@
   </properties>
   <body>
     <release version="2.3" date="In SVN">
+      <action dev="olamy" type="fix" issue="MCLIRR-34">
+        Build should not fail if previous artifact is not found
+      </action>
       <action dev="olamy" type="fix" issue="MCLIRR-35">
         Allow setting of "minSeverity" parameter for the check goal aswell.
       </action>

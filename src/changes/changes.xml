@@ -7,6 +7,9 @@
       <action dev="olamy" type="fix" issue="MCLIRR-35">
         Allow setting of "minSeverity" parameter for the check goal aswell.
       </action>
+      <action dev="olamy" type="add" issue="MCLIRR-29">
+        add a check-no-fork goal.
+      </action>      
     </release>    
     <release version="2.2.3" date="23-Nov-2010">
       <action dev="olamy" type="fix" issue="MCLIRR-28">

@@ -349,7 +349,9 @@ public abstract class AbstractClirrMojo
         }
         catch ( ArtifactNotFoundException e )
         {
-            throw new MojoExecutionException( "Error finding previous version: " + e.getMessage(), e );
+            getLog().warn( "Impossible to find previous version" );
+            return new JavaType[0];
+            //throw new MojoExecutionException( "Error finding previous version: " + e.getMessage(), e );
         }
         catch ( MalformedURLException e )
         {

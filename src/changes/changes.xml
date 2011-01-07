@@ -3,7 +3,12 @@
     <title>Changes in the Clirr Maven Plugin</title>
   </properties>
   <body>
-    <release version="2.2.3" date="In SVN">
+    <release version="2.3" date="In SVN">
+      <action dev="olamy" type="fix" issue="MCLIRR-35">
+        Allow setting of "minSeverity" parameter for the check goal aswell.
+      </action>
+    </release>    
+    <release version="2.2.3" date="23-Nov-2010">
       <action dev="olamy" type="fix" issue="MCLIRR-28">
         Mutli Module Projects fail on top pom.
       </action>    

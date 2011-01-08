@@ -54,6 +54,7 @@ import java.util.ResourceBundle;
  *
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  * @goal clirr
+ * @execute phase="compile"
  */
 public class ClirrReport
     extends AbstractClirrMojo

@@ -43,6 +43,10 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
+  
+  <properties>
+    <sitePluginVersion>2.2</sitePluginVersion>
+  </properties>
 
   <developers>
     <developer>

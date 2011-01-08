@@ -51,6 +51,7 @@ import java.util.Set;
  * @author <a href="mailto:jmcconnell@apache.org">Jesse McConnell</a>
  * @goal check-arbitrary
  * @phase verify
+ * @execute phase="compile"
  */
 public class ClirrArbitraryCheckMojo
     extends AbstractClirrMojo

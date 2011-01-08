@@ -22,10 +22,11 @@ package org.codehaus.mojo.clirr;
  *
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  * @goal check-no-fork
+ * @phase verify
  * @since 2.3
  */
 public class ClirrCheckNoForkMojo
-    extends ClirrCheckMojo
+    extends AbstractClirrCheckMojo
 {
    // no op
 }

@@ -74,7 +74,6 @@ import org.codehaus.plexus.util.IOUtil;
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  * @todo i18n exceptions, log messages
  * @requiresDependencyResolution compile
- * @execute phase="compile"
  */
 public abstract class AbstractClirrMojo
     extends AbstractMojo

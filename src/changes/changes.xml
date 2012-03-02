@@ -3,7 +3,7 @@
     <title>Changes in the Clirr Maven Plugin</title>
   </properties>
   <body>
-    <release version="2.3" date="In SVN">
+    <release version="2.3" date="12-Jan-2011">
       <action dev="olamy" type="fix" issue="MCLIRR-34">
         Build should not fail if previous artifact is not found
       </action>

@@ -332,7 +332,8 @@ public abstract class AbstractClirrMojo
                     files.add( new File( localRepository.getBasedir(), localRepository.pathOf( artifact ) ) );
                 }
             }
-            return BcelTypeArrayBuilder.createClassSet( (File[]) files.toArray(new File[files.size()]), origDepCL, classFilter );
+            return BcelTypeArrayBuilder.createClassSet( (File[]) files.toArray( new File[files.size()] ),
+                                                        origDepCL, classFilter );
         }
         catch ( ProjectBuildingException e )
         {

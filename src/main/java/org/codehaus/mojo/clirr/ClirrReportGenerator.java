@@ -295,7 +295,7 @@ public class ClirrReportGenerator
                     // MCLIRR-18 Special handling of links to inner classes:
                     // We link to the page for the containing class
                     final int innerClassIndex = pathToClass.lastIndexOf( '$' );
-                    if( innerClassIndex != -1 )
+                    if ( innerClassIndex != -1 )
                     {
                         pathToClass = pathToClass.substring( 0, innerClassIndex );
                     }

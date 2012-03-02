@@ -657,8 +657,16 @@ public abstract class AbstractClirrMojo
             getLog().error( e.getMessage() );
 
             // remove class with errors
-            JavaType[] origClasses2 = new JavaType[origClasses.length - 1];
+            int matchingClasses = 0;
             int j = 0;
+            for ( int i = 0; i < origClasses.length; i++ )
+            {
+                if ( !e.getMessage().endsWith( origClasses[i].getName() ) )
+                {
+                    matchingClasses++;
+                }
+            }
+            JavaType[] origClasses2 = new JavaType[matchingClasses];
             for ( int i = 0; i < origClasses.length; i++ )
             {
                 if ( !e.getMessage().endsWith( origClasses[i].getName() ) )
@@ -666,8 +674,17 @@ public abstract class AbstractClirrMojo
                     origClasses2[j++] = origClasses[i];
                 }
             }
-            JavaType[] currentClasses2 = new JavaType[currentClasses.length - 1];
+
+            matchingClasses = 0;
             j = 0;
+            for ( int i = 0; i < currentClasses.length; i++ )
+            {
+                if ( !e.getMessage().endsWith( currentClasses[i].getName() ) )
+                {
+                    matchingClasses++;
+                }
+            }
+            JavaType[] currentClasses2 = new JavaType[matchingClasses];
             for ( int i = 0; i < currentClasses.length; i++ )
             {
                 if ( !e.getMessage().endsWith( currentClasses[i].getName() ) )

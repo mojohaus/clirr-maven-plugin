@@ -72,7 +72,7 @@ public class AbstractClirrCheckMojo
         ClirrDiffListener listener;
         try
         {
-            listener = executeClirr(minSeverity);
+            listener = executeClirr( minSeverity );
         }
         catch ( MissingPreviousException e )
         {
@@ -119,7 +119,7 @@ public class AbstractClirrCheckMojo
         }
 
         int infoCount = listener.getSeverityCount( Severity.INFO );
-        if ( failOnInfo && infoCount > 0)
+        if ( failOnInfo && infoCount > 0 )
         {
             log( listener, Severity.INFO );
             String message;

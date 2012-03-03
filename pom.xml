@@ -230,6 +230,7 @@
             <configuration>
               <locales>
                 <locale>fr</locale>
+                <locale>nl</locale>
               </locales>
             </configuration>
           </plugin>

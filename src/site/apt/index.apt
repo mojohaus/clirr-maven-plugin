@@ -32,10 +32,10 @@ The Clirr Maven Plugin
 
   The plugin offers the following goals:
 
-  * {{{./usage.html#Compatibility Checks}clirr:check}} is used as part of the
+  * {{{./usage.html#Compatibility_Checks}clirr:check}} is used as part of the
     build to ensure a configurable level of compatibility.
 
-  * {{{./usage.html#Generating a report}clirr:clirr}} generates a report for the
+  * {{{./usage.html#Generating_a_report}clirr:clirr}} generates a report for the
     project's website.
 
 * Usage

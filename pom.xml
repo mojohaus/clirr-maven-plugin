@@ -2,7 +2,7 @@
   <parent>
     <groupId>org.codehaus.mojo</groupId>
     <artifactId>mojo-parent</artifactId>
-    <version>27</version>
+    <version>29</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -200,41 +200,43 @@
         <artifactId>maven-docck-plugin</artifactId>
         <version>1.0-beta-2</version>
       </plugin>
-
     </plugins>
   </build>
 
-  <reporting>
-    <plugins>
-      <plugin>
-        <artifactId>maven-changes-plugin</artifactId>
-        <version>2.6</version>
-        <configuration>
-          <onlyCurrentVersion>true</onlyCurrentVersion>
-        </configuration>
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>changes-report</report>
-              <report>jira-report</report>
-            </reports>
-          </reportSet>
-        </reportSets>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>l10n-maven-plugin</artifactId>
-        <version>1.0-alpha-2</version>
-        <configuration>
-          <locales>
-            <locale>fr</locale>
-          </locales>
-        </configuration>
-      </plugin>
-    </plugins>
-  </reporting>
-
   <profiles>
+    <profile>
+      <id>reporting</id>
+      <reporting>
+        <plugins>
+          <plugin>
+            <artifactId>maven-changes-plugin</artifactId>
+            <version>2.6</version>
+            <configuration>
+              <onlyCurrentVersion>true</onlyCurrentVersion>
+            </configuration>
+            <reportSets>
+              <reportSet>
+                <reports>
+                  <report>changes-report</report>
+                  <report>jira-report</report>
+                </reports>
+              </reportSet>
+            </reportSets>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>l10n-maven-plugin</artifactId>
+            <version>1.0-alpha-2</version>
+            <configuration>
+              <locales>
+                <locale>fr</locale>
+              </locales>
+            </configuration>
+          </plugin>
+        </plugins>
+      </reporting>
+    </profile>
+
     <profile>
       <id>run-its</id>
       <activation>

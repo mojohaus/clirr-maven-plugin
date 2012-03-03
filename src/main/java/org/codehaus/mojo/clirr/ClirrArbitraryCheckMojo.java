@@ -16,6 +16,15 @@ package org.codehaus.mojo.clirr;
  * limitations under the License.
  */
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+
 import net.sf.clirr.core.ApiDifference;
 import net.sf.clirr.core.Checker;
 import net.sf.clirr.core.ClassFilter;
@@ -33,16 +42,6 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.codehaus.plexus.i18n.I18N;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
 
 /**
  * Check for compatibility between two arbitrary artifact sets.

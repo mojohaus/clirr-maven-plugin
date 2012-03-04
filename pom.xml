@@ -232,6 +232,7 @@
                 <locale>en</locale>
                 <locale>fr</locale>
                 <locale>nl</locale>
+                <locale>ru</locale>
               </locales>
             </configuration>
           </plugin>

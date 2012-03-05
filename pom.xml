@@ -230,7 +230,6 @@
             <version>1.0-alpha-2</version>
             <configuration>
               <locales>
-                <locale>en</locale>
                 <locale>fr</locale>
                 <locale>nl</locale>
                 <locale>ru</locale>

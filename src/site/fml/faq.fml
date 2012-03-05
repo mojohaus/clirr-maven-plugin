@@ -24,8 +24,8 @@ under the License.
       <question>What is Clirr?</question>
       <answer>
         <p>Clirr is a tool that checks Java libraries for binary and source compatibility with older releases.
-          Basically you give it two sets of jar files and Clirr dumps out a list of changes in the public api.
-          Clirr can be used to break the build if it detects incompatible api changes. In a continuous
+          Basically you give it two sets of JAR files and Clirr dumps out a list of changes in the public API.
+          Clirr Maven Plugin can be used to break the build if it detects incompatible API changes. In a continuous
           integration process Clirr can automatically prevent accidental introduction of binary or source
           compatibility problems.</p>
         <p>Clirr is provided by the <a href="http://clirr.sourceforge.net/">SourceForge</a> project with

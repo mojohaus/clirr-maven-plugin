@@ -49,7 +49,6 @@
     <doxiaVersion>1.0</doxiaVersion>
     <doxiaSitetoolsVersion>1.0</doxiaSitetoolsVersion>
     <mavenVersion>2.0.6</mavenVersion>
-    <sitePluginVersion>2.2</sitePluginVersion>
   </properties>
 
   <developers>

@@ -19,14 +19,15 @@
  Introduction
  -----
  -----
- 2008-09-13
+ 2012-03-05
  -----
 
 The Clirr Maven Plugin
 
   {{{http://clirr.sourceforge.net}Clirr}} is an application, which allows
   you to compare binaries or sources for compatibility. The Clirr Maven
-  Plugin allows you to use Clirr from within Maven 2.
+  Plugin allows you to use Clirr from Maven 2. This version of the plugin uses
+  Clirr ${clirrVersion}.
 
 * Goals Overview
 

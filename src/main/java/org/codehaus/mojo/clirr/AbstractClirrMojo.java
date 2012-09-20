@@ -16,21 +16,6 @@ package org.codehaus.mojo.clirr;
  * limitations under the License.
  */
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 import net.sf.clirr.core.Checker;
 import net.sf.clirr.core.CheckerException;
 import net.sf.clirr.core.ClassFilter;
@@ -40,7 +25,6 @@ import net.sf.clirr.core.XmlDiffListener;
 import net.sf.clirr.core.internal.bcel.BcelJavaType;
 import net.sf.clirr.core.internal.bcel.BcelTypeArrayBuilder;
 import net.sf.clirr.core.spi.JavaType;
-
 import org.apache.bcel.classfile.ClassParser;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.util.ClassLoaderRepository;
@@ -67,6 +51,24 @@ import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.codehaus.plexus.util.IOUtil;
+import org.codehaus.plexus.util.ReaderFactory;
+import org.codehaus.plexus.util.xml.XmlStreamReader;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Base parameters for Clirr check and report.
@@ -139,6 +141,7 @@ public abstract class AbstractClirrMojo
      * Each <code>comparisonArtifact</code> is made of a <code>groupId</code>, an <code>artifactId</code> and
      * a <code>version</code> number. Optionally it may have a <code>classifier</code>
      * (default null) and a <code>type</code> (default "jar").
+     *
      * @parameter
      */
     protected ArtifactSpecification[] comparisonArtifacts;
@@ -182,6 +185,24 @@ public abstract class AbstractClirrMojo
     protected String[] excludes;
 
     /**
+     * A list of differences reported by Clirr that should be ignored when producing the final report.
+     * Values specified here will be joined with the ones specified using the "ignoredDifferencesFile"
+     * parameter.
+     *
+     * @parameter
+     */
+    protected Difference[] ignored;
+
+    /**
+     * A path to the XML file containing the ignored differences definitions.
+     * Values specified int the file will be joined with the ones specified using the "ignored"
+     * parameter.
+     *
+     * @parameter expression="${clirr.ignoredDifferencesFile}"
+     */
+    protected File ignoredDifferencesFile;
+
+    /**
      * Whether to log the results to the console or not.
      *
      * @parameter expression="${logResults}" default-value="false"
@@ -189,19 +210,22 @@ public abstract class AbstractClirrMojo
     protected boolean logResults;
 
     private static final URL[] EMPTY_URL_ARRAY = new URL[0];
-    
+
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
-        if ( skip ) {
+        if ( skip )
+        {
             getLog().info( "Skipping execution" );
         }
-        else {
+        else
+        {
             doExecute();
         }
     }
-    
-    protected abstract void doExecute() throws MojoExecutionException, MojoFailureException;
+
+    protected abstract void doExecute()
+        throws MojoExecutionException, MojoFailureException;
 
     public ClirrDiffListener executeClirr()
         throws MojoExecutionException, MojoFailureException
@@ -258,11 +282,54 @@ public abstract class AbstractClirrMojo
             listeners.add( new LogDiffListener( getLog() ) );
         }
 
-        checker.addDiffListener( new DelegatingListener( listeners, minSeverity ) );
+        checker.addDiffListener( new DelegatingListener( listeners, minSeverity, getAllIgnored() ) );
 
         reportDiffs( checker, origClasses, currentClasses );
 
         return listener;
+    }
+
+    protected Difference[] getAllIgnored()
+    {
+        Difference[] ret = ignored;
+
+        if ( ignoredDifferencesFile != null )
+        {
+            XmlStreamReader rdr = null;
+            try
+            {
+                rdr = ReaderFactory.newXmlReader( ignoredDifferencesFile );
+
+                Difference[] diffs = Difference.parseXml( rdr );
+
+                int ignoredLength = ignored == null ? 0 : ignored.length;
+
+                Difference[] tmp = new Difference[ignoredLength + diffs.length];
+
+                if ( ignored != null )
+                {
+                    System.arraycopy( ignored, 0, tmp, 0, ignoredLength );
+                }
+
+                System.arraycopy( diffs, 0, tmp, ignoredLength, diffs.length );
+
+                ret = tmp;
+            }
+            catch ( IOException e )
+            {
+                getLog().error( "Could not read the ignored differences file.", e );
+            }
+            catch ( XmlPullParserException e )
+            {
+                getLog().error( "Could not read the ignored differences file.", e );
+            }
+            finally
+            {
+                IOUtil.close( rdr );
+            }
+        }
+
+        return ret;
     }
 
     private JavaType[] resolveCurrentClasses( ClassFilter classFilter )
@@ -295,26 +362,23 @@ public abstract class AbstractClirrMojo
         {
             previousArtifacts = resolveArtifacts( comparisonArtifacts );
             Artifact a = null;
-            for ( Iterator iter = previousArtifacts.iterator();  iter.hasNext();  )
+            for ( Iterator iter = previousArtifacts.iterator(); iter.hasNext(); )
             {
                 Artifact artifact = (Artifact) iter.next();
                 if ( a == null )
                 {
                     a = artifact;
                 }
-                getLog().debug( "Comparing to "
-                               + artifact.getGroupId() + ":"
-                               + artifact.getArtifactId() + ":"
-                               + artifact.getVersion() + ":"
-                               + artifact.getClassifier() + ":"
-                               + artifact.getType() );
+                getLog().debug( "Comparing to " + artifact.getGroupId() + ":" + artifact.getArtifactId() + ":"
+                                    + artifact.getVersion() + ":" + artifact.getClassifier() + ":"
+                                    + artifact.getType() );
             }
             firstPreviousArtifact = a;
         }
 
         try
         {
-            for ( Iterator iter = previousArtifacts.iterator();  iter.hasNext();  )
+            for ( Iterator iter = previousArtifacts.iterator(); iter.hasNext(); )
             {
                 Artifact artifact = (Artifact) iter.next();
                 resolver.resolve( artifact, project.getRemoteArtifactRepositories(), localRepository );
@@ -324,17 +388,18 @@ public abstract class AbstractClirrMojo
 
             ClassLoader origDepCL = createClassLoader( dependencies, previousArtifacts );
             final Set files = new HashSet();
-            for ( Iterator iter = previousArtifacts.iterator();  iter.hasNext();  )
+            for ( Iterator iter = previousArtifacts.iterator(); iter.hasNext(); )
             {
                 Artifact artifact = (Artifact) iter.next();
                 // Clirr expects JAR files, so let's not pass other artifact files.
                 // MCLIRR-39 Support for Maven Plugins, which are also JARs
-                if ( "jar".equals( artifact.getType() ) || "maven-plugin".equals( artifact.getType() ) ) {
+                if ( "jar".equals( artifact.getType() ) || "maven-plugin".equals( artifact.getType() ) )
+                {
                     files.add( new File( localRepository.getBasedir(), localRepository.pathOf( artifact ) ) );
                 }
             }
-            return BcelTypeArrayBuilder.createClassSet( (File[]) files.toArray( new File[files.size()] ),
-                                                        origDepCL, classFilter );
+            return BcelTypeArrayBuilder.createClassSet( (File[]) files.toArray( new File[files.size()] ), origDepCL,
+                                                        classFilter );
         }
         catch ( ProjectBuildingException e )
         {
@@ -365,24 +430,18 @@ public abstract class AbstractClirrMojo
         ArtifactNotFoundException
     {
         final List dependencies = new ArrayList();
-        for ( Iterator iter = previousArtifacts.iterator();  iter.hasNext();  )
+        for ( Iterator iter = previousArtifacts.iterator(); iter.hasNext(); )
         {
             final Artifact a = (Artifact) iter.next();
-            final Artifact pomArtifact = factory.createArtifact(
-                    a.getGroupId(),
-                    a.getArtifactId(),
-                    a.getVersion(),
-                    a.getScope(),
-                    "pom" );
-            final MavenProject pomProject = mavenProjectBuilder.buildFromRepository(
-                    pomArtifact,
-                    project.getRemoteArtifactRepositories(),
-                    localRepository );
+            final Artifact pomArtifact =
+                factory.createArtifact( a.getGroupId(), a.getArtifactId(), a.getVersion(), a.getScope(), "pom" );
+            final MavenProject pomProject =
+                mavenProjectBuilder.buildFromRepository( pomArtifact, project.getRemoteArtifactRepositories(),
+                                                         localRepository );
             final Set pomProjectArtifacts = pomProject.createArtifacts( factory, null, null );
-            final ArtifactResolutionResult result = resolver.resolveTransitively( pomProjectArtifacts,
-                    pomArtifact, localRepository,
-                    project.getRemoteArtifactRepositories(),
-                    metadataSource, null );
+            final ArtifactResolutionResult result =
+                resolver.resolveTransitively( pomProjectArtifacts, pomArtifact, localRepository,
+                                              project.getRemoteArtifactRepositories(), metadataSource, null );
             dependencies.addAll( result.getArtifacts() );
         }
         return dependencies;
@@ -496,7 +555,7 @@ public abstract class AbstractClirrMojo
     public static JavaType[] createClassSet( File classes, ClassLoader thirdPartyClasses, ClassFilter classFilter )
         throws MalformedURLException
     {
-        ClassLoader classLoader = new URLClassLoader( new URL[]{classes.toURI().toURL()}, thirdPartyClasses );
+        ClassLoader classLoader = new URLClassLoader( new URL[]{ classes.toURI().toURL() }, thirdPartyClasses );
 
         Repository repository = new ClassLoaderRepository( classLoader );
 
@@ -504,7 +563,7 @@ public abstract class AbstractClirrMojo
 
         DirectoryScanner scanner = new DirectoryScanner();
         scanner.setBasedir( classes );
-        scanner.setIncludes( new String[]{"**/*.class"} );
+        scanner.setIncludes( new String[]{ "**/*.class" } );
         scanner.scan();
 
         String[] files = scanner.getIncludedFiles();
@@ -554,12 +613,13 @@ public abstract class AbstractClirrMojo
      * that we let BCEL inspect the artifacts in the latter set, using a
      * {@link ClassLoader}, which contains the dependencies. However, the
      * {@link ClassLoader} must not contain the jar files, which are being inspected.
-     * @param artifacts The artifacts, from which to build a {@link ClassLoader}.
+     *
+     * @param artifacts         The artifacts, from which to build a {@link ClassLoader}.
      * @param previousArtifacts The artifacts being inspected, or null, if te
-     *   returned {@link ClassLoader} should contain all the elements of
-     *   <code>artifacts</code>.
+     *                          returned {@link ClassLoader} should contain all the elements of
+     *                          <code>artifacts</code>.
      * @return A {@link ClassLoader} which may be used to inspect the classes in
-     *   previousArtifacts.
+     *         previousArtifacts.
      * @throws MalformedURLException Failed to convert a file to an URL.
      */
     protected static ClassLoader createClassLoader( Collection artifacts, Set previousArtifacts )
@@ -632,7 +692,8 @@ public abstract class AbstractClirrMojo
             Artifact previousArtifact = getComparisonArtifact();
             if ( previousArtifact.getVersion() == null )
             {
-                getLog().info( "Not generating Clirr report as there is no previous version of the library to compare against" );
+                getLog().info(
+                    "Not generating Clirr report as there is no previous version of the library to compare against" );
                 return false;
             }
         }
@@ -643,8 +704,8 @@ public abstract class AbstractClirrMojo
     /**
      * Calls {@link Checker#reportDiffs(JavaType[], JavaType[])} and take care of BCEL errors.
      *
-     * @param checker not null
-     * @param origClasses not null
+     * @param checker        not null
+     * @param origClasses    not null
      * @param currentClasses not null
      * @see Checker#reportDiffs(JavaType[], JavaType[])
      */

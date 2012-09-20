@@ -1,0 +1,16 @@
+<differences>
+    <difference>
+        <className>Class*</className>
+        <field>publicFiel.</field><!-- Testing the regexp, too -->
+        <differenceType>6004</differenceType>
+        <from>int</from>
+        <to>float</to>
+        <justification>just because</justification>
+    </difference>
+    <difference>
+        <className>Class1</className>
+        <method>voidMethod</method>
+        <differenceType>7004</differenceType>
+        <justification>just because</justification>
+    </difference>
+</differences>

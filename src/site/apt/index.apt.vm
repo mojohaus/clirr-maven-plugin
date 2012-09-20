@@ -52,3 +52,6 @@ The Clirr Maven Plugin
 
   * Comparing the current version against an {{{./examples/specific-artifacts.html}arbitrary
     different artifact}}.
+
+  * Ignoring differences that would {{{./examples/ignored-differences.html}otherwise be reported}}.
+  

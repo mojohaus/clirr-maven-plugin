@@ -38,19 +38,18 @@
           <ignoredDifferencesFile>predefined-ignored-differences.xml</ignoredDifferencesFile>
           <ignored>
               <difference>
+                 <!-- This will actually match 2 different methods. Both of them should get ignored correctly. -->
                  <className>Class1</className>
-                 <method>paramsMethod</method>
+                 <method>void paramsMethod?(int, java.lang.String)</method>
                  <differenceType>7005</differenceType>
-                 <from>void paramsMethod(int, java.lang.String)</from>
-                 <to>void paramsMethod(long, int)</to>
+                 <to>void paramsMethod?(long, int)</to>
                  <justification>just because</justification>
               </difference>
               <difference>
                  <className>Class1</className>
-                 <method>returnMethod</method>
+                 <method>int returnMethod*</method>
                  <differenceType>7006</differenceType>
-                 <from>int</from>
-                 <to>long</to>
+                 <to>lo?g</to>
                  <justification>just because</justification>
               </difference>
           </ignored>

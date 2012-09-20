@@ -1,0 +1,173 @@
+ -----
+ Specifying ignored differences
+ -----
+ Lukas Krejci
+ -----
+ 2012-09-20
+ -----
+
+ ~~ Licensed to the Apache Software Foundation (ASF) under one
+ ~~ or more contributor license agreements.  See the NOTICE file
+ ~~ distributed with this work for additional information
+ ~~ regarding copyright ownership.  The ASF licenses this file
+ ~~ to you under the Apache License, Version 2.0 (the
+ ~~ "License"); you may not use this file except in compliance
+ ~~ with the License.  You may obtain a copy of the License at
+ ~~
+ ~~   http://www.apache.org/licenses/LICENSE-2.0
+ ~~
+ ~~ Unless required by applicable law or agreed to in writing,
+ ~~ software distributed under the License is distributed on an
+ ~~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ ~~ KIND, either express or implied.  See the License for the
+ ~~ specific language governing permissions and limitations
+ ~~ under the License.
+
+Specifying ignored differences
+
+ If you made some intentional changes to your API that you don't want Clirr 
+ to error out on, you can specifically ignore those differences.
+ You can do it either directly in the configuration of the Clirr maven plugin
+ using the <<<ignored>>> element or you can put them in a standalone
+ file and reference them using the <<<ignoredDifferencesFile>>> element in the
+ Clirr maven plugin's configuration (the file can have an arbitrary root element
+ that contains a list of the <<<difference>>> elements as specified below).
+
+ You can ignore any type of difference that Clirr can report and this document
+ describes in more detail what parameters you can use to specify different kinds
+ of differences reported by Clirr.
+
+ An ignored difference is described by the <<<difference>>> element:
+
+-----------------------------------------------------------------------------------
+
+<difference>
+    <className>**/example/*Remote</className>
+    <differenceType>...</differenceType>
+    <field>my*</field>
+    <method>MyObject* method(int, java.lang.String)</method>
+    <from>...</from>
+    <to>...</to>
+</difference>
+
+-----------------------------------------------------------------------------------
+
+ As you can see the <<<className>>> parameter is a path expression to a class
+ containing the difference to be ignored and thus you can capture more than 1
+ classes with one difference "rule".
+
+ The <<<differenceType>>> is a number assigned by Clirr to differentiate between
+ different kinds of differences. Please refer to 
+ {{{http://clirr.sourceforge.net/clirr-core/exegesis.html}Clirr documentation}} for 
+ more detailed discussion of individual differences.
+
+ If the difference to be ignored concerns a field, you can specify the name of the
+ field using the <<<field>>> parameter. This again is an expression, so you can capture
+ more than 1 field by one rule.
+
+ If the difference to be ignored concerns a method, you can specify the signature
+ of the method using the <<<method>>> parameter. Notice that the signature lacks
+ the visibility (i.e. public or private). The value is again an expression so
+ you can do wild things with matching the methods.
+
+ The <<<from>>> parameter is used only with a handful of difference types and specifies
+ the "original" form of given "thing" (be it a class, field or method).
+ Again, the parameter is usually an expression (unless specified otherwise in the detailed
+ list below).
+
+ Finally, the <<<to>>> parameter specifies the "new" form of the "thing". As with the 
+ <<<from>>> element, it is usually an expression and its meaning differs depending on the
+ difference type.
+
+ Here is the list of the possible difference types, their meaning and expected parameters:
+ 
+ * <<1000>> (Increased visibility of a class): className
+ 
+ * <<1001>> (Decreased visibility of a class): className
+ 
+ * <<2000>> (Changed from class to interface): className
+
+ * <<2001>> (Changed from interface to class): className
+
+ * <<3001>> (Removed final modifier from class): className
+
+ * <<3002>> (Added final modifier to effectively final class): className
+
+ * <<3003>> (Added final modifier to class): className
+
+ * <<3004>> (Removed abstract modifier from class): className
+
+ * <<3005>> (Added abstract modifier to class): className
+
+ * <<4000>> (Added interface to the set of implemented interfaces): className, to (as a path expression)
+
+ * <<4001>> (Removed interface from the set of implemented interfaces): className, to (as a path expression)
+
+ * <<5000>> (Added class to the set of superclasses): className, to (as a path expression)
+
+ * <<5001>> (Removed class from the set of superclasses): className, to (as a path expression)
+
+ * <<6000>> (added field): className, field
+
+ * <<6001>> (removed field): className, field
+
+ * <<6002>> (field value no longer a compile-time constant): className, field
+
+ * <<6003>> (value of the compile-time constant changed on a field): className, field
+
+ * <<6004>> (field type changed): className, field, from, to
+
+ * <<6005>> (field now non-final): className, field
+
+ * <<6006>> (field now final): className, field
+
+ * <<6007>> (field now non-static): className, field
+
+ * <<6008>> (field now static): className, field
+
+ * <<6009>> (field more accessible): className, field
+
+ * <<6010>> (field less accessible): className, field
+
+ * <<6011>> (removed a constant field): className, field
+
+ * <<7000>> (method now in superclass): className, method
+
+ * <<7001>> (method now in interface): className, method
+
+ * <<7002>> (method removed): className, method
+
+ * <<7003>> (Method Overide Removed): className, method
+
+ * <<7004>> (Method Argument Count Changed): className, method
+
+ * <<7005>> (Method Argument Type changed): className, method, to (to is a full new signature)
+
+ * <<7006>> (Method Return Type changed): className, method, to (to is just the return type)
+
+ * <<7007>> (Method has been Deprecated): className, method
+
+ * <<7008>> (Method has been Undeprecated): className, method
+
+ * <<7009>> (Method is now Less Accessible): className, method
+
+ * <<7010>> (Method is now More Accessible): className, method
+
+ * <<7011>> (Method Added): className, method
+
+ * <<7012>> (Method Added to Interface): className, method
+
+ * <<7013>> (Abstract Method Added to Class): className, method
+
+ * <<7014>> (Method now final): className, method
+
+ * <<7015>> (Method now non-final): className, method
+
+ * <<8000>> (Class added): className
+
+ * <<8001>> (Class removed): className
+
+ * <<10000>> (Class format version increased): className, from, to (class format version numbers, NOT expressions)
+
+ * <<10001>> (Class format version decreased): className, from, to (class format version numbers, NOT expressions)
+

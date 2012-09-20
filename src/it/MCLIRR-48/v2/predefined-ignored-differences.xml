@@ -1,16 +1,48 @@
 <differences>
     <difference>
         <className>Class*</className>
-        <field>publicFiel.</field><!-- Testing the regexp, too -->
+        <field>%regex[publicFiel.]</field><!-- Testing the regexp, too -->
         <differenceType>6004</differenceType>
-        <from>int</from>
-        <to>float</to>
+        <from>*</from>
+        <to>flo?t</to>
         <justification>just because</justification>
     </difference>
     <difference>
         <className>Class1</className>
-        <method>voidMethod</method>
+        <method>void voidMethod()</method>
         <differenceType>7004</differenceType>
         <justification>just because</justification>
+    </difference>
+    <difference>
+        <className>Class2</className>
+        <differenceType>4000</differenceType>
+        <to>java/io/Ser*</to>
+    </difference>
+    <difference>
+        <className>Class1</className>
+        <differenceType>4001</differenceType>
+        <to>java/io/Ser*</to>
+    </difference>
+    <difference>
+        <className>Class2</className>
+        <differenceType>5000</differenceType>
+        <to>Base</to>
+    </difference>
+    <difference>
+        <className>Class1</className>
+        <differenceType>5001</differenceType>
+        <to>Base</to>
+    </difference>
+    <difference>
+        <className>Base</className>
+        <differenceType>1001</differenceType>
+    </difference>
+    <difference>
+        <className>Added</className>
+        <differenceType>8000</differenceType>
+    </difference>
+    <difference>
+        <className>Removed</className>
+        <differenceType>8001</differenceType>
     </difference>
 </differences>

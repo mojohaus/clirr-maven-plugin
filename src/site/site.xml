@@ -53,6 +53,7 @@ under the License.
     <menu name="Examples">
       <item name="Comparing against a specific version" href="examples/specific-version.html"/>
       <item name="Comparing against a specific artifact" href="examples/specific-artifacts.html"/>
+      <item name="Specifying ignored differences" href="examples/ignored-differences.html"/>
     </menu>
   </body>
 </project>

@@ -16,15 +16,6 @@ package org.codehaus.mojo.clirr;
  * limitations under the License.
  */
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-
 import net.sf.clirr.core.ApiDifference;
 import net.sf.clirr.core.Checker;
 import net.sf.clirr.core.ClassFilter;
@@ -33,7 +24,6 @@ import net.sf.clirr.core.Severity;
 import net.sf.clirr.core.XmlDiffListener;
 import net.sf.clirr.core.internal.bcel.BcelTypeArrayBuilder;
 import net.sf.clirr.core.spi.JavaType;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
@@ -42,6 +32,15 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.codehaus.plexus.i18n.I18N;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 /**
  * Check for compatibility between two arbitrary artifact sets.
@@ -76,34 +75,33 @@ public class ClirrArbitraryCheckMojo
 
     /**
      * List of artifacts to serve as a baseline to compare against.
-     * 
+     *
      * @parameter
      * @required
      */
     protected ArtifactSpecification[] oldComparisonArtifacts;
-    
+
     /**
      * List of artifacts to compare to baseline.
-     * 
+     *
      * @parameter
      * @required
      */
     protected ArtifactSpecification[] newComparisonArtifacts;
-    
+
     protected void doExecute()
         throws MojoExecutionException, MojoFailureException
-    {   
+    {
         if ( oldComparisonArtifacts == null || oldComparisonArtifacts.length == 0 )
         {
-            getLog().info( "Missing required oldComparisonArtifacts" ); 
+            getLog().info( "Missing required oldComparisonArtifacts" );
         }
 
         if ( newComparisonArtifacts == null || newComparisonArtifacts.length == 0 )
         {
-            getLog().info( "Missing required newComparisonArtifacts" ); 
+            getLog().info( "Missing required newComparisonArtifacts" );
         }
 
-        
         ClirrDiffListener listener;
         try
         {
@@ -113,7 +111,7 @@ public class ClirrArbitraryCheckMojo
         {
             getLog().debug( e );
             getLog().info( "No previous version was found. Use 'comparisonArtifacts'"
-                    + " for explicit configuration if you think this is wrong." );
+                               + " for explicit configuration if you think this is wrong." );
             return;
         }
 
@@ -126,7 +124,7 @@ public class ClirrArbitraryCheckMojo
             String message;
             if ( errorCount > 1 )
             {
-                String[] args = new String[]{String.valueOf( errorCount )};
+                String[] args = new String[]{ String.valueOf( errorCount ) };
                 message = i18n.format( "clirr-report", locale, "check.clirr.failure.errors", args );
             }
             else
@@ -143,7 +141,7 @@ public class ClirrArbitraryCheckMojo
             String message;
             if ( errorCount > 1 )
             {
-                String[] args = new String[]{String.valueOf( errorCount )};
+                String[] args = new String[]{ String.valueOf( errorCount ) };
                 message = i18n.format( "clirr-report", locale, "check.clirr.failure.warnings", args );
             }
             else
@@ -155,7 +153,7 @@ public class ClirrArbitraryCheckMojo
 
         int infoCount = listener.getSeverityCount( Severity.INFO );
         String[] args =
-            new String[]{String.valueOf( errorCount ), String.valueOf( warningCount ), String.valueOf( infoCount )};
+            new String[]{ String.valueOf( errorCount ), String.valueOf( warningCount ), String.valueOf( infoCount ) };
         getLog().info( i18n.format( "clirr-report", locale, "check.clirr.success", args ) );
     }
 
@@ -174,7 +172,7 @@ public class ClirrArbitraryCheckMojo
             }
         }
     }
-    
+
     protected JavaType[] resolveClasses( ArtifactSpecification[] artifacts, ClassFilter classFilter )
         throws MojoFailureException, MojoExecutionException
     {
@@ -189,8 +187,9 @@ public class ClirrArbitraryCheckMojo
             {
                 a = artifact;
             }
-            getLog().debug( "Comparing to " + artifact.getGroupId() + ":" + artifact.getArtifactId() + ":"
-                                + artifact.getVersion() + ":" + artifact.getClassifier() + ":" + artifact.getType() );
+            getLog().debug(
+                "Comparing to " + artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getVersion()
+                    + ":" + artifact.getClassifier() + ":" + artifact.getType() );
         }
 
         try
@@ -284,7 +283,7 @@ public class ClirrArbitraryCheckMojo
             listeners.add( new LogDiffListener( getLog() ) );
         }
 
-        checker.addDiffListener( new DelegatingListener( listeners, minSeverity ) );
+        checker.addDiffListener( new DelegatingListener( listeners, minSeverity, getAllIgnored() ) );
 
         checker.reportDiffs( origClasses, currentClasses );
 

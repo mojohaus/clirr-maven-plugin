@@ -35,11 +35,15 @@ public class DelegatingListener
 
     private final Severity minSeverity;
 
-    public DelegatingListener( List listeners, Severity minSeverity )
+    private final Difference[] ignored;
+
+    public DelegatingListener( List listeners, Severity minSeverity, Difference[] ignored )
     {
         this.listeners = listeners;
 
         this.minSeverity = minSeverity;
+
+        this.ignored = ignored;
     }
 
     public void start()
@@ -53,7 +57,8 @@ public class DelegatingListener
 
     public void reportDiff( ApiDifference apiDifference )
     {
-        if ( minSeverity == null || minSeverity.compareTo( apiDifference.getMaximumSeverity() ) <= 0 )
+        if ( !isIgnored( apiDifference ) && ( minSeverity == null
+            || minSeverity.compareTo( apiDifference.getMaximumSeverity() ) <= 0 ) )
         {
             for ( Iterator i = listeners.iterator(); i.hasNext(); )
             {
@@ -70,5 +75,23 @@ public class DelegatingListener
             DiffListener listener = (DiffListener) i.next();
             listener.stop();
         }
+    }
+
+    private boolean isIgnored( ApiDifference apiDiff )
+    {
+        if ( ignored == null )
+        {
+            return false;
+        }
+
+        for ( int i = 0; i < ignored.length; ++i )
+        {
+            if ( ignored[i].matches( apiDiff ) )
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

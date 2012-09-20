@@ -118,6 +118,10 @@
       <name>Dominik Zindel</name>
       <email>dominik.zindel@elca.ch</email>
     </contributor>
+    <contributor>
+       <name>Lukas Krejci</name>
+       <email>lkrejci@centrum.cz</email>
+    </contributor>
   </contributors>
 
   <dependencies>

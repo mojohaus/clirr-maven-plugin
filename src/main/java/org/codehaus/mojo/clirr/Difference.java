@@ -1,3 +1,5 @@
+package org.codehaus.mojo.clirr;
+
 /*
  * Copyright 2012 The Apache Software Foundation.
  *
@@ -13,8 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.codehaus.mojo.clirr;
 
 import net.sf.clirr.core.ApiDifference;
 import net.sf.clirr.core.MessageTranslator;

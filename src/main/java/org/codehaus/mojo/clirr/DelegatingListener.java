@@ -21,6 +21,7 @@ import net.sf.clirr.core.DiffListener;
 import net.sf.clirr.core.Severity;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -34,30 +35,29 @@ import java.util.Map;
 public class DelegatingListener
     implements DiffListener
 {
-    private final List listeners;
+    private final List<DiffListener> listeners;
 
     private final Severity minSeverity;
 
-    private final Difference[] ignored;
+    private final List<Difference> ignored;
     
     private Map deferredMatchesPerDifference = new HashMap();
     
-    public DelegatingListener( List listeners, Severity minSeverity, Difference[] ignored )
+    public DelegatingListener( List<DiffListener> listeners, Severity minSeverity, List<Difference> ignored )
     {
-        this.listeners = listeners;
+        this.listeners = listeners == null ? Collections.<DiffListener>emptyList() : listeners;
 
         this.minSeverity = minSeverity;
         
-        this.ignored = ignored;
+        this.ignored = ignored == null ? Collections.<Difference>emptyList() : ignored;
     }
 
     public void start()    
     {
         deferredMatchesPerDifference.clear();
         
-        for ( Iterator i = listeners.iterator(); i.hasNext(); )
+        for ( DiffListener listener : listeners )
         {
-            DiffListener listener = (DiffListener) i.next();
             listener.start();
         }
     }
@@ -66,9 +66,8 @@ public class DelegatingListener
     {
         if ( ( minSeverity == null || minSeverity.compareTo( apiDifference.getMaximumSeverity() ) <= 0 ) && !isIgnored( apiDifference ) )
         {
-            for ( Iterator i = listeners.iterator(); i.hasNext(); )
+            for ( DiffListener listener : listeners )
             {
-                DiffListener listener = (DiffListener) i.next();
                 listener.reportDiff( apiDifference );
             }
         }

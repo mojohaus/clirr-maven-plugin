@@ -19,6 +19,7 @@ package org.codehaus.mojo.clirr;
 import net.sf.clirr.core.Checker;
 import net.sf.clirr.core.CheckerException;
 import net.sf.clirr.core.ClassFilter;
+import net.sf.clirr.core.DiffListener;
 import net.sf.clirr.core.PlainDiffListener;
 import net.sf.clirr.core.Severity;
 import net.sf.clirr.core.XmlDiffListener;
@@ -63,6 +64,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -247,7 +249,7 @@ public abstract class AbstractClirrMojo
         // Create a Clirr checker and execute
         Checker checker = new Checker();
 
-        List listeners = new ArrayList();
+        List<DiffListener> listeners = new ArrayList<DiffListener>();
 
         listeners.add( listener );
 
@@ -289,7 +291,7 @@ public abstract class AbstractClirrMojo
         return listener;
     }
 
-    protected Difference[] getAllIgnored()
+    protected List<Difference> getAllIgnored()
     {
         Difference[] ret = ignored;
 
@@ -329,7 +331,7 @@ public abstract class AbstractClirrMojo
             }
         }
 
-        return ret;
+        return ret == null ? Collections.<Difference>emptyList() : Arrays.asList( ret );
     }
 
     private JavaType[] resolveCurrentClasses( ClassFilter classFilter )

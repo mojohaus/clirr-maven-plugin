@@ -22,7 +22,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.i18n.I18N;
 
-import java.util.Iterator;
 import java.util.Locale;
 
 /**

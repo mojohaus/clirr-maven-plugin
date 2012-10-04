@@ -132,10 +132,11 @@ public class DelegatingListener
                 case Difference.Result.NOT_MATCHED:
                     break;
                 case Difference.Result.DEFERRED_MATCH:
-                    Map<Object,List<ApiDifference>> diffsPerDifferentiator = (Map) deferredMatchesPerDifference.get( ignored );
+                    Map<Object, List<ApiDifference>> diffsPerDifferentiator =
+                        (Map) deferredMatchesPerDifference.get( ignored );
                     if ( diffsPerDifferentiator == null )
                     {
-                        diffsPerDifferentiator = new HashMap<Object,List<ApiDifference>>();
+                        diffsPerDifferentiator = new HashMap<Object, List<ApiDifference>>();
                         deferredMatchesPerDifference.put( ignored, diffsPerDifferentiator );
                     }
 

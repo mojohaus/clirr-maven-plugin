@@ -1,4 +1,7 @@
-public class Class1 {
+import java.io.Serializable;
+
+public class Class1 extends Base implements Serializable {
+
     public float publicField;
     
     public void voidMethod(String p) {

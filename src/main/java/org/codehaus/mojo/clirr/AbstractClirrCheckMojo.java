@@ -145,9 +145,8 @@ public class AbstractClirrCheckMojo
         if ( !logResults )
         {
             LogDiffListener l = new LogDiffListener( getLog() );
-            for ( Iterator i = listener.getApiDifferences().iterator(); i.hasNext(); )
+            for ( ApiDifference difference : listener.getApiDifferences() )
             {
-                ApiDifference difference = (ApiDifference) i.next();
                 if ( difference.getMaximumSeverity().equals( severity ) )
                 {
                     l.reportDiff( difference );

@@ -192,6 +192,7 @@ public abstract class AbstractClirrMojo
      * parameter.
      *
      * @parameter
+     * @since 2.5
      */
     protected Difference[] ignored;
 
@@ -201,6 +202,7 @@ public abstract class AbstractClirrMojo
      * parameter.
      *
      * @parameter expression="${clirr.ignoredDifferencesFile}"
+     * @since 2.5
      */
     protected File ignoredDifferencesFile;
 

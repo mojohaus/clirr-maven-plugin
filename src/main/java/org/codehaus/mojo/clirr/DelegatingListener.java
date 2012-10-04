@@ -40,22 +40,22 @@ public class DelegatingListener
     private final Severity minSeverity;
 
     private final List<Difference> ignored;
-    
+
     private Map deferredMatchesPerDifference = new HashMap();
-    
+
     public DelegatingListener( List<DiffListener> listeners, Severity minSeverity, List<Difference> ignored )
     {
         this.listeners = listeners == null ? Collections.<DiffListener>emptyList() : listeners;
 
         this.minSeverity = minSeverity;
-        
+
         this.ignored = ignored == null ? Collections.<Difference>emptyList() : ignored;
     }
 
-    public void start()    
+    public void start()
     {
         deferredMatchesPerDifference.clear();
-        
+
         for ( DiffListener listener : listeners )
         {
             listener.start();
@@ -64,7 +64,8 @@ public class DelegatingListener
 
     public void reportDiff( ApiDifference apiDifference )
     {
-        if ( ( minSeverity == null || minSeverity.compareTo( apiDifference.getMaximumSeverity() ) <= 0 ) && !isIgnored( apiDifference ) )
+        if ( ( minSeverity == null || minSeverity.compareTo( apiDifference.getMaximumSeverity() ) <= 0 ) && !isIgnored(
+            apiDifference ) )
         {
             for ( DiffListener listener : listeners )
             {
@@ -76,23 +77,23 @@ public class DelegatingListener
     public void stop()
     {
         //process the deferred matches now
-        for ( Iterator perDifferenceIt = deferredMatchesPerDifference.entrySet().iterator(); perDifferenceIt.hasNext(); ) 
+        for ( Iterator perDifferenceIt = deferredMatchesPerDifference.entrySet().iterator();
+              perDifferenceIt.hasNext(); )
         {
             Map.Entry perDifferenceEntry = (Map.Entry) perDifferenceIt.next();
-            
+
             Difference diff = (Difference) perDifferenceEntry.getKey();
             Map diffsPerId = (Map) perDifferenceEntry.getValue();
-            
+
             for ( Iterator perIdIt = diffsPerId.values().iterator(); perIdIt.hasNext(); )
             {
                 List apiDiffs = (List) perIdIt.next();
-                
-                if ( !diff.resolveDefferedMatches( apiDiffs ) ) 
+
+                if ( !diff.resolveDefferedMatches( apiDiffs ) )
                 {
-                    for ( Iterator i = listeners.iterator(); i.hasNext(); )
+                    for ( DiffListener listener : listeners )
                     {
-                        DiffListener listener = (DiffListener) i.next();
-                        
+
                         for ( Iterator j = apiDiffs.iterator(); j.hasNext(); )
                         {
                             listener.reportDiff( (ApiDifference) j.next() );
@@ -101,56 +102,56 @@ public class DelegatingListener
                 }
             }
         }
-        
+
         //and stop the underlying listeners
-        for ( Iterator i = listeners.iterator(); i.hasNext(); )
+        for ( DiffListener listener : listeners )
         {
-            DiffListener listener = (DiffListener) i.next();
             listener.stop();
         }
     }
-    
-    private boolean isIgnored( ApiDifference apiDiff ) 
+
+    private boolean isIgnored( ApiDifference apiDiff )
     {
-        if (ignored == null)
+        if ( ignored == null )
         {
             return false;
         }
-        
+
         boolean someDeferred = false;
         boolean matched = false;
-        
+
         for ( Difference difference : ignored )
-        {         
+        {
             Difference.Result res = difference.matches( apiDiff );
-            
+
             switch ( res.getCode() )
             {
-            case Difference.Result.MATCHED:
-                matched = true;
-                break;
-            case Difference.Result.NOT_MATCHED:
-                break;
-            case Difference.Result.DEFERRED_MATCH:
-                Map diffsPerDifferentiator = (Map) deferredMatchesPerDifference.get( ignored );
-                if (diffsPerDifferentiator == null) 
-                {
-                    diffsPerDifferentiator = new HashMap();
-                    deferredMatchesPerDifference.put( ignored, diffsPerDifferentiator );
-                }
-                
-                List diffs = (List) diffsPerDifferentiator.get(res.getDifferentiator());
-                if (diffs == null) {
-                    diffs = new ArrayList();
-                    diffsPerDifferentiator.put(res.getDifferentiator(), diffs);
-                }
-                
-                diffs.add(apiDiff);
-                someDeferred = true;
-                break;
+                case Difference.Result.MATCHED:
+                    matched = true;
+                    break;
+                case Difference.Result.NOT_MATCHED:
+                    break;
+                case Difference.Result.DEFERRED_MATCH:
+                    Map<Object,List<ApiDifference>> diffsPerDifferentiator = (Map) deferredMatchesPerDifference.get( ignored );
+                    if ( diffsPerDifferentiator == null )
+                    {
+                        diffsPerDifferentiator = new HashMap<Object,List<ApiDifference>>();
+                        deferredMatchesPerDifference.put( ignored, diffsPerDifferentiator );
+                    }
+
+                    List<ApiDifference> diffs = diffsPerDifferentiator.get( res.getDifferentiator() );
+                    if ( diffs == null )
+                    {
+                        diffs = new ArrayList<ApiDifference>();
+                        diffsPerDifferentiator.put( res.getDifferentiator(), diffs );
+                    }
+
+                    diffs.add( apiDiff );
+                    someDeferred = true;
+                    break;
             }
         }
-        
+
         return matched || someDeferred;
     }
 }

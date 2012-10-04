@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import net.sf.clirr.core.ApiDifference;
@@ -35,6 +34,7 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
  * A specification of a ignored difference found by Clirr.
  * 
  * @author Lukas Krejci
+ * @since 2.5
  */
 public class Difference
 {
@@ -95,7 +95,7 @@ public class Difference
         XmlPullParser parser = new MXParser();
         parser.setInput( xml );
 
-        ArrayList diffs = new ArrayList();
+        List<Difference> diffs = new ArrayList<Difference>();
 
         int state = 0;
         int event;
@@ -461,7 +461,7 @@ public class Difference
         }
     }
 
-    public boolean resolveDefferedMatches( List defferedApiDifferences )
+    public boolean resolveDefferedMatches( List<ApiDifference> defferedApiDifferences )
     {
         if ( differenceType == 7005 )
         {
@@ -702,11 +702,11 @@ public class Difference
     /**
      * Method Argument Type changed
      */
-    private boolean matches7005( List apiDiffs )
+    private boolean matches7005( List<ApiDifference> apiDiffs )
     {
         throwIfMissing( false, true, false, true );
 
-        ApiDifference firstDiff = (ApiDifference) apiDiffs.get( 0 );
+        ApiDifference firstDiff = apiDiffs.get( 0 );
 
         String methodSig = removeVisibilityFromMethodSignature( firstDiff );
 
@@ -716,10 +716,8 @@ public class Difference
         }
 
         String newType = methodSig;
-        for ( Iterator i = apiDiffs.iterator(); i.hasNext(); )
+        for ( ApiDifference apiDiff : apiDiffs )
         {
-            ApiDifference apiDiff = (ApiDifference) i.next();
-
             String[] args = getArgs( apiDiff );
 
             // 1-based

@@ -7,8 +7,7 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>MCLIRR-48</name>
-  <url>http://maven.apache.org</url>
+  <name>MCLIRR-48-aggregator</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

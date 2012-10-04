@@ -121,9 +121,9 @@ public class DelegatingListener
         boolean someDeferred = false;
         boolean matched = false;
         
-        for ( int i = 0; i < ignored.length; ++i )
+        for ( Difference difference : ignored )
         {         
-            Difference.Result res = ignored[i].matches( apiDiff );
+            Difference.Result res = difference.matches( apiDiff );
             
             switch ( res.getCode() )
             {
@@ -133,11 +133,11 @@ public class DelegatingListener
             case Difference.Result.NOT_MATCHED:
                 break;
             case Difference.Result.DEFERRED_MATCH:
-                Map diffsPerDifferentiator = (Map) deferredMatchesPerDifference.get( ignored[i] );
+                Map diffsPerDifferentiator = (Map) deferredMatchesPerDifference.get( ignored );
                 if (diffsPerDifferentiator == null) 
                 {
                     diffsPerDifferentiator = new HashMap();
-                    deferredMatchesPerDifference.put( ignored[i], diffsPerDifferentiator );
+                    deferredMatchesPerDifference.put( ignored, diffsPerDifferentiator );
                 }
                 
                 List diffs = (List) diffsPerDifferentiator.get(res.getDifferentiator());

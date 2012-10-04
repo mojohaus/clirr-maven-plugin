@@ -49,6 +49,7 @@
     <doxiaVersion>1.0</doxiaVersion>
     <doxiaSitetoolsVersion>1.0</doxiaSitetoolsVersion>
     <mavenVersion>2.0.6</mavenVersion>
+    <mojo.java.target>1.5</mojo.java.target>
   </properties>
 
   <developers>

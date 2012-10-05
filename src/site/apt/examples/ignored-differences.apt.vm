@@ -40,15 +40,18 @@ Specifying ignored differences
  An ignored difference is described by the <<<difference>>> element:
 
 -----------------------------------------------------------------------------------
-
-<difference>
+<differences>
+  ...
+  <difference>
     <className>**/example/*Remote</className>
     <differenceType>...</differenceType>
     <field>my*</field>
     <method>MyObject* method(int, java.lang.String)</method>
     <from>...</from>
     <to>...</to>
-</difference>
+  </difference>
+  ...
+</differences>
 
 -----------------------------------------------------------------------------------
 

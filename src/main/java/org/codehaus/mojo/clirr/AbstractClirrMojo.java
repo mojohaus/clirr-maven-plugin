@@ -200,6 +200,18 @@ public abstract class AbstractClirrMojo
      * A path to the XML file containing the ignored differences definitions.
      * Values specified int the file will be joined with the ones specified using the "ignored"
      * parameter.
+     * <br/>
+     * File Format
+     * <pre>
+     * &lt;differences&gt;
+     *   ...
+     *   &lt;difference&gt;
+     *     &lt;className&gt;com.thoughtworks.qdox.parser.impl.Parser&lt;/className&gt;
+     *     &lt;field&gt;*&lt;/field&gt;
+     *   &lt;/difference&gt;
+     *   ...
+     * &lt;/differences&gt;
+     * </pre>
      *
      * @parameter expression="${clirr.ignoredDifferencesFile}"
      * @since 2.5

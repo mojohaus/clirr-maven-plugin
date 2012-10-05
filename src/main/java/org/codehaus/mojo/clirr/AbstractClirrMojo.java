@@ -297,7 +297,7 @@ public abstract class AbstractClirrMojo
     {
         Difference[] ret = ignored;
 
-        if ( ignoredDifferencesFile != null )
+        if ( ignoredDifferencesFile != null && ignoredDifferencesFile.exists() )
         {
             XmlStreamReader rdr = null;
             try

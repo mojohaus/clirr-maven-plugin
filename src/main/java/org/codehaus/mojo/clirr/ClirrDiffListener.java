@@ -38,7 +38,7 @@ public class ClirrDiffListener
     /**
      * The list of differences that occurred.
      */
-    private List apiDifferences = new LinkedList();
+    private List<ApiDifference> apiDifferences = new LinkedList<ApiDifference>();
 
     /**
      * The number messages for each severity.
@@ -54,13 +54,10 @@ public class ClirrDiffListener
 
     public void stop()
     {
-        Collections.sort( apiDifferences, new Comparator()
+        Collections.sort( apiDifferences, new Comparator<ApiDifference>()
         {
-            public int compare( Object o1, Object o2 )
+            public int compare( ApiDifference d1, ApiDifference d2 )
             {
-                ApiDifference d1 = (ApiDifference) o1;
-                ApiDifference d2 = (ApiDifference) o2;
-
                 // compare maximum severities - order highest to lowest.
                 return d2.getMaximumSeverity().compareTo( d1.getMaximumSeverity() );
             }
@@ -86,7 +83,7 @@ public class ClirrDiffListener
         return count.intValue();
     }
 
-    public List getApiDifferences()
+    public List<ApiDifference> getApiDifferences()
     {
         return Collections.unmodifiableList( apiDifferences );
     }

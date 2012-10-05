@@ -22,7 +22,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.i18n.I18N;
 
-import java.util.Iterator;
 import java.util.Locale;
 
 /**
@@ -145,9 +144,8 @@ public class AbstractClirrCheckMojo
         if ( !logResults )
         {
             LogDiffListener l = new LogDiffListener( getLog() );
-            for ( Iterator i = listener.getApiDifferences().iterator(); i.hasNext(); )
+            for ( ApiDifference difference : listener.getApiDifferences() )
             {
-                ApiDifference difference = (ApiDifference) i.next();
                 if ( difference.getMaximumSeverity().equals( severity ) )
                 {
                     l.reportDiff( difference );

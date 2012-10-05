@@ -122,6 +122,10 @@ public class DelegatingListener
 
         for ( Difference difference : ignored )
         {
+            if ( difference == null )
+            {
+                continue;
+            }
             Difference.Result res = difference.matches( apiDiff );
 
             switch ( res.getCode() )

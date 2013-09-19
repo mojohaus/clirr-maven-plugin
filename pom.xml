@@ -2,7 +2,7 @@
   <parent>
     <groupId>org.codehaus.mojo</groupId>
     <artifactId>mojo-parent</artifactId>
-    <version>30</version>
+    <version>32</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -50,6 +50,7 @@
     <doxiaSitetoolsVersion>1.0</doxiaSitetoolsVersion>
     <mavenVersion>2.0.6</mavenVersion>
     <mojo.java.target>1.5</mojo.java.target>
+    <sitePluginVersion>3.3</sitePluginVersion>
   </properties>
 
   <developers>

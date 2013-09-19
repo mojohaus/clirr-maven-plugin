@@ -270,7 +270,7 @@
               <localRepositoryPath>${project.build.directory}/local repository</localRepositoryPath>
               <goals>
                 <goal>clean</goal>
-                <goal>verify</goal>
+                <goal>install</goal>
               </goals>
               <settingsFile>src/it/settings.xml</settingsFile>
               <cloneProjectsTo>${project.build.directory}/it-tests</cloneProjectsTo>

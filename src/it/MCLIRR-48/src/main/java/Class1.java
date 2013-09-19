@@ -4,6 +4,10 @@ public class Class1 extends Base implements Serializable {
 
     public float publicField;
     
+    class SubClass {
+        
+    }
+    
     public void voidMethod(String p) {
         
     }
@@ -18,5 +22,21 @@ public class Class1 extends Base implements Serializable {
 
     public long returnMethod() {
         return 0;
+    }
+    
+    public String fluent1() {
+        return null;
+    }
+    
+    public Class1 fluent2() {
+        return null;
+    }
+    
+    public String returnSubClass1() {
+        return null;
+    }
+
+    public SubClass returnSubClass2() {
+        return null;
     }
 }

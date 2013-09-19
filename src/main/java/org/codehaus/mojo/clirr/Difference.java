@@ -745,14 +745,6 @@ public class Difference
             return false;
         }
 
-        if ( methodSig.startsWith( apiDiff.getAffectedClass() ) )
-        {
-            // well, it's kinda hard to tell here, right?
-            // Constructors aren't supposed to change return types
-            // or to have any.
-            return false;
-        }
-
         String newRetType = getArgs( apiDiff )[0];
 
         return SelectorUtils.matchPath( to, newRetType );

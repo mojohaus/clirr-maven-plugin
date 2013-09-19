@@ -45,4 +45,28 @@
         <className>Removed</className>
         <differenceType>8001</differenceType>
     </difference>
+    <difference>
+        <className>Class1</className>
+        <differenceType>7006</differenceType>
+        <method>Class1 fluent1()</method>
+        <to>java.lang.String</to>        
+    </difference>
+    <difference>
+        <className>Class1</className>
+        <differenceType>7006</differenceType>
+        <method>java.lang.String fluent2()</method>
+        <to>Class1</to>        
+    </difference>
+    <difference>
+        <className>Class1</className>
+        <differenceType>7006</differenceType>
+        <method>Class1$SubClass returnSubClass1()</method>
+        <to>java.lang.String</to>        
+    </difference>
+    <difference>
+        <className>Class1</className>
+        <differenceType>7006</differenceType>
+        <method>java.lang.String returnSubClass2()</method>
+        <to>Class1$SubClass</to>        
+    </difference>
 </differences>

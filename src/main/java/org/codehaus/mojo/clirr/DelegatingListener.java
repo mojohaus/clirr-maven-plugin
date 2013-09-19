@@ -23,7 +23,6 @@ import net.sf.clirr.core.Severity;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +40,7 @@ public class DelegatingListener
 
     private final List<Difference> ignored;
 
-    private Map deferredMatchesPerDifference = new HashMap();
+    private Map<Difference, Map<Object, List<ApiDifference>>> deferredMatchesPerDifference = new HashMap<Difference, Map<Object, List<ApiDifference>>>();
 
     public DelegatingListener( List<DiffListener> listeners, Severity minSeverity, List<Difference> ignored )
     {
@@ -77,26 +76,21 @@ public class DelegatingListener
     public void stop()
     {
         //process the deferred matches now
-        for ( Iterator perDifferenceIt = deferredMatchesPerDifference.entrySet().iterator();
-              perDifferenceIt.hasNext(); )
+        for ( Map.Entry<Difference, Map<Object, List<ApiDifference>>> perDifferenceEntry : deferredMatchesPerDifference.entrySet() )
         {
-            Map.Entry perDifferenceEntry = (Map.Entry) perDifferenceIt.next();
+            Difference diff = perDifferenceEntry.getKey();
+            Map<Object, List<ApiDifference>> diffsPerId = perDifferenceEntry.getValue();
 
-            Difference diff = (Difference) perDifferenceEntry.getKey();
-            Map diffsPerId = (Map) perDifferenceEntry.getValue();
-
-            for ( Iterator perIdIt = diffsPerId.values().iterator(); perIdIt.hasNext(); )
+            for ( List<ApiDifference> apiDiffs : diffsPerId.values() )
             {
-                List apiDiffs = (List) perIdIt.next();
-
                 if ( !diff.resolveDefferedMatches( apiDiffs ) )
                 {
                     for ( DiffListener listener : listeners )
                     {
 
-                        for ( Iterator j = apiDiffs.iterator(); j.hasNext(); )
+                        for ( ApiDifference apiDiff : apiDiffs )
                         {
-                            listener.reportDiff( (ApiDifference) j.next() );
+                            listener.reportDiff( apiDiff );
                         }
                     }
                 }
@@ -137,11 +131,11 @@ public class DelegatingListener
                     break;
                 case Difference.Result.DEFERRED_MATCH:
                     Map<Object, List<ApiDifference>> diffsPerDifferentiator =
-                        (Map) deferredMatchesPerDifference.get( ignored );
+                        deferredMatchesPerDifference.get( difference );
                     if ( diffsPerDifferentiator == null )
                     {
                         diffsPerDifferentiator = new HashMap<Object, List<ApiDifference>>();
-                        deferredMatchesPerDifference.put( ignored, diffsPerDifferentiator );
+                        deferredMatchesPerDifference.put( difference, diffsPerDifferentiator );
                     }
 
                     List<ApiDifference> diffs = diffsPerDifferentiator.get( res.getDifferentiator() );

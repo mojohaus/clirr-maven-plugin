@@ -8,8 +8,12 @@
         <justification>just because</justification>
     </difference>
     <difference>
-        <className>Class1</className>
-        <method>void voidMethod()</method>
+        <className>
+          Class1
+        </className>
+        <method>
+          void voidMethod()
+        </method>
         <differenceType>7004</differenceType>
         <justification>just because</justification>
     </difference>

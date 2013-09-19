@@ -118,7 +118,7 @@ public class Difference
                             break;
                         case 2: // reading difference
                             String name = parser.getName();
-                            String value = parser.nextText();
+                            String value = parser.nextText().trim();
                             if ( "className".equals( name ) )
                             {
                                 current.className = value;

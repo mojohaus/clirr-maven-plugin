@@ -34,6 +34,7 @@
         </executions>
         <configuration>
           <comparisonVersion>1.0</comparisonVersion>
+          <textOutputFile>${project.build.directory}/clirr-check-results.txt</textOutputFile>
           <xmlOutputFile>${project.build.directory}/clirr-check-results.xml</xmlOutputFile>
           <ignoredDifferencesFile>predefined-ignored-differences.xml</ignoredDifferencesFile>
           <ignored>

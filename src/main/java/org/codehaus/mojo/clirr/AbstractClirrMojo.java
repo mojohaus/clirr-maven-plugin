@@ -271,7 +271,7 @@ public abstract class AbstractClirrMojo
         {
             try
             {
-                listeners.add( new XmlDiffListener( xmlOutputFile.getAbsolutePath() ) );
+                listeners.add( new TypeRevealingXmlDiffListener( xmlOutputFile.getAbsolutePath() ) );
             }
             catch ( IOException e )
             {

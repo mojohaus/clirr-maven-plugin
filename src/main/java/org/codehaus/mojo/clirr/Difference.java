@@ -16,7 +16,6 @@ package org.codehaus.mojo.clirr;
  * limitations under the License.
  */
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
@@ -32,7 +31,7 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 /**
  * A specification of a ignored difference found by Clirr.
- * 
+ *
  * @author Lukas Krejci
  * @since 2.5
  */
@@ -222,7 +221,7 @@ public class Difference
      * <li><b>10000 (Class format version increased)</b>: className, from, to (class format version numbers)
      * <li><b>10001 (Class format version decreased)</b>: className, from, to (class format version numbers)
      * </ul>
-     * 
+     *
      * @parameter
      * @required
      */
@@ -230,7 +229,7 @@ public class Difference
 
     /**
      * The name of the class that contains the ignored difference. This can be a path expression.
-     * 
+     *
      * @parameter
      * @required
      */
@@ -240,7 +239,7 @@ public class Difference
      * The name of the field that should be ignored according to the difference type and optionally 'from' and 'to'
      * conditions. This is parameter is a regular expression. Note that this must not contain any type information and
      * only match the field's name. This parameter is an expression (technically a maven path expression).
-     * 
+     *
      * @parameter
      */
     private String field;
@@ -248,7 +247,7 @@ public class Difference
     /**
      * The signature of the method that should be ignored according to the {@link #differenceType difference type}. This
      * parameter is an expression (technically a maven path expression).
-     * 
+     *
      * @parameter
      */
     private String method;
@@ -257,7 +256,7 @@ public class Difference
      * The original type of the field (if it is important for the difference type, otherwise can be left out). Note that
      * this parameter is ignored when dealing with methods. This parameter is an expression (technically a maven path
      * expression).
-     * 
+     *
      * @parameter
      */
     private String from;
@@ -266,14 +265,14 @@ public class Difference
      * The "new" type of the field (or method return type) or "new" method signature (if it is important for the
      * difference type, otherwise can be left out). This parameter is an expression (technically a maven path
      * expression).
-     * 
+     *
      * @parameter
      */
     private String to;
 
     /**
      * The reason why ignoring this difference is deemed OK.
-     * 
+     *
      * @parameter
      * @required
      */
@@ -356,8 +355,8 @@ public class Difference
             return Result.notMatched();
         }
 
-        String affectedClassPath = apiDiff.getAffectedClass().replace( ".", File.separator );
-        if ( !SelectorUtils.matchPath( className, affectedClassPath ) )
+        String affectedClassPath = apiDiff.getAffectedClass().replace( '.', '/' );
+        if ( !SelectorUtils.matchPath( className, affectedClassPath, "/", true ) )
         {
             return Result.notMatched();
         }
@@ -487,9 +486,9 @@ public class Difference
         throwIfMissing( false, false, false, true );
 
         String newIface = getArgs( apiDiff )[0];
-        newIface = newIface.replace( ".", File.separator );
+        newIface = newIface.replace( '.', '/' );
 
-        return SelectorUtils.matchPath( to, newIface );
+        return SelectorUtils.matchPath( to, newIface, "/", true );
     }
 
     /**
@@ -500,9 +499,9 @@ public class Difference
         throwIfMissing( false, false, false, true );
 
         String removedIface = getArgs( apiDiff )[0];
-        removedIface = removedIface.replace( ".", File.separator );
+        removedIface = removedIface.replace( '.', '/' );
 
-        return SelectorUtils.matchPath( to, removedIface );
+        return SelectorUtils.matchPath( to, removedIface, "/", true );
     }
 
     /**
@@ -513,9 +512,9 @@ public class Difference
         throwIfMissing( false, false, false, true );
 
         String newSuperclass = getArgs( apiDiff )[0];
-        newSuperclass = newSuperclass.replace( ".", File.separator );
+        newSuperclass = newSuperclass.replace( '.', '/' );
 
-        return SelectorUtils.matchPath( to, newSuperclass );
+        return SelectorUtils.matchPath( to, newSuperclass, "/", true );
     }
 
     /**
@@ -526,9 +525,9 @@ public class Difference
         throwIfMissing( false, false, false, true );
 
         String removedSuperclass = getArgs( apiDiff )[0];
-        removedSuperclass = removedSuperclass.replace( ".", File.separator );
+        removedSuperclass = removedSuperclass.replace( '.', '/' );
 
-        return SelectorUtils.matchPath( to, removedSuperclass );
+        return SelectorUtils.matchPath( to, removedSuperclass, "/", true );
     }
 
     /**

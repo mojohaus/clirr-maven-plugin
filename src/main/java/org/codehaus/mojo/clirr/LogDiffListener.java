@@ -43,7 +43,8 @@ public class LogDiffListener
 
     public void reportDiff( ApiDifference apiDifference )
     {
-        String message = apiDifference.getAffectedClass() + ": " + apiDifference.getReport( messageTranslator );
+        String message = apiDifference.getMessage().getId() + ": " + apiDifference.getAffectedClass() + ": " +
+            apiDifference.getReport( messageTranslator );
 
         Severity severity = apiDifference.getMaximumSeverity();
         if ( severity.equals( Severity.INFO ) )

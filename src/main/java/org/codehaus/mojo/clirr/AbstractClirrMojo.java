@@ -225,6 +225,11 @@ public abstract class AbstractClirrMojo
      */
     protected boolean logResults;
 
+    /**
+     * @parameter expression="${clirr.skipArtifactTypeTest}" default-value="false"
+     */
+    private boolean skipArtifactTypeTest;
+
     private static final URL[] EMPTY_URL_ARRAY = new URL[0];
 
     public void execute()
@@ -411,7 +416,8 @@ public abstract class AbstractClirrMojo
                 // MCLIRR-39 Support for Maven Plugins, which are also JARs
                 // MCLIRR-61: jenkins plugin so test if isAddedToClasspath
                 if ( "jar".equals( artifact.getType() ) || "maven-plugin".equals( artifact.getType() )
-                    || "bundle".equals( artifact.getType() ) || artifact.getArtifactHandler().isAddedToClasspath() )
+                    || "bundle".equals( artifact.getType() ) || artifact.getArtifactHandler().isAddedToClasspath()
+                    || skipArtifactTypeTest )
                 {
                     files.add( new File( localRepository.getBasedir(), localRepository.pathOf( artifact ) ) );
                 }

@@ -409,8 +409,9 @@ public abstract class AbstractClirrMojo
                 Artifact artifact = (Artifact) iter.next();
                 // Clirr expects JAR files, so let's not pass other artifact files.
                 // MCLIRR-39 Support for Maven Plugins, which are also JARs
+                // MCLIRR-61: jenkins plugin so test if isAddedToClasspath
                 if ( "jar".equals( artifact.getType() ) || "maven-plugin".equals( artifact.getType() )
-                    || "bundle".equals( artifact.getType() ) )
+                    || "bundle".equals( artifact.getType() ) || artifact.getArtifactHandler().isAddedToClasspath() )
                 {
                     files.add( new File( localRepository.getBasedir(), localRepository.pathOf( artifact ) ) );
                 }

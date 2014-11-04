@@ -50,7 +50,7 @@
     <doxiaSitetoolsVersion>1.0</doxiaSitetoolsVersion>
     <mavenVersion>2.0.6</mavenVersion>
     <mojo.java.target>1.5</mojo.java.target>
-    <sitePluginVersion>3.3</sitePluginVersion>
+    <sitePluginVersion>3.4</sitePluginVersion>
   </properties>
 
   <developers>

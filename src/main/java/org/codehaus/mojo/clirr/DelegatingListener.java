@@ -32,7 +32,7 @@ import java.util.Map;
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  */
 public class DelegatingListener
-    implements DiffListener
+    implements IDiffListener
 {
     private final List<DiffListener> listeners;
 
@@ -63,12 +63,36 @@ public class DelegatingListener
 
     public void reportDiff( ApiDifference apiDifference )
     {
-        if ( ( minSeverity == null || minSeverity.compareTo( apiDifference.getMaximumSeverity() ) <= 0 ) && !isIgnored(
-            apiDifference ) )
+        if ( ( minSeverity == null || minSeverity.compareTo( apiDifference.getMaximumSeverity() ) <= 0 ) )
         {
-            for ( DiffListener listener : listeners )
+            Difference reasonToIgnoreDiff = getReasonToIgnoreDiff( apiDifference );
+            if ( reasonToIgnoreDiff == null )
             {
-                listener.reportDiff( apiDifference );
+                reportDiff_(apiDifference);
+            }
+            else
+            {
+                reportIgnoredDiff(apiDifference, reasonToIgnoreDiff);
+            }
+        }
+    }
+
+    private void reportDiff_(ApiDifference apiDifference)
+    {
+        for ( DiffListener listener : listeners )
+        {
+            listener.reportDiff( apiDifference );
+        }
+    }
+
+    public void reportIgnoredDiff( ApiDifference ignoredDiff, Difference reason )
+    {
+        for ( DiffListener listener : listeners )
+        {
+            if ( listener instanceof IDiffListener )
+            {
+                IDiffListener l = (IDiffListener) listener;
+                l.reportIgnoredDiff( ignoredDiff, reason );
             }
         }
     }
@@ -85,13 +109,16 @@ public class DelegatingListener
             {
                 if ( !diff.resolveDefferedMatches( apiDiffs ) )
                 {
-                    for ( DiffListener listener : listeners )
+                    for ( ApiDifference apiDiff : apiDiffs )
                     {
-
-                        for ( ApiDifference apiDiff : apiDiffs )
-                        {
-                            listener.reportDiff( apiDiff );
-                        }
+                        reportDiff_(apiDiff);
+                    }
+                }
+                else
+                {
+                    for ( ApiDifference apiDiff : apiDiffs )
+                    {
+                        reportIgnoredDiff(apiDiff, diff);
                     }
                 }
             }
@@ -104,16 +131,17 @@ public class DelegatingListener
         }
     }
 
-    private boolean isIgnored( ApiDifference apiDiff )
+    private Difference getReasonToIgnoreDiff( ApiDifference apiDiff )
     {
         if ( ignored == null )
         {
-            return false;
+            return null;
         }
 
         boolean someDeferred = false;
         boolean matched = false;
 
+        Difference reason = null;
         for ( Difference difference : ignored )
         {
             if ( difference == null )
@@ -125,6 +153,10 @@ public class DelegatingListener
             switch ( res.getCode() )
             {
                 case Difference.Result.MATCHED:
+                    if ( reason == null )
+                    {
+                        reason = difference;
+                    }
                     matched = true;
                     break;
                 case Difference.Result.NOT_MATCHED:
@@ -146,11 +178,19 @@ public class DelegatingListener
                     }
 
                     diffs.add( apiDiff );
+                    if ( reason == null )
+                    {
+                        reason = difference;
+                    }
                     someDeferred = true;
                     break;
             }
         }
 
-        return matched || someDeferred;
+        if ( matched || someDeferred )
+        {
+          return reason;
+        }
+        return null;
     }
 }

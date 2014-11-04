@@ -19,12 +19,15 @@ package org.codehaus.mojo.clirr;
 import net.sf.clirr.core.ApiDifference;
 import net.sf.clirr.core.MessageTranslator;
 import net.sf.clirr.core.Severity;
-import org.apache.maven.doxia.sink.Sink;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
+import org.apache.maven.doxia.sink.Sink;
+import org.codehaus.plexus.i18n.I18N;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.Comparator;
 import java.util.ResourceBundle;
+import java.util.TreeMap;
 
 /**
  * Generate the Clirr report.
@@ -33,6 +36,51 @@ import java.util.ResourceBundle;
  */
 public class ClirrReportGenerator
 {
+
+    /**
+     * Clirr's difference type.
+     */
+    private static final int METHOD_ARGUMENT_TYPE_CHANGED = 7005;
+
+    private static class ApiChange
+    {
+        private Difference difference;
+        private List<ApiDifference> apiDifferences = new LinkedList<ApiDifference>();
+
+        private ApiDifference getFirst()
+        {
+            return apiDifferences.get(0);
+        }
+
+        private String getAffectedClass()
+        {
+            return getFirst().getAffectedClass();
+        }
+
+        private String getFrom()
+        {
+            ApiDifference apiDiff = getFirst();
+            if (apiDiff.getAffectedMethod() != null)
+            {
+                return apiDiff.getAffectedMethod();
+            }
+            return apiDiff.getAffectedField();
+        }
+
+        private String getTo()
+        {
+            ApiDifference apiDiff = getFirst();
+            if ( difference.getDifferenceType() == METHOD_ARGUMENT_TYPE_CHANGED )
+            {
+                String methodSig = apiDiff.getAffectedMethod();
+                return Difference.getNewMethodSignature( methodSig, apiDifferences );
+            }
+            return difference.getTo();
+        }
+    }
+
+    private final I18N i18n;
+
     private final ResourceBundle bundle;
 
     private final Sink sink;
@@ -49,8 +97,10 @@ public class ClirrReportGenerator
 
     private String comparisonVersion;
 
-    public ClirrReportGenerator( Sink sink, ResourceBundle bundle, Locale locale )
+    public ClirrReportGenerator( Sink sink, I18N i18n, ResourceBundle bundle, Locale locale )
     {
+        this.i18n = i18n;
+
         this.bundle = bundle;
 
         this.sink = sink;
@@ -70,6 +120,7 @@ public class ClirrReportGenerator
         }
 
         doDetails( listener );
+        doApiChanges( listener );
 
         sink.body_();
         sink.flush();
@@ -123,31 +174,26 @@ public class ClirrReportGenerator
 
     private void iconInfo()
     {
-        sink.figure();
-        sink.figureCaption();
-        sink.text( bundle.getString( "report.clirr.level.info" ) );
-        sink.figureCaption_();
-        sink.figureGraphics( "images/icon_info_sml.gif" );
-        sink.figure_();
+        icon( "report.clirr.level.info", "images/icon_info_sml.gif" );
     }
 
     private void iconWarning()
     {
-        sink.figure();
-        sink.figureCaption();
-        sink.text( bundle.getString( "report.clirr.level.warning" ) );
-        sink.figureCaption_();
-        sink.figureGraphics( "images/icon_warning_sml.gif" );
-        sink.figure_();
+        icon( "report.clirr.level.warning" , "images/icon_warning_sml.gif" );
     }
 
     private void iconError()
     {
+        icon( "report.clirr.level.error", "images/icon_error_sml.gif" );
+    }
+
+    private void icon(String altText, String image)
+    {
         sink.figure();
         sink.figureCaption();
-        sink.text( bundle.getString( "report.clirr.level.error" ) );
+        sink.text( bundle.getString( altText ) );
         sink.figureCaption_();
-        sink.figureGraphics( "images/icon_error_sml.gif" );
+        sink.figureGraphics( image );
         sink.figure_();
     }
 
@@ -172,43 +218,19 @@ public class ClirrReportGenerator
 
         sink.tableRow_();
 
-        sink.tableRow();
-        sink.tableCell();
-        iconError();
-        sink.nonBreakingSpace();
-        sink.text( bundle.getString( "report.clirr.level.error" ) );
-        sink.tableCell_();
-        sink.tableCell();
-        sink.text( String.valueOf( listener.getSeverityCount( Severity.ERROR ) ) );
-        sink.tableCell_();
-        sink.tableRow_();
+        severityReportTableRow( listener, Severity.ERROR,
+            "report.clirr.level.error", "images/icon_error_sml.gif" );
 
         if ( minSeverity == null || minSeverity.compareTo( Severity.WARNING ) <= 0 )
         {
-            sink.tableRow();
-            sink.tableCell();
-            iconWarning();
-            sink.nonBreakingSpace();
-            sink.text( bundle.getString( "report.clirr.level.warning" ) );
-            sink.tableCell_();
-            sink.tableCell();
-            sink.text( String.valueOf( listener.getSeverityCount( Severity.WARNING ) ) );
-            sink.tableCell_();
-            sink.tableRow_();
+            severityReportTableRow( listener, Severity.WARNING,
+                "report.clirr.level.warning", "images/icon_warning_sml.gif" );
         }
 
         if ( minSeverity == null || minSeverity.compareTo( Severity.INFO ) <= 0 )
         {
-            sink.tableRow();
-            sink.tableCell();
-            iconInfo();
-            sink.nonBreakingSpace();
-            sink.text( bundle.getString( "report.clirr.level.info" ) );
-            sink.tableCell_();
-            sink.tableCell();
-            sink.text( String.valueOf( listener.getSeverityCount( Severity.INFO ) ) );
-            sink.tableCell_();
-            sink.tableRow_();
+            severityReportTableRow( listener, Severity.INFO,
+                "report.clirr.level.info", "images/icon_info_sml.gif" );
         }
 
         sink.table_();
@@ -225,14 +247,29 @@ public class ClirrReportGenerator
         sink.section1_();
     }
 
+    private void severityReportTableRow( ClirrDiffListener listener, Severity severity,
+        String altText, String image )
+    {
+        sink.tableRow();
+        sink.tableCell();
+        icon( altText, image );
+        sink.nonBreakingSpace();
+        sink.text( bundle.getString( altText ) );
+        sink.tableCell_();
+        sink.tableCell();
+        sink.text( String.valueOf( listener.getSeverityCount( severity ) ) );
+        sink.tableCell_();
+        sink.tableRow_();
+    }
+
     private void doDetails( ClirrDiffListener listener )
     {
         sink.section1();
         sink.sectionTitle1();
-        sink.text( bundle.getString( "report.clirr.details" ) );
+        sink.text( bundle.getString( "report.clirr.api.incompatibilities" ) );
         sink.sectionTitle1_();
 
-        List differences = listener.getApiDifferences();
+        List<ApiDifference> differences = listener.getApiDifferences();
 
         if ( !differences.isEmpty() )
         {
@@ -248,7 +285,7 @@ public class ClirrReportGenerator
         sink.section1_();
     }
 
-    private void doTable( List differences )
+    private void doTable( List<ApiDifference> differences )
     {
         sink.table();
         sink.tableRow();
@@ -269,10 +306,8 @@ public class ClirrReportGenerator
         MessageTranslator translator = new MessageTranslator();
         translator.setLocale( locale );
 
-        for ( Iterator events = differences.iterator(); events.hasNext(); )
+        for ( ApiDifference difference : differences )
         {
-            ApiDifference difference = (ApiDifference) events.next();
-
             // TODO: differentiate source and binary? The only difference seems to be MSG_CONSTANT_REMOVED at this point
             Severity maximumSeverity = difference.getMaximumSeverity();
 
@@ -334,6 +369,188 @@ public class ClirrReportGenerator
         {
             iconError();
         }
+    }
+
+    private void doApiChanges( ClirrDiffListener listener )
+    {
+        sink.section1();
+        sink.sectionTitle1();
+        sink.text( bundle.getString( "report.clirr.api.changes" ) );
+        sink.sectionTitle1_();
+
+        Map<Difference, List<ApiChange>> apiChangeReport = getApiChangeReport( listener );
+        if ( apiChangeReport.isEmpty() )
+        {
+            sink.paragraph();
+            sink.text( bundle.getString( "report.clirr.noresults" ) );
+            sink.paragraph_();
+        }
+        else
+        {
+            doTable2( apiChangeReport );
+        }
+
+        sink.section1_();
+    }
+
+    private Map<Difference, List<ApiChange>> getApiChangeReport( ClirrDiffListener listener )
+    {
+        final Map<String, List<ApiChange>> tmp = new HashMap<String, List<ApiChange>>();
+        for ( Entry<Difference, List<ApiDifference>> ignoredDiff
+            : listener.getIgnoredApiDifferences().entrySet() )
+        {
+            for ( ApiDifference apiDiff : ignoredDiff.getValue() )
+            {
+                putApiChange( tmp, apiDiff, ignoredDiff.getKey() );
+            }
+        }
+        for ( ApiDifference apiDiff : listener.getApiDifferences() )
+        {
+            putApiChange( tmp, apiDiff, null );
+        }
+
+
+        final Map<Difference, List<ApiChange>> results =
+            new TreeMap<Difference, List<ApiChange>>( new Comparator<Difference>()
+            {
+
+              public int compare( Difference o1, Difference o2 )
+              {
+                return o1.getJustification().compareTo( o2.getJustification() );
+              }
+            } );
+
+        for ( List<ApiChange> changes : tmp.values() )
+        {
+            for ( ApiChange apiChange : changes )
+            {
+                List<ApiChange> changesForDifference = results.get( apiChange.difference );
+                if ( changesForDifference == null )
+                {
+                    changesForDifference = new LinkedList<ApiChange>();
+                    results.put( apiChange.difference, changesForDifference );
+                }
+                changesForDifference.add( apiChange );
+            }
+        }
+        return results;
+    }
+
+    private void putApiChange( Map<String, List<ApiChange>> results,
+            ApiDifference ignoredDiff, Difference reason )
+    {
+        String apiChangeKey = getKey( ignoredDiff );
+        List<ApiChange> apiChanges = results.get( apiChangeKey );
+        if ( apiChanges == null )
+        {
+            apiChanges = new LinkedList<ApiChange>();
+            results.put(apiChangeKey, apiChanges);
+        }
+
+        if ( reason != null && reason.getDifferenceType() == METHOD_ARGUMENT_TYPE_CHANGED )
+        {
+            ApiChange apiChange7005 = find7005ApiChange( apiChanges );
+            if ( apiChange7005 != null )
+            {
+                apiChange7005.apiDifferences.add(ignoredDiff);
+                return;
+            }
+        }
+        ApiChange change = new ApiChange();
+        if ( reason != null )
+        {
+          change.difference = reason;
+        }
+        else
+        {
+          // use a null object to avoid doing null checks everywhere 
+          change.difference = new Difference();
+          change.difference.setClassName("");
+          change.difference.setMethod("");
+          change.difference.setField("");
+          change.difference.setFrom("");
+          change.difference.setTo("");
+          change.difference.setJustification( bundle.getString( "report.clirr.api.changes.unjustified" ) );
+        }
+        change.apiDifferences.add( ignoredDiff );
+        apiChanges.add( change );
+    }
+
+    private String getKey( ApiDifference apiDiff )
+    {
+        if ( apiDiff.getAffectedMethod() != null )
+        {
+            return apiDiff.getAffectedClass() + " " + apiDiff.getAffectedMethod();
+        }
+        return apiDiff.getAffectedClass() + " " + apiDiff.getAffectedField();
+    }
+
+    private ApiChange find7005ApiChange( List<ApiChange> apiChanges )
+    {
+        for ( ApiChange apiChange : apiChanges )
+        {
+            if ( apiChange.difference.getDifferenceType() == METHOD_ARGUMENT_TYPE_CHANGED )
+            {
+                return apiChange;
+            }
+        }
+        return null;
+    }
+
+    private void doTable2( Map<Difference, List<ApiChange>> apiChangeReport )
+    {
+        if ( comparisonVersion != null )
+        {
+            String[] args = new String[]{comparisonVersion, currentVersion};
+            String message = i18n.format(
+                "clirr-report", locale, "report.clirr.api.changes.listing.comparisonversion", args );
+            sink.text( message );
+        }
+        else
+        {
+            sink.text( bundle.getString( "report.clirr.api.changes.listing" ) );
+        }
+
+        sink.list();
+        for ( Entry<Difference, List<ApiChange>> apiChanges
+            : apiChangeReport.entrySet() )
+        {
+            sink.listItem();
+            sink.text( apiChanges.getKey().getJustification() );
+            sink.paragraph();
+
+            sink.table();
+            sink.tableRow();
+            sink.tableHeaderCell();
+            sink.text( bundle.getString( "report.clirr.api.changes.class" ) );
+            sink.tableHeaderCell_();
+            sink.tableHeaderCell();
+            sink.text( bundle.getString( "report.clirr.api.changes.from" ) );
+            sink.tableHeaderCell_();
+            sink.tableHeaderCell();
+            sink.text( bundle.getString( "report.clirr.api.changes.to" ) );
+            sink.tableHeaderCell_();
+            sink.tableRow_();
+
+            for (ApiChange apiChange : apiChanges.getValue())
+            {
+                sink.tableRow();
+                sink.tableCell();
+                sink.text( apiChange.getAffectedClass() );
+                sink.tableCell_();
+                sink.tableCell();
+                sink.text( apiChange.getFrom() );
+                sink.tableCell_();
+                sink.tableCell();
+                sink.text( apiChange.getTo() );
+                sink.tableCell_();
+                sink.tableRow_();
+            }
+            sink.table_();
+            sink.paragraph_();
+            sink.listItem_();
+        }
+        sink.list_();
     }
 
     public void setEnableSeveritySummary( boolean enableSeveritySummary )

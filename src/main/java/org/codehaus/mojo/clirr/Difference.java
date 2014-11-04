@@ -165,9 +165,7 @@ public class Difference
             }
         }
 
-        Difference[] ret = new Difference[diffs.size()];
-
-        return (Difference[]) diffs.toArray( ret );
+        return diffs.toArray( new Difference[diffs.size()] );
     }
 
     /**
@@ -472,10 +470,10 @@ public class Difference
         }
     }
 
+    @Override
     public String toString()
     {
-        return new StringBuilder( "Difference[differenceType=" ).append( differenceType ).append( ", className=" ).append( className ).append( ", field=" ).append( field ).append( ", method=" ).append( method ).append( ", from=" ).append( from ).append( ", to=" ).append( to ).append( "]" ).toString();
-
+        return "Difference[differenceType=" + differenceType + ", className=" + className + ", field=" + field + ", method=" + method + ", from=" + from + ", to=" + to + "]";
     }
 
     /**
@@ -706,29 +704,31 @@ public class Difference
         throwIfMissing( false, true, false, true );
 
         ApiDifference firstDiff = apiDiffs.get( 0 );
-
         String methodSig = removeVisibilityFromMethodSignature( firstDiff );
-
         if ( !SelectorUtils.matchPath( method, methodSig ) )
         {
             return false;
         }
 
-        String newType = methodSig;
-        for ( ApiDifference apiDiff : apiDiffs )
-        {
-            String[] args = getArgs( apiDiff );
+        String newMethodSig = getNewMethodSignature( methodSig, apiDiffs );
+        return SelectorUtils.matchPath( to, newMethodSig );
+    }
 
-            // 1-based
-            int idx = Integer.parseInt( args[0] ) - 1;
-            String diffNewType = args[1];
+    public static String getNewMethodSignature( String methodSig, List<ApiDifference> apiDiffs )
+    {
+      String newMethodSig = methodSig;
+      for ( ApiDifference apiDiff : apiDiffs )
+      {
+          String[] args = getArgs( apiDiff );
 
-            // construct the new full type
+          // 1-based
+          int idx = Integer.parseInt( args[0] ) - 1;
+          String diffNewType = args[1];
 
-            newType = replaceNthArgumentType( newType, idx, diffNewType );
-        }
-
-        return SelectorUtils.matchPath( to, newType );
+          // construct the new full method signature
+          newMethodSig = replaceNthArgumentType( newMethodSig, idx, diffNewType );
+      }
+      return newMethodSig;
     }
 
     /**
@@ -900,7 +900,7 @@ public class Difference
         return fromVersion == reportedOld && toVersion == reportedNew;
     }
 
-    private String[] getArgs( ApiDifference apiDiff )
+    private static String[] getArgs( ApiDifference apiDiff )
     {
         String args = apiDiff.getReport( ARGS_EXTRACTOR );
         return args.split( "&" );

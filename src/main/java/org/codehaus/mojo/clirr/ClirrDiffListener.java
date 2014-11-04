@@ -34,17 +34,23 @@ import java.util.Map;
  */
 public class ClirrDiffListener
     extends DiffListenerAdapter
+    implements IDiffListener
 {
     /**
      * The list of differences that occurred.
      */
     private List<ApiDifference> apiDifferences = new LinkedList<ApiDifference>();
+    /**
+     * The list of ignored differences that occurred.
+     */
+    private Map<Difference, List<ApiDifference>> ignoredApiDifferences = new HashMap<Difference, List<ApiDifference>>();
 
     /**
      * The number messages for each severity.
      */
-    private Map counts = new HashMap( 3 );
+    private Map<Severity, Integer> counts = new HashMap<Severity, Integer>( 3 );
 
+    @Override
     public void reportDiff( ApiDifference apiDifference )
     {
         incrementCount( apiDifference.getMaximumSeverity(), counts );
@@ -52,6 +58,17 @@ public class ClirrDiffListener
         apiDifferences.add( apiDifference );
     }
 
+    public void reportIgnoredDiff( ApiDifference ignoredDiff, Difference reason )
+    {
+        List<ApiDifference> diffs = ignoredApiDifferences.get( reason );
+        if ( diffs == null ) {
+            diffs = new LinkedList<ApiDifference>();
+            ignoredApiDifferences.put( reason, diffs );
+        }
+        diffs.add( ignoredDiff );
+    }
+
+    @Override
     public void stop()
     {
         Collections.sort( apiDifferences, new Comparator<ApiDifference>()
@@ -64,21 +81,21 @@ public class ClirrDiffListener
         } );
     }
 
-    private void incrementCount( Severity sev, Map counts )
+    private void incrementCount( Severity sev, Map<Severity, Integer> counts )
     {
         if ( sev != null )
         {
             int count = getCount( counts, sev );
-            counts.put( sev, new Integer( count + 1 ) );
+            counts.put( sev, count + 1 );
         }
     }
 
-    private int getCount( Map counts, Severity sev )
+    private int getCount( Map<Severity, Integer> counts, Severity sev )
     {
-        Integer count = (Integer) counts.get( sev );
+        Integer count = counts.get( sev );
         if ( count == null )
         {
-            count = new Integer( 0 );
+            count = 0;
         }
         return count.intValue();
     }
@@ -86,6 +103,11 @@ public class ClirrDiffListener
     public List<ApiDifference> getApiDifferences()
     {
         return Collections.unmodifiableList( apiDifferences );
+    }
+
+    public Map<Difference, List<ApiDifference>> getIgnoredApiDifferences()
+    {
+      return Collections.unmodifiableMap( ignoredApiDifferences);
     }
 
     public int getSeverityCount( Severity severity )

@@ -17,6 +17,7 @@ package org.codehaus.mojo.clirr;
  */
 
 import net.sf.clirr.core.Severity;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
@@ -36,6 +37,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.reporting.MavenReport;
 import org.apache.maven.reporting.MavenReportException;
+import org.codehaus.plexus.i18n.I18N;
 import org.codehaus.plexus.util.PathTool;
 import org.codehaus.plexus.util.StringUtils;
 
@@ -102,6 +104,11 @@ public class ClirrReport
      */
     private File xrefLocation;
 
+    /**
+     * @component
+     */
+    private I18N i18n;
+
     public String getCategoryName()
     {
         return MavenReport.CATEGORY_PROJECT_REPORTS;
@@ -157,6 +164,7 @@ public class ClirrReport
         return artifact.getFile();
     }
 
+    @Override
     protected void doExecute()
         throws MojoExecutionException, MojoFailureException
     {
@@ -258,7 +266,7 @@ public class ClirrReport
 
             if ( htmlReport )
             {
-                ClirrReportGenerator generator = new ClirrReportGenerator( sink, bundle, locale );
+                ClirrReportGenerator generator = new ClirrReportGenerator( sink, i18n, bundle, locale );
 
                 generator.setEnableSeveritySummary( showSummary );
 

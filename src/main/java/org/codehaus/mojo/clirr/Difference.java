@@ -970,7 +970,7 @@ public class Difference
 
             String type = paramIdx == idx ? newType : signature.substring( commaIdx, nextCommaIdx );
 
-            bld.append( type );
+            bld.append( type.trim() );
             bld.append( ", " );
 
             commaIdx = nextCommaIdx + 1;

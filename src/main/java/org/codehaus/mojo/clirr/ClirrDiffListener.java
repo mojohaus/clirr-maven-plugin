@@ -34,7 +34,7 @@ import java.util.Map;
  */
 public class ClirrDiffListener
     extends DiffListenerAdapter
-    implements IDiffListener
+    implements MojoDiffListener
 {
     /**
      * The list of differences that occurred.

@@ -32,7 +32,7 @@ import java.util.Map;
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  */
 public class DelegatingListener
-    implements IDiffListener
+    implements MojoDiffListener
 {
     private final List<DiffListener> listeners;
 
@@ -89,9 +89,9 @@ public class DelegatingListener
     {
         for ( DiffListener listener : listeners )
         {
-            if ( listener instanceof IDiffListener )
+            if ( listener instanceof MojoDiffListener )
             {
-                IDiffListener l = (IDiffListener) listener;
+                MojoDiffListener l = (MojoDiffListener) listener;
                 l.reportIgnoredDiff( ignoredDiff, reason );
             }
         }

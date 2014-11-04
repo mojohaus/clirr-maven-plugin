@@ -22,7 +22,7 @@ import net.sf.clirr.core.DiffListener;
 /**
  * DiffListener that can listen for ignored differences.
  */
-public interface IDiffListener
+public interface MojoDiffListener
     extends DiffListener
 {
 

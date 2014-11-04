@@ -124,6 +124,9 @@
        <name>Lukas Krejci</name>
        <email>lkrejci@centrum.cz</email>
     </contributor>
+    <contributor>
+      <name>Jean-Noel Rouvignac</name>
+    </contributor>
   </contributors>
 
   <dependencies>

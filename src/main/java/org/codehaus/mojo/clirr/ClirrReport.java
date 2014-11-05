@@ -78,14 +78,14 @@ public class ClirrReport
     /**
      * Whether to show the summary of the number of errors, warnings and informational messages.
      *
-     * @parameter expression="${showSummary}" default-value="true"
+     * @parameter property="showSummary" default-value="true"
      */
     private boolean showSummary;
 
     /**
      * Whether to render the HTML report or not.
      *
-     * @parameter expression="${htmlReport}" default-value="true"
+     * @parameter property="htmlReport" default-value="true"
      */
     private boolean htmlReport;
 
@@ -93,14 +93,14 @@ public class ClirrReport
      * Link the violation line numbers to the source Xref. This will create links
      * if the JXR Plugin is being used.
      *
-     * @parameter expression="${linkXRef}" default-value="true"
+     * @parameter property="linkXRef" default-value="true"
      */
     private boolean linkXRef;
 
     /**
      * Location of the Xrefs to link to.
      *
-     * @parameter expression="${xrefLocation}" default-value="${project.build.directory}/site/xref"
+     * @parameter property="xrefLocation" default-value="${project.build.directory}/site/xref"
      */
     private File xrefLocation;
 

@@ -22,7 +22,6 @@ import net.sf.clirr.core.ClassFilter;
 import net.sf.clirr.core.DiffListener;
 import net.sf.clirr.core.PlainDiffListener;
 import net.sf.clirr.core.Severity;
-import net.sf.clirr.core.XmlDiffListener;
 import net.sf.clirr.core.internal.bcel.BcelJavaType;
 import net.sf.clirr.core.internal.bcel.BcelTypeArrayBuilder;
 import net.sf.clirr.core.spi.JavaType;
@@ -85,12 +84,12 @@ public abstract class AbstractClirrMojo
     /**
      * Flag to easily skip execution.
      *
-     * @parameter expression="${clirr.skip}" default-value="false"
+     * @parameter property="clirr.skip" default-value="false"
      */
     protected boolean skip;
 
     /**
-     * @parameter expression="${project}"
+     * @parameter property="project"
      * @required
      * @readonly
      */
@@ -133,7 +132,7 @@ public abstract class AbstractClirrMojo
     /**
      * Version to compare the current code against.
      *
-     * @parameter expression="${comparisonVersion}" default-value="(,${project.version})"
+     * @parameter property="comparisonVersion" default-value="(,${project.version})"
      */
     protected String comparisonVersion;
 
@@ -152,21 +151,21 @@ public abstract class AbstractClirrMojo
      * Show only messages of this severity or higher. Valid values are
      * <code>info</code>, <code>warning</code> and <code>error</code>.
      *
-     * @parameter expression="${minSeverity}" default-value="warning"
+     * @parameter property="minSeverity" default-value="warning"
      */
     protected String minSeverity;
 
     /**
      * A text output file to render to. If omitted, no output is rendered to a text file.
      *
-     * @parameter expression="${textOutputFile}"
+     * @parameter property="textOutputFile"
      */
     protected File textOutputFile;
 
     /**
      * An XML file to render to. If omitted, no output is rendered to an XML file.
      *
-     * @parameter expression="${xmlOutputFile}"
+     * @parameter property="xmlOutputFile"
      */
     protected File xmlOutputFile;
 
@@ -213,7 +212,7 @@ public abstract class AbstractClirrMojo
      * &lt;/differences&gt;
      * </pre>
      *
-     * @parameter expression="${clirr.ignoredDifferencesFile}"
+     * @parameter property="clirr.ignoredDifferencesFile"
      * @since 2.5
      */
     protected File ignoredDifferencesFile;
@@ -221,12 +220,12 @@ public abstract class AbstractClirrMojo
     /**
      * Whether to log the results to the console or not.
      *
-     * @parameter expression="${logResults}" default-value="false"
+     * @parameter property="logResults" default-value="false"
      */
     protected boolean logResults;
 
     /**
-     * @parameter expression="${clirr.skipArtifactTypeTest}" default-value="false"
+     * @parameter property="clirr.skipArtifactTypeTest" default-value="false"
      */
     private boolean skipArtifactTypeTest;
 

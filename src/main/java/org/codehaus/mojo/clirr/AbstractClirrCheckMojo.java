@@ -35,21 +35,21 @@ public class AbstractClirrCheckMojo
     /**
      * Whether to fail on errors.
      *
-     * @parameter expression="${failOnError}" default-value="true"
+     * @parameter property="failOnError" default-value="true"
      */
     private boolean failOnError;
 
     /**
      * Whether to fail on warnings.
      *
-     * @parameter expression="${failOnWarning}" default-value="false"
+     * @parameter property="failOnWarning" default-value="false"
      */
     private boolean failOnWarning;
 
     /**
      * Whether to fail on info.
      *
-     * @parameter expression="${failOnInfo}" default-value="false"
+     * @parameter property="failOnInfo" default-value="false"
      */
     private boolean failOnInfo;
 

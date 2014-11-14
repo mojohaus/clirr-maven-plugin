@@ -1,0 +1,43 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.codehaus.mojo.clirr</groupId>
+  <artifactId>MCLIRR-63</artifactId>
+  <version>2.0</version>
+  <packaging>jar</packaging>
+
+  <name>MCLIRR-63</name>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>@sitePluginVersion@</version>
+      </plugin>
+    </plugins>
+  </build>
+
+  <reporting>
+    <excludeDefaults>true</excludeDefaults>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>clirr-maven-plugin</artifactId>
+        <version>@project.version@</version>
+        <configuration>
+          <comparisonVersion>1.0</comparisonVersion>
+          <textOutputFile>${project.build.directory}/clirr-check-results.txt</textOutputFile>
+          <xmlOutputFile>${project.build.directory}/clirr-check-results.xml</xmlOutputFile>
+          <ignoredDifferencesFile>predefined-ignored-differences.xml</ignoredDifferencesFile>
+        </configuration>
+      </plugin>
+    </plugins>
+  </reporting>
+</project>

@@ -28,6 +28,8 @@ import java.util.Map.Entry;
 import java.util.Comparator;
 import java.util.ResourceBundle;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /**
  * Generate the Clirr report.
@@ -38,45 +40,116 @@ public class ClirrReportGenerator
 {
 
     /**
-     * Clirr's difference type.
+     * Clirr's difference types.
      */
+    private static final int FIELD_TYPE_CHANGED = 6004;
     private static final int METHOD_ARGUMENT_TYPE_CHANGED = 7005;
+    private static final int METHOD_RETURN_TYPE_CHANGED = 7006;
+
+    private static final class JustificationComparator implements Comparator<Difference>
+    {
+        public int compare( Difference o1, Difference o2 )
+        {
+            return o1.getJustification().compareTo( o2.getJustification() );
+        }
+    }
+
+    private static final class ApiChangeComparator implements Comparator<ApiChange>
+    {
+        public int compare(ApiChange c1, ApiChange c2)
+        {
+            int cmp = c1.getAffectedClass().compareTo(c2.getAffectedClass());
+            if (cmp == 0)
+            {
+                cmp = c1.getFrom().compareTo(c2.getFrom());
+                if (cmp == 0)
+                {
+                    return c1.getTo().compareTo(c2.getTo());
+                }
+            }
+            return cmp;
+        }
+    }
 
     private static class ApiChange
     {
         private Difference difference;
         private List<ApiDifference> apiDifferences = new LinkedList<ApiDifference>();
-
-        private ApiDifference getFirst()
-        {
-            return apiDifferences.get(0);
-        }
+        private String from;
+        private String to;
 
         private String getAffectedClass()
         {
-            return getFirst().getAffectedClass();
+            return apiDifferences.get(0).getAffectedClass();
         }
 
         private String getFrom()
         {
-            ApiDifference apiDiff = getFirst();
-            if (apiDiff.getAffectedMethod() != null)
-            {
-                return apiDiff.getAffectedMethod();
-            }
-            return apiDiff.getAffectedField();
+          return from;
         }
 
         private String getTo()
         {
-            ApiDifference apiDiff = getFirst();
-            if ( difference.getDifferenceType() == METHOD_ARGUMENT_TYPE_CHANGED )
-            {
-                String methodSig = apiDiff.getAffectedMethod();
-                return Difference.getNewMethodSignature( methodSig, apiDifferences );
-            }
-            return difference.getTo();
+            return to;
         }
+
+        private void computeFields()
+        {
+          ApiDifference apiDiff = apiDifferences.get(0);
+          String methodSig = apiDiff.getAffectedMethod();
+
+          // set default values that can be overwritten later
+          if (apiDiff.getAffectedMethod() != null)
+          {
+              from = apiDiff.getAffectedMethod();
+          }
+          else
+          {
+              from = apiDiff.getAffectedField();
+          }
+          to = difference.getTo();
+
+
+          switch (difference.getDifferenceType())
+          {
+          case FIELD_TYPE_CHANGED: {
+              String clirrReport = apiDiff.getReport(new MessageTranslator());
+              Pattern p = Pattern.compile("Changed type of field ([^ ]+) from ([^ ]+) to ([^ ]+)");
+              Matcher m = p.matcher(clirrReport);
+              if (m.find())
+              {
+                  from = m.group(2) + ' ' + m.group(1);
+                  to = m.group(3) + ' ' + m.group(1);
+              }
+              break;
+              }
+
+          case METHOD_ARGUMENT_TYPE_CHANGED: {
+              to = Difference.getNewMethodSignature( methodSig, apiDifferences );
+              break;
+              }
+
+          case METHOD_RETURN_TYPE_CHANGED: {
+              String clirrReport = apiDiff.getReport(new MessageTranslator());
+              Pattern p = Pattern.compile("Return type of method '[^']+' has been changed to (.+)");
+              Matcher m = p.matcher(clirrReport);
+              if (m.find())
+              {
+                  int openParIdx = methodSig.indexOf('(');
+                  int afterReturnTypeIdx = methodSig.lastIndexOf(' ', openParIdx);
+                  int beforeReturnTypeIdx = methodSig.lastIndexOf(' ', afterReturnTypeIdx - 1);
+                  to = new StringBuilder()
+                        .append(methodSig, 0, beforeReturnTypeIdx + 1)
+                        .append(m.group(1))
+                        .append(methodSig, afterReturnTypeIdx, methodSig.length())
+                        .toString();
+              }
+              break;
+              }
+
+          }
+        }
+
     }
 
     private final I18N i18n;
@@ -84,29 +157,19 @@ public class ClirrReportGenerator
     private final ResourceBundle bundle;
 
     private final Sink sink;
-
     private boolean enableSeveritySummary;
-
     private final Locale locale;
-
     private Severity minSeverity;
-
     private String xrefLocation;
-
     private String currentVersion;
-
     private String comparisonVersion;
 
     public ClirrReportGenerator( Sink sink, I18N i18n, ResourceBundle bundle, Locale locale )
     {
         this.i18n = i18n;
-
         this.bundle = bundle;
-
         this.sink = sink;
-
         this.enableSeveritySummary = true;
-
         this.locale = locale;
     }
 
@@ -273,7 +336,7 @@ public class ClirrReportGenerator
 
         if ( !differences.isEmpty() )
         {
-            doTable( differences );
+            doIncompatibilitiesTable( differences );
         }
         else
         {
@@ -285,7 +348,7 @@ public class ClirrReportGenerator
         sink.section1_();
     }
 
-    private void doTable( List<ApiDifference> differences )
+    private void doIncompatibilitiesTable( List<ApiDifference> differences )
     {
         sink.table();
         sink.tableRow();
@@ -387,7 +450,7 @@ public class ClirrReportGenerator
         }
         else
         {
-            doTable2( apiChangeReport );
+            doApiChangesTable( apiChangeReport );
         }
 
         sink.section1_();
@@ -411,14 +474,7 @@ public class ClirrReportGenerator
 
 
         final Map<Difference, List<ApiChange>> results =
-            new TreeMap<Difference, List<ApiChange>>( new Comparator<Difference>()
-            {
-
-              public int compare( Difference o1, Difference o2 )
-              {
-                return o1.getJustification().compareTo( o2.getJustification() );
-              }
-            } );
+            new TreeMap<Difference, List<ApiChange>>( new JustificationComparator() );
 
         for ( List<ApiChange> changes : tmp.values() )
         {
@@ -457,23 +513,28 @@ public class ClirrReportGenerator
             }
         }
         ApiChange change = new ApiChange();
-        if ( reason != null )
+        change.difference = reason != null ? reason : createNullObject();
+        if (change.difference.getJustification() == null)
         {
-          change.difference = reason;
-        }
-        else
-        {
-          // use a null object to avoid doing null checks everywhere 
-          change.difference = new Difference();
-          change.difference.setClassName("");
-          change.difference.setMethod("");
-          change.difference.setField("");
-          change.difference.setFrom("");
-          change.difference.setTo("");
           change.difference.setJustification( bundle.getString( "report.clirr.api.changes.unjustified" ) );
         }
         change.apiDifferences.add( ignoredDiff );
         apiChanges.add( change );
+    }
+
+    /**
+     * Use a null object to avoid doing null checks everywhere.
+     */
+    private Difference createNullObject()
+    {
+        Difference difference = new Difference();
+        difference.setClassName("");
+        difference.setMethod("");
+        difference.setField("");
+        difference.setFrom("");
+        difference.setTo("");
+        difference.setJustification( bundle.getString( "report.clirr.api.changes.unjustified" ) );
+        return difference;
     }
 
     private String getKey( ApiDifference apiDiff )
@@ -497,7 +558,7 @@ public class ClirrReportGenerator
         return null;
     }
 
-    private void doTable2( Map<Difference, List<ApiChange>> apiChangeReport )
+    private void doApiChangesTable( Map<Difference, List<ApiChange>> apiChangeReport )
     {
         if ( comparisonVersion != null )
         {
@@ -531,6 +592,12 @@ public class ClirrReportGenerator
             sink.text( bundle.getString( "report.clirr.api.changes.to" ) );
             sink.tableHeaderCell_();
             sink.tableRow_();
+
+            for (ApiChange apiChange : apiChanges.getValue())
+            {
+                apiChange.computeFields();
+            }
+            Collections.sort(apiChanges.getValue(), new ApiChangeComparator());
 
             for (ApiChange apiChange : apiChanges.getValue())
             {

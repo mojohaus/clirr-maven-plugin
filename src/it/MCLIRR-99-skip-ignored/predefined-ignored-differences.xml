@@ -1,0 +1,91 @@
+<differences>
+    <difference>
+        <className>Class*</className>
+        <field>%regex[publicFiel.]</field>
+        <differenceType>6004</differenceType>
+        <from>*</from>
+        <to>flo?t</to>
+        <justification>just because</justification>
+    </difference>
+    <difference>
+        <className>
+          Class1
+        </className>
+        <method>
+          void voidMethod()
+        </method>
+        <differenceType>7004</differenceType>
+        <justification>just because</justification>
+    </difference>
+    <difference>
+        <className>Class2</className>
+        <differenceType>4000</differenceType>
+        <to>java/io/Ser*</to>
+    </difference>
+    <difference>
+        <className>Class1</className>
+        <differenceType>4001</differenceType>
+        <to>java/io/Ser*</to>
+    </difference>
+    <difference>
+        <className>Class2</className>
+        <differenceType>5000</differenceType>
+        <to>Base</to>
+    </difference>
+    <difference>
+        <className>Class1</className>
+        <differenceType>5001</differenceType>
+        <to>Base</to>
+    </difference>
+    <difference>
+        <className>Base</className>
+        <differenceType>1001</differenceType>
+    </difference>
+    <difference>
+        <className>Added</className>
+        <differenceType>8000</differenceType>
+    </difference>
+    <difference>
+        <className>Removed</className>
+        <differenceType>8001</differenceType>
+    </difference>
+    <difference>
+        <className>Class1</className>
+        <differenceType>7006</differenceType>
+        <method>Class1 fluent1()</method>
+        <to>java.lang.String</to>
+    </difference>
+    <difference>
+        <className>Class1</className>
+        <differenceType>7006</differenceType>
+        <method>java.lang.String fluent2()</method>
+        <to>Class1</to>
+    </difference>
+    <difference>
+        <className>Class1</className>
+        <differenceType>7006</differenceType>
+        <method>Class1$SubClass returnSubClass1()</method>
+        <to>java.lang.String</to>
+    </difference>
+    <difference>
+        <className>Class1</className>
+        <differenceType>7006</differenceType>
+        <method>java.lang.String returnSubClass2()</method>
+        <to>Class1$SubClass</to>
+    </difference>
+    <difference>
+       <!-- This will actually match 2 different methods. Both of them should get ignored correctly. -->
+       <className>Class1</className>
+       <method>void paramsMethod?(int, java.lang.String)</method>
+       <differenceType>7005</differenceType>
+       <to>void paramsMethod?(long, int)</to>
+       <justification>just because</justification>
+    </difference>
+    <difference>
+       <className>Class1</className>
+       <method>int returnMethod*</method>
+       <differenceType>7006</differenceType>
+       <to>lo?g</to>
+       <justification>just because</justification>
+    </difference>
+</differences>

@@ -340,19 +340,14 @@ public class ClirrReport
 
     public boolean canGenerateReport()
     {
-        boolean generate = true;
         try
         {
             if ( skip )
             {
                 getLog().info( "Skipping execution" );
-                generate = false;
+                return false;
             }
-            if ( generate )
-            {
-                generate = canGenerate();
-            }
-            return generate;
+            return canGenerate();
         }
         catch ( MojoFailureException e )
         {

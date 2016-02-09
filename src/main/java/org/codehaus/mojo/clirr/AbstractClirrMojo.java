@@ -469,36 +469,60 @@ public abstract class AbstractClirrMojo
         }
         return dependencies;
     }
+    
+    private Artifact resolveArtifactFromVersionSpec(ArtifactSpecification artifactWithVersionSpec) throws MojoFailureException, MojoExecutionException {
+        final String groupId = artifactWithVersionSpec.getGroupId();
+        final String artifactId = artifactWithVersionSpec.getArtifactId();
+        final String versionSpec = artifactWithVersionSpec.getVersion();
+        final String artifactType = (artifactWithVersionSpec.getType()==null)?"jar":artifactWithVersionSpec.getType();
+        final String artifactClassifier = artifactWithVersionSpec.getClassifier();
+    
+        checkMandatory(groupId, "groupId", artifactWithVersionSpec);
+        checkMandatory(artifactId, "artifactId", artifactWithVersionSpec);
+        checkMandatory(versionSpec, "version", artifactWithVersionSpec);
+        checkMandatory(artifactType, "type", artifactWithVersionSpec);
+        
+        VersionRange range;
+        try {
+            range = VersionRange.createFromVersionSpec( versionSpec );
+        } catch ( InvalidVersionSpecificationException e ) {
+            getLog().info(String.format("%s cannot be used as a Version specification", versionSpec));
+            range = VersionRange.createFromVersion(versionSpec);
+        }
+        
+        Artifact resolvedArtifact;
+        try {
+            resolvedArtifact = factory.createDependencyArtifact( groupId, artifactId, range, artifactType, artifactClassifier, Artifact.SCOPE_COMPILE);
 
-    private Artifact resolveArtifact( ArtifactSpecification artifactSpec )
-        throws MojoFailureException, MojoExecutionException
-    {
-        final String groupId = artifactSpec.getGroupId();
-        if ( groupId == null )
-        {
-            throw new MojoFailureException( "An artifacts groupId is required." );
+            if (!resolvedArtifact.getVersionRange().isSelectedVersionKnown(resolvedArtifact)) {
+                getLog().debug("Searching for versions in range: " + resolvedArtifact.getVersionRange());
+                
+                List availableVersions = metadataSource.retrieveAvailableVersions(resolvedArtifact, localRepository, project.getRemoteArtifactRepositories());
+                filterSnapshots(availableVersions);
+
+                ArtifactVersion version = range.matchVersion(availableVersions);
+                if (version != null) {
+                    resolvedArtifact.selectVersion(version.toString());
+                }
+            }
         }
-        final String artifactId = artifactSpec.getArtifactId();
-        if ( artifactId == null )
-        {
-            throw new MojoFailureException( "An artifacts artifactId is required." );
-        }
-        final String version = artifactSpec.getVersion();
-        if ( version == null )
-        {
-            throw new MojoFailureException( "An artifacts version number is required." );
-        }
-        final VersionRange versionRange = VersionRange.createFromVersion( version );
-        String type = artifactSpec.getType();
-        if ( type == null )
-        {
-            type = "jar";
+        catch (OverConstrainedVersionException e1) {
+            throw new MojoFailureException("Invalid comparison version: " + e1.getMessage());
+        } catch (ArtifactMetadataRetrievalException e11) {
+            throw new MojoExecutionException("Error determining previous version: " + e11.getMessage(), e11);
         }
 
-        Artifact artifact =
-            factory.createDependencyArtifact( groupId, artifactId, versionRange, type, artifactSpec.getClassifier(),
-                                              Artifact.SCOPE_COMPILE );
-        return artifact;
+        if (resolvedArtifact.getVersion() == null) {
+            getLog().info( "Unable to find a good candidate version of " + artifactWithVersionSpec.toString() + " in the repository");
+        }
+
+        return resolvedArtifact;
+    }
+    
+    private void checkMandatory(String item, String itemName, ArtifactSpecification artifact) throws MojoFailureException {
+        if (item == null || item.trim().length() == 0) {
+            throw new MojoFailureException("A " + itemName + " is required in artifact: " + artifact.toString());
+        }
     }
 
     protected Set resolveArtifacts( ArtifactSpecification[] artifacts )
@@ -508,10 +532,12 @@ public abstract class AbstractClirrMojo
         Artifact[] result = new Artifact[artifacts.length];
         for ( int i = 0; i < result.length; i++ )
         {
-            artifactSet.add( resolveArtifact( artifacts[i] ) );
+            artifactSet.add( resolveArtifactFromVersionSpec( artifacts[i] ) );
         }
         return artifactSet;
     }
+    
+
 
     private Artifact getComparisonArtifact()
         throws MojoFailureException, MojoExecutionException

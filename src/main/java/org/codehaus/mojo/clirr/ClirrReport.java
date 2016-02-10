@@ -342,6 +342,11 @@ public class ClirrReport
     {
         try
         {
+            if ( skip )
+            {
+                getLog().info( "Skipping execution" );
+                return false;
+            }
             return canGenerate();
         }
         catch ( MojoFailureException e )

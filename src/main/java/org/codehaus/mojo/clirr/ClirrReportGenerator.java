@@ -103,9 +103,11 @@ public class ClirrReportGenerator
           {
               from = apiDiff.getAffectedMethod();
           }
-          else
+          else if (apiDiff.getAffectedField() != null)
           {
               from = apiDiff.getAffectedField();
+          } else {
+              from = "";
           }
           to = difference.getTo();
 

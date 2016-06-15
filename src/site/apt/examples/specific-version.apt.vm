@@ -27,7 +27,7 @@ Comparing against a specific version
   By default, the Clirr Maven Plugin compares the current code against
   the latest released version, which is lower than the current version.
   This is, because the parameter <<<comparisonVersion>>> has the
-  default value <<<(,${project.version})>>>. This parameter can be
+  default value <<<(,$\{project.version\})>>>. This parameter can be
   changed, if you want to compare your code against a particular
   version:
 

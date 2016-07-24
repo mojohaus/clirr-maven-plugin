@@ -51,7 +51,7 @@
     <mavenVersion>2.0.6</mavenVersion>
     <mojo.java.target>1.5</mojo.java.target>
     <sitePluginVersion>3.4</sitePluginVersion>
-    <bcelFindbugsVersion>6.0</bcelFindbugsVersion>
+    <bcelVersion>6.0</bcelVersion>
   </properties>
 
   <developers>
@@ -143,9 +143,9 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>bcel-findbugs</artifactId>
-      <version>${bcelFindbugsVersion}</version>
+      <groupId>org.apache.bcel</groupId>
+      <artifactId>bcel</artifactId>
+      <version>${bcelVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>

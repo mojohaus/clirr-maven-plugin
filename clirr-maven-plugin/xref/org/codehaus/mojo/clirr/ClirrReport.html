@@ -350,30 +350,35 @@
 <a class="jxr_linenumber" name="L342" href="#L342">342</a>     {
 <a class="jxr_linenumber" name="L343" href="#L343">343</a>         <strong class="jxr_keyword">try</strong>
 <a class="jxr_linenumber" name="L344" href="#L344">344</a>         {
-<a class="jxr_linenumber" name="L345" href="#L345">345</a>             <strong class="jxr_keyword">return</strong> canGenerate();
-<a class="jxr_linenumber" name="L346" href="#L346">346</a>         }
-<a class="jxr_linenumber" name="L347" href="#L347">347</a>         <strong class="jxr_keyword">catch</strong> ( MojoFailureException e )
-<a class="jxr_linenumber" name="L348" href="#L348">348</a>         {
-<a class="jxr_linenumber" name="L349" href="#L349">349</a>             getLog().error( <span class="jxr_string">"Can't generate Clirr report: "</span> + e.getMessage() );
-<a class="jxr_linenumber" name="L350" href="#L350">350</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L345" href="#L345">345</a>             <strong class="jxr_keyword">if</strong> ( skip )
+<a class="jxr_linenumber" name="L346" href="#L346">346</a>             {
+<a class="jxr_linenumber" name="L347" href="#L347">347</a>                 getLog().info( <span class="jxr_string">"Skipping execution"</span> );
+<a class="jxr_linenumber" name="L348" href="#L348">348</a>                 <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L349" href="#L349">349</a>             }
+<a class="jxr_linenumber" name="L350" href="#L350">350</a>             <strong class="jxr_keyword">return</strong> canGenerate();
 <a class="jxr_linenumber" name="L351" href="#L351">351</a>         }
-<a class="jxr_linenumber" name="L352" href="#L352">352</a>         <strong class="jxr_keyword">catch</strong> ( MojoExecutionException e )
+<a class="jxr_linenumber" name="L352" href="#L352">352</a>         <strong class="jxr_keyword">catch</strong> ( MojoFailureException e )
 <a class="jxr_linenumber" name="L353" href="#L353">353</a>         {
-<a class="jxr_linenumber" name="L354" href="#L354">354</a>             getLog().error( <span class="jxr_string">"Can't generate Clirr report: "</span> + e.getMessage(), e );
+<a class="jxr_linenumber" name="L354" href="#L354">354</a>             getLog().error( <span class="jxr_string">"Can't generate Clirr report: "</span> + e.getMessage() );
 <a class="jxr_linenumber" name="L355" href="#L355">355</a>             <strong class="jxr_keyword">return</strong> false;
 <a class="jxr_linenumber" name="L356" href="#L356">356</a>         }
-<a class="jxr_linenumber" name="L357" href="#L357">357</a>     }
-<a class="jxr_linenumber" name="L358" href="#L358">358</a> 
-<a class="jxr_linenumber" name="L359" href="#L359">359</a>     <em class="jxr_comment">// eventually, we must replace this with the o.a.m.d.s.Sink class as a parameter</em>
-<a class="jxr_linenumber" name="L360" href="#L360">360</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> generate( org.codehaus.doxia.sink.Sink sink, Locale locale )
-<a class="jxr_linenumber" name="L361" href="#L361">361</a>         <strong class="jxr_keyword">throws</strong> MavenReportException
-<a class="jxr_linenumber" name="L362" href="#L362">362</a>     {
-<a class="jxr_linenumber" name="L363" href="#L363">363</a>         generate( (Sink) sink, locale );
-<a class="jxr_linenumber" name="L364" href="#L364">364</a> 
-<a class="jxr_linenumber" name="L365" href="#L365">365</a>     }
-<a class="jxr_linenumber" name="L366" href="#L366">366</a> }
+<a class="jxr_linenumber" name="L357" href="#L357">357</a>         <strong class="jxr_keyword">catch</strong> ( MojoExecutionException e )
+<a class="jxr_linenumber" name="L358" href="#L358">358</a>         {
+<a class="jxr_linenumber" name="L359" href="#L359">359</a>             getLog().error( <span class="jxr_string">"Can't generate Clirr report: "</span> + e.getMessage(), e );
+<a class="jxr_linenumber" name="L360" href="#L360">360</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L361" href="#L361">361</a>         }
+<a class="jxr_linenumber" name="L362" href="#L362">362</a>     }
+<a class="jxr_linenumber" name="L363" href="#L363">363</a> 
+<a class="jxr_linenumber" name="L364" href="#L364">364</a>     <em class="jxr_comment">// eventually, we must replace this with the o.a.m.d.s.Sink class as a parameter</em>
+<a class="jxr_linenumber" name="L365" href="#L365">365</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> generate( org.codehaus.doxia.sink.Sink sink, Locale locale )
+<a class="jxr_linenumber" name="L366" href="#L366">366</a>         <strong class="jxr_keyword">throws</strong> MavenReportException
+<a class="jxr_linenumber" name="L367" href="#L367">367</a>     {
+<a class="jxr_linenumber" name="L368" href="#L368">368</a>         generate( (Sink) sink, locale );
+<a class="jxr_linenumber" name="L369" href="#L369">369</a> 
+<a class="jxr_linenumber" name="L370" href="#L370">370</a>     }
+<a class="jxr_linenumber" name="L371" href="#L371">371</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2006&#x2013;2015 <a href="http://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2006&#x2013;2016 <a href="http://www.mojohaus.org">MojoHaus</a>. All rights reserved.</div>
 </body>
 </html>

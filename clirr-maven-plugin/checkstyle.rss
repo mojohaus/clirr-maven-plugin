@@ -23,10 +23,10 @@ under the License.
     <link>http://www.mojohaus.org/clirr-maven-plugin/clirr-maven-plugin</link>
     <description>Clirr Maven Plugin - Checkstyle report</description>
     <language>en-us</language>
-    <copyright>&#169;2006 - 2015 MojoHaus</copyright>
+    <copyright>&#169;2006 - 2016 MojoHaus</copyright>
     <item>
       <title>File: 25,
-             Errors: 173,
+             Errors: 177,
              Warnings: 93,
              Infos: 3
       </title>
@@ -237,7 +237,7 @@ under the License.
                   10
                 </td>
                 <td>
-                  88
+                  92
                 </td>
               </tr>
                           <tr>

@@ -42,9 +42,12 @@ import org.codehaus.plexus.util.PathTool;
 import org.codehaus.plexus.util.StringUtils;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
@@ -190,8 +193,10 @@ public class ClirrReport
             generate( sink, locale );
 
             outputDirectory.mkdirs();
+            
+            FileOutputStream stream = new FileOutputStream(new File( outputDirectory, getOutputName() + ".html" ));
 
-            Writer writer = new FileWriter( new File( outputDirectory, getOutputName() + ".html" ) );
+            Writer writer = new OutputStreamWriter( stream, StandardCharsets.UTF_8 );
 
             siteRenderer.generateDocument( writer, sink, siteContext );
 

@@ -3,6 +3,7 @@ jdk:
   - openjdk7
   - openjdk8
   - oraclejdk8
+  - oraclejdk9
 script: "mvn --show-version --errors --batch-mode -Prun-its clean verify"
 cache:
     directories:

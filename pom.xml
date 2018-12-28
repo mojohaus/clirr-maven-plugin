@@ -5,6 +5,7 @@
     <groupId>org.codehaus.mojo</groupId>
     <artifactId>mojo-parent</artifactId>
     <version>50</version>
+    <relativePath />
   </parent>
 
   <prerequisites>

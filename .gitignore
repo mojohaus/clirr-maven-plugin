@@ -1,4 +1,12 @@
+# intellij
 .idea/
 *.iml
+
+# maven
 target/
 .mvn/wrapper/maven-wrapper.jar
+
+# eclipse
+.classpath
+.project
+.settings

@@ -48,6 +48,8 @@ public class ArtifactSpecification
 
     /**
      * Returns the artifacts groupId.
+     *
+     * @return the group id
      */
     public String getGroupId()
     {
@@ -56,6 +58,8 @@ public class ArtifactSpecification
 
     /**
      * Sets the artifacts groupId.
+     *
+     * @param groupId the new group id
      */
     public void setGroupId( String groupId )
     {
@@ -64,6 +68,8 @@ public class ArtifactSpecification
 
     /**
      * Returns the artifacts artifactId.
+     *
+     * @return the artifact id
      */
     public String getArtifactId()
     {
@@ -72,6 +78,8 @@ public class ArtifactSpecification
 
     /**
      * Sets the artifacts artifactId.
+     *
+     * @param artifactId the new artifact id
      */
     public void setArtifactId( String artifactId )
     {
@@ -80,6 +88,8 @@ public class ArtifactSpecification
 
     /**
      * Returns the artifacts version number.
+     *
+     * @return the version
      */
     public String getVersion()
     {
@@ -88,6 +98,8 @@ public class ArtifactSpecification
 
     /**
      * Sets the artifacts version number.
+     *
+     * @param version the new version
      */
     public void setVersion( String version )
     {
@@ -96,6 +108,8 @@ public class ArtifactSpecification
 
     /**
      * Returns the artifacts classifier.
+     *
+     * @return the classifier
      */
     public String getClassifier()
     {
@@ -104,6 +118,8 @@ public class ArtifactSpecification
 
     /**
      * Sets the artifacts classifier.
+     *
+     * @param classifier the new classifier
      */
     public void setClassifier( String classifier )
     {
@@ -112,6 +128,8 @@ public class ArtifactSpecification
 
     /**
      * Returns the artifacts type; defaults to "jar".
+     *
+     * @return the type
      */
     public String getType()
     {
@@ -120,6 +138,8 @@ public class ArtifactSpecification
 
     /**
      * Sets the artifacts type; defaults to "jar".
+     *
+     * @param type the new type
      */
     public void setType( String type )
     {

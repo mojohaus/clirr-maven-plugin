@@ -75,9 +75,9 @@ import java.util.Set;
  * Base parameters for Clirr check and report.
  *
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
- * @todo i18n exceptions, log messages
  * @requiresDependencyResolution compile
  */
+// TODO i18n exceptions, log messages
 public abstract class AbstractClirrMojo
     extends AbstractMojo
 {
@@ -199,7 +199,8 @@ public abstract class AbstractClirrMojo
      * A path to the XML file containing the ignored differences definitions.
      * Values specified int the file will be joined with the ones specified using the "ignored"
      * parameter.
-     * <br/>
+     * <br>
+     * <br>
      * File Format
      * <pre>
      * &lt;differences&gt;

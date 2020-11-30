@@ -72,9 +72,12 @@ public class ClirrClassFilter
         {
             this.excludeAnnotated = null;
         }
-        else
-        {
-            this.excludeAnnotated = excludeAnnotated.clone();
+        else {
+            this.excludeAnnotated = new String[excludeAnnotated.length];
+            for (int i = 0; i < excludeAnnotated.length; i++)
+            {
+                this.excludeAnnotated[i] = "L" + excludeAnnotated[i].replace( '.', '/' ) + ";";
+            }
         }
     }
 
@@ -101,16 +104,20 @@ public class ClirrClassFilter
                 }
             }
 
-            if (excludeAnnotated != null && javaClass.getAnnotationEntries() != null)
+            if (excludeAnnotated != null)
             {
-                for (AnnotationEntry annotationEntry : javaClass.getAnnotationEntries())
+                final AnnotationEntry[] annotationEntries = javaClass.getAnnotationEntries();
+                if (annotationEntries != null)
                 {
-                    final String annotationType = annotationEntry.getAnnotationType();
-                    for ( String annotated: excludeAnnotated )
+                    for (AnnotationEntry annotationEntry : annotationEntries)
                     {
-                        if (annotationType.equals("L" + annotated.replace( '.', '/' ) + ";"))
+                        final String annotationType = annotationEntry.getAnnotationType();
+                        for ( String annotated: excludeAnnotated )
                         {
-                            return false;
+                            if ( annotationType.equals(annotated) )
+                            {
+                                return false;
+                            }
                         }
                     }
                 }

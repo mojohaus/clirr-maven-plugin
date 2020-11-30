@@ -16,9 +16,11 @@ package org.codehaus.mojo.clirr;
  * limitations under the License.
  */
 
-import net.sf.clirr.core.ClassFilter;
+import org.apache.bcel.classfile.AnnotationEntry;
 import org.apache.bcel.classfile.JavaClass;
 import org.codehaus.plexus.util.SelectorUtils;
+
+import net.sf.clirr.core.ClassFilter;
 
 /**
  * Filter classes by pattern sets.
@@ -32,9 +34,16 @@ public class ClirrClassFilter
 
     private final String[] includes;
 
+    private final String[] excludeAnnotated;
+
     private boolean alwaysTrue;
 
     public ClirrClassFilter( String[] includes, String[] excludes )
+    {
+        this( includes, excludes, null );
+    }
+
+    public ClirrClassFilter( String[] includes, String[] excludes, String[] excludeAnnotated )
     {
         if ( excludes == null || excludes.length == 0 )
         {
@@ -57,6 +66,18 @@ public class ClirrClassFilter
         else
         {
             this.includes = (String[]) includes.clone();
+        }
+
+        if ( excludeAnnotated == null || excludeAnnotated.length == 0 )
+        {
+            this.excludeAnnotated = null;
+        }
+        else {
+            this.excludeAnnotated = new String[excludeAnnotated.length];
+            for (int i = 0; i < excludeAnnotated.length; i++)
+            {
+                this.excludeAnnotated[i] = "L" + excludeAnnotated[i].replace( '.', '/' ) + ";";
+            }
         }
     }
 
@@ -82,6 +103,26 @@ public class ClirrClassFilter
                     result = !SelectorUtils.matchPath( excludes[i], path );
                 }
             }
+
+            if (excludeAnnotated != null)
+            {
+                final AnnotationEntry[] annotationEntries = javaClass.getAnnotationEntries();
+                if (annotationEntries != null)
+                {
+                    for (AnnotationEntry annotationEntry : annotationEntries)
+                    {
+                        final String annotationType = annotationEntry.getAnnotationType();
+                        for ( String annotated: excludeAnnotated )
+                        {
+                            if ( annotationType.equals(annotated) )
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+
         }
 
         return result;

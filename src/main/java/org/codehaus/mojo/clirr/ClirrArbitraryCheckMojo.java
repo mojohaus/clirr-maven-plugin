@@ -239,7 +239,7 @@ public class ClirrArbitraryCheckMojo
     {
         ClirrDiffListener listener = new ClirrDiffListener();
 
-        ClassFilter classFilter = new ClirrClassFilter( includes, excludes );
+        ClassFilter classFilter = new ClirrClassFilter( includes, excludes, excludeAnnotated );
 
         JavaType[] origClasses = resolveClasses( oldComparisonArtifacts, classFilter );
 

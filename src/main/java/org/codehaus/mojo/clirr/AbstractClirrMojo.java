@@ -186,6 +186,15 @@ public abstract class AbstractClirrMojo
     protected String[] excludes;
 
     /**
+     * A list of annotations marking special classes and interfaces to be excluded from comparison.
+     * Classes annotated with these annotations are excluded from the list of classes that are included.
+     * Values are specified in class name notation, e.g. <code>java.lang.Deprecated</code>.
+     *
+     * @parameter
+     */
+    protected String[] excludeAnnotated;
+
+    /**
      * A list of differences reported by Clirr that should be ignored when producing the final report.
      * Values specified here will be joined with the ones specified using the "ignoredDifferencesFile"
      * parameter.
@@ -259,7 +268,7 @@ public abstract class AbstractClirrMojo
     {
         ClirrDiffListener listener = new ClirrDiffListener();
 
-        ClassFilter classFilter = new ClirrClassFilter( includes, excludes );
+        ClassFilter classFilter = new ClirrClassFilter( includes, excludes, excludeAnnotated );
 
         JavaType[] origClasses = resolvePreviousReleaseClasses( classFilter );
 

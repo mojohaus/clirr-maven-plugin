@@ -48,8 +48,8 @@
 
   <properties>
     <clirrVersion>0.6</clirrVersion>
-    <doxiaVersion>1.0</doxiaVersion>
-    <doxiaSitetoolsVersion>1.0</doxiaSitetoolsVersion>
+    <doxiaVersion>1.12.0</doxiaVersion>
+    <doxiaSitetoolsVersion>1.11.1</doxiaSitetoolsVersion>
     <mavenVersion>2.0.11</mavenVersion>
     <mojo.java.target>8</mojo.java.target>
     <mojo.java.source>8</mojo.java.source>
@@ -221,6 +221,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-invoker-plugin</artifactId>
+            <version>3.9.0</version>
             <configuration>
               <debug>true</debug>
               <projectsDirectory>src/it</projectsDirectory>

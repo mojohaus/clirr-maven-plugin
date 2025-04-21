@@ -54,7 +54,7 @@
     <mojo.java.target>1.7</mojo.java.target>
     <mojo.java.source>1.7</mojo.java.source>
     <sitePluginVersion>3.7.1</sitePluginVersion>
-    <bcelVersion>6.6.0</bcelVersion>
+    <bcelVersion>6.10.0</bcelVersion>
   </properties>
 
   <developers>

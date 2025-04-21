@@ -23,13 +23,13 @@ import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
-import org.apache.maven.doxia.module.xhtml.decoration.render.RenderingContext;
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.doxia.site.decoration.Body;
 import org.apache.maven.doxia.site.decoration.DecorationModel;
 import org.apache.maven.doxia.site.decoration.Skin;
 import org.apache.maven.doxia.siterenderer.Renderer;
 import org.apache.maven.doxia.siterenderer.RendererException;
+import org.apache.maven.doxia.siterenderer.RenderingContext;
 import org.apache.maven.doxia.siterenderer.SiteRenderingContext;
 import org.apache.maven.doxia.siterenderer.sink.SiteRendererSink;
 import org.apache.maven.model.ReportPlugin;
@@ -43,13 +43,11 @@ import org.codehaus.plexus.util.StringUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -132,7 +130,7 @@ public class ClirrReport
         return false;
     }
 
-    private File getSkinArtifactFile()
+    private Artifact getSkinArtifactFile()
         throws MojoFailureException, MojoExecutionException
     {
         Skin skin = Skin.getDefaultSkin();
@@ -164,7 +162,7 @@ public class ClirrReport
             throw new MojoFailureException( "The skin does not exist: " + e.getMessage() );
         }
 
-        return artifact.getFile();
+        return artifact;
     }
 
     @Override
@@ -181,7 +179,7 @@ public class ClirrReport
         {
             DecorationModel model = new DecorationModel();
             model.setBody( new Body() );
-            Map attributes = new HashMap();
+            Map<String, String> attributes = new HashMap<>();
             attributes.put( "outputEncoding", "UTF-8" );
             Locale locale = Locale.getDefault();
             SiteRenderingContext siteContext = siteRenderer.createContextForSkin( getSkinArtifactFile(), attributes,
@@ -193,7 +191,7 @@ public class ClirrReport
             generate( sink, locale );
 
             outputDirectory.mkdirs();
-            
+
             FileOutputStream stream = new FileOutputStream(new File( outputDirectory, getOutputName() + ".html" ));
 
             Writer writer = new OutputStreamWriter( stream, StandardCharsets.UTF_8 );
@@ -203,17 +201,7 @@ public class ClirrReport
             siteRenderer.copyResources( siteContext, new File( project.getBasedir(), "src/site/resources" ),
                                         outputDirectory );
         }
-        catch ( RendererException e )
-        {
-            throw new MojoExecutionException(
-                "An error has occurred in " + getName( Locale.ENGLISH ) + " report generation.", e );
-        }
-        catch ( IOException e )
-        {
-            throw new MojoExecutionException(
-                "An error has occurred in " + getName( Locale.ENGLISH ) + " report generation.", e );
-        }
-        catch ( MavenReportException e )
+        catch (RendererException | MavenReportException | IOException e )
         {
             throw new MojoExecutionException(
                 "An error has occurred in " + getName( Locale.ENGLISH ) + " report generation.", e );
@@ -301,14 +289,12 @@ public class ClirrReport
                     else
                     {
                         // Not yet generated - check if the report is on its way
-                        for ( Iterator reports = project.getReportPlugins().iterator(); reports.hasNext(); )
-                        {
-                            ReportPlugin report = (ReportPlugin) reports.next();
+                        for (Object o : project.getReportPlugins()) {
+                            ReportPlugin report = (ReportPlugin) o;
 
                             String artifactId = report.getArtifactId();
-                            if ( "maven-jxr-plugin".equals( artifactId ) || "jxr-maven-plugin".equals( artifactId ) )
-                            {
-                                generator.setXrefLocation( relativePath );
+                            if ("maven-jxr-plugin".equals(artifactId) || "jxr-maven-plugin".equals(artifactId)) {
+                                generator.setXrefLocation(relativePath);
                             }
                         }
                     }

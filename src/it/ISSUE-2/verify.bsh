@@ -1,0 +1,48 @@
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
+
+
+
+boolean isBuildSuccess(String buildLogString) {
+	String buffer = buildLogString;
+	//cropping string to anything from search phrase onwards
+	String cropped = buffer.substring(buildLogString.indexOf("[INFO] Comparing to version:"));
+	//removing search phrase
+	String removedSearchString = cropped.substring(cropped.indexOf("\n") + 1);
+	//removing anything after the relevant log information on errors, warnings and changes
+	String relevantInformation = removedSearchString.substring(0, buildLogString.indexOf("\n"));
+	return hasNoError(relevantInformation);
+}
+
+boolean hasNoError(String relevantInformation) {
+	int index = StringUtils.indexOfAny(relevantInformation, "0123456789");
+	return relevantInformation.charAt(index) == '0';
+}
+
+String readLog(String path) throws IOException {
+	File buildlog = new File(path);
+	return FileUtils.readFileToString(buildlog);
+}
+
+
+
+try {
+	String rootPath =  new File(".").getAbsolutePath();
+	String buildlogPath = rootPath + "/target/it-tests/ISSUE-2/build.log";
+	String buildLogString = readLog(buildlogPath);
+	boolean buildSuccess = isBuildSuccess(buildLogString);
+	
+	if(buildSuccess) {
+		throw new RuntimeException("Build succeeded but should fail.");
+	}
+} catch (IOException e) {
+	e.printStackTrace();
+}
+
+
+
+

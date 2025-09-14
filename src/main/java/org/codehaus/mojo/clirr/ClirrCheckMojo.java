@@ -16,7 +16,6 @@ package org.codehaus.mojo.clirr;
  * limitations under the License.
  */
 
-
 /**
  * Check for compatibility with previous version.
  *
@@ -25,8 +24,6 @@ package org.codehaus.mojo.clirr;
  * @phase verify
  * @execute phase="compile"
  */
-public class ClirrCheckMojo
-    extends AbstractClirrCheckMojo
-{
+public class ClirrCheckMojo extends AbstractClirrCheckMojo {
     // no op
 }

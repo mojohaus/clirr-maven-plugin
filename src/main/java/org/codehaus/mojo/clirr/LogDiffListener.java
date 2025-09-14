@@ -27,37 +27,28 @@ import org.apache.maven.plugin.logging.Log;
  *
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  */
-public class LogDiffListener
-    extends DiffListenerAdapter
-{
+public class LogDiffListener extends DiffListenerAdapter {
     private final Log log;
 
     private final MessageTranslator messageTranslator;
 
-    public LogDiffListener( Log log )
-    {
+    public LogDiffListener(Log log) {
         this.log = log;
 
         this.messageTranslator = new MessageTranslator();
     }
 
-    public void reportDiff( ApiDifference apiDifference )
-    {
-        String message = apiDifference.getMessage().getId() + ": " + apiDifference.getAffectedClass() + ": " +
-            apiDifference.getReport( messageTranslator );
+    public void reportDiff(ApiDifference apiDifference) {
+        String message = apiDifference.getMessage().getId() + ": " + apiDifference.getAffectedClass() + ": "
+                + apiDifference.getReport(messageTranslator);
 
         Severity severity = apiDifference.getMaximumSeverity();
-        if ( severity.equals( Severity.INFO ) )
-        {
-            log.info( message );
-        }
-        else if ( severity.equals( Severity.WARNING ) )
-        {
-            log.warn( message );
-        }
-        else if ( severity.equals( Severity.ERROR ) )
-        {
-            log.error( message );
+        if (severity.equals(Severity.INFO)) {
+            log.info(message);
+        } else if (severity.equals(Severity.WARNING)) {
+            log.warn(message);
+        } else if (severity.equals(Severity.ERROR)) {
+            log.error(message);
         }
     }
 }

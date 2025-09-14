@@ -25,61 +25,44 @@ import org.codehaus.plexus.util.SelectorUtils;
  *
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  */
-public class ClirrClassFilter
-    implements ClassFilter
-{
+public class ClirrClassFilter implements ClassFilter {
     private final String[] excludes;
 
     private final String[] includes;
 
     private boolean alwaysTrue;
 
-    public ClirrClassFilter( String[] includes, String[] excludes )
-    {
-        if ( excludes == null || excludes.length == 0 )
-        {
+    public ClirrClassFilter(String[] includes, String[] excludes) {
+        if (excludes == null || excludes.length == 0) {
             this.excludes = null;
-        }
-        else
-        {
+        } else {
             this.excludes = (String[]) excludes.clone();
         }
 
-        if ( includes == null || includes.length == 0 )
-        {
-            this.includes = new String[]{"**"};
+        if (includes == null || includes.length == 0) {
+            this.includes = new String[] {"**"};
 
-            if ( excludes == null )
-            {
+            if (excludes == null) {
                 alwaysTrue = true;
             }
-        }
-        else
-        {
+        } else {
             this.includes = (String[]) includes.clone();
         }
     }
 
-    public boolean isSelected( JavaClass javaClass )
-    {
+    public boolean isSelected(JavaClass javaClass) {
         boolean result = false;
-        if ( alwaysTrue )
-        {
+        if (alwaysTrue) {
             result = true;
-        }
-        else
-        {
-            String path = javaClass.getClassName().replace( '.', '/' );
-            for ( int i = 0; i < includes.length && !result; i++ )
-            {
-                result = SelectorUtils.matchPath( includes[i], path );
+        } else {
+            String path = javaClass.getClassName().replace('.', '/');
+            for (int i = 0; i < includes.length && !result; i++) {
+                result = SelectorUtils.matchPath(includes[i], path);
             }
 
-            if ( excludes != null )
-            {
-                for ( int i = 0; i < excludes.length && result; i++ )
-                {
-                    result = !SelectorUtils.matchPath( excludes[i], path );
+            if (excludes != null) {
+                for (int i = 0; i < excludes.length && result; i++) {
+                    result = !SelectorUtils.matchPath(excludes[i], path);
                 }
             }
         }

@@ -23,7 +23,6 @@ import java.util.List;
 
 import net.sf.clirr.core.ApiDifference;
 import net.sf.clirr.core.MessageTranslator;
-
 import org.codehaus.plexus.util.SelectorUtils;
 import org.codehaus.plexus.util.xml.pull.MXParser;
 import org.codehaus.plexus.util.xml.pull.XmlPullParser;
@@ -35,83 +34,69 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
  * @author Lukas Krejci
  * @since 2.5
  */
-public class Difference
-{
+public class Difference {
 
-    public static class Result
-    {
+    public static class Result {
         public static final int MATCHED = 0;
 
         public static final int NOT_MATCHED = 1;
 
         public static final int DEFERRED_MATCH = 2;
 
-        public Result( int code, Object differentiator )
-        {
+        public Result(int code, Object differentiator) {
             this.code = code;
             this.differentiator = differentiator;
         }
 
-        public static Result notMatched()
-        {
-            return new Result( NOT_MATCHED, null );
+        public static Result notMatched() {
+            return new Result(NOT_MATCHED, null);
         }
 
-        public static Result matched()
-        {
-            return new Result( MATCHED, null );
+        public static Result matched() {
+            return new Result(MATCHED, null);
         }
 
-        public static Result deferred( Object differentiator )
-        {
-            return new Result( DEFERRED_MATCH, differentiator );
+        public static Result deferred(Object differentiator) {
+            return new Result(DEFERRED_MATCH, differentiator);
         }
 
         private int code;
 
         private Object differentiator;
 
-        public int getCode()
-        {
+        public int getCode() {
             return code;
         }
 
-        public Object getDifferentiator()
-        {
+        public Object getDifferentiator() {
             return differentiator;
         }
     }
 
     private static final MessageTranslator ARGS_EXTRACTOR = new MessageTranslator();
-    static
-    {
-        ARGS_EXTRACTOR.setResourceName( Difference.class.getName() );
+
+    static {
+        ARGS_EXTRACTOR.setResourceName(Difference.class.getName());
     }
 
-    public static Difference[] parseXml( Reader xml )
-        throws XmlPullParserException, IOException
-    {
+    public static Difference[] parseXml(Reader xml) throws XmlPullParserException, IOException {
         XmlPullParser parser = new MXParser();
-        parser.setInput( xml );
+        parser.setInput(xml);
 
         List<Difference> diffs = new ArrayList<Difference>();
 
         int state = 0;
         int event;
         Difference current = null;
-        while ( ( event = parser.next() ) != XmlPullParser.END_DOCUMENT )
-        {
-            switch ( event )
-            {
+        while ((event = parser.next()) != XmlPullParser.END_DOCUMENT) {
+            switch (event) {
                 case XmlPullParser.START_TAG:
-                    switch ( state )
-                    {
+                    switch (state) {
                         case 0: // start document
                             state = 1;
                             break;
                         case 1: // expect next difference
-                            if ( "difference".equals( parser.getName() ) )
-                            {
+                            if ("difference".equals(parser.getName())) {
                                 current = new Difference();
                                 state = 2;
                             }
@@ -119,45 +104,30 @@ public class Difference
                         case 2: // reading difference
                             String name = parser.getName();
                             String value = parser.nextText().trim();
-                            if ( "className".equals( name ) )
-                            {
+                            if ("className".equals(name)) {
                                 current.className = value;
-                            }
-                            else if ( "differenceType".equals( name ) )
-                            {
-                                current.differenceType = Integer.parseInt( value );
-                            }
-                            else if ( "field".equals( name ) )
-                            {
+                            } else if ("differenceType".equals(name)) {
+                                current.differenceType = Integer.parseInt(value);
+                            } else if ("field".equals(name)) {
                                 current.field = value;
-                            }
-                            else if ( "method".equals( name ) )
-                            {
+                            } else if ("method".equals(name)) {
                                 current.method = value;
-                            }
-                            else if ( "from".equals( name ) )
-                            {
+                            } else if ("from".equals(name)) {
                                 current.from = value;
-                            }
-                            else if ( "to".equals( name ) )
-                            {
+                            } else if ("to".equals(name)) {
                                 current.to = value;
-                            }
-                            else if ( "justification".equals( name ) )
-                            {
+                            } else if ("justification".equals(name)) {
                                 current.justification = value;
                             }
                             break;
                     }
                     break;
                 case XmlPullParser.END_TAG:
-                    switch ( state )
-                    {
+                    switch (state) {
                         case 1:
                         case 2:
-                            if ( "difference".equals( parser.getName() ) )
-                            {
-                                diffs.add( current );
+                            if ("difference".equals(parser.getName())) {
+                                diffs.add(current);
                                 state = 1;
                             }
                             break;
@@ -165,7 +135,7 @@ public class Difference
             }
         }
 
-        return diffs.toArray( new Difference[diffs.size()] );
+        return diffs.toArray(new Difference[diffs.size()]);
     }
 
     /**
@@ -276,91 +246,73 @@ public class Difference
      */
     private String justification;
 
-    public int getDifferenceType()
-    {
+    public int getDifferenceType() {
         return differenceType;
     }
 
-    public void setDifferenceType( int differenceType )
-    {
+    public void setDifferenceType(int differenceType) {
         this.differenceType = differenceType;
     }
 
-    public String getClassName()
-    {
+    public String getClassName() {
         return className;
     }
 
-    public void setClassName( String className )
-    {
+    public void setClassName(String className) {
         this.className = className;
     }
 
-    public String getField()
-    {
+    public String getField() {
         return field;
     }
 
-    public void setField( String field )
-    {
+    public void setField(String field) {
         this.field = field;
     }
 
-    public String getMethod()
-    {
+    public String getMethod() {
         return method;
     }
 
-    public void setMethod( String method )
-    {
+    public void setMethod(String method) {
         this.method = method;
     }
 
-    public String getFrom()
-    {
+    public String getFrom() {
         return from;
     }
 
-    public void setFrom( String from )
-    {
+    public void setFrom(String from) {
         this.from = from;
     }
 
-    public String getTo()
-    {
+    public String getTo() {
         return to;
     }
 
-    public void setTo( String to )
-    {
+    public void setTo(String to) {
         this.to = to;
     }
 
-    public String getJustification()
-    {
+    public String getJustification() {
         return justification;
     }
 
-    public void setJustification( String justification )
-    {
+    public void setJustification(String justification) {
         this.justification = justification;
     }
 
-    public Result matches( ApiDifference apiDiff )
-    {
-        if ( apiDiff.getMessage().getId() != differenceType )
-        {
+    public Result matches(ApiDifference apiDiff) {
+        if (apiDiff.getMessage().getId() != differenceType) {
             return Result.notMatched();
         }
 
-        String affectedClassPath = apiDiff.getAffectedClass().replace( '.', '/' );
-        if ( !SelectorUtils.matchPath( className, affectedClassPath, "/", true ) )
-        {
+        String affectedClassPath = apiDiff.getAffectedClass().replace('.', '/');
+        if (!SelectorUtils.matchPath(className, affectedClassPath, "/", true)) {
             return Result.notMatched();
         }
 
-        switch ( differenceType )
-        {
+        switch (differenceType) {
             case 1000:
                 return Result.matched();
             case 1001:
@@ -382,485 +334,436 @@ public class Difference
             case 3005:
                 return Result.matched();
             case 4000:
-                return matches4000( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches4000(apiDiff) ? Result.matched() : Result.notMatched();
             case 4001:
-                return matches4001( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches4001(apiDiff) ? Result.matched() : Result.notMatched();
             case 5000:
-                return matches5000( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches5000(apiDiff) ? Result.matched() : Result.notMatched();
             case 5001:
-                return matches5001( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches5001(apiDiff) ? Result.matched() : Result.notMatched();
             case 6000: // added field
-                return matches6000( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches6000(apiDiff) ? Result.matched() : Result.notMatched();
             case 6001: // removed field
-                return matches6001( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches6001(apiDiff) ? Result.matched() : Result.notMatched();
             case 6002: // field value no longer a compile-time constant
-                return matches6002( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches6002(apiDiff) ? Result.matched() : Result.notMatched();
             case 6003: // value of the compile-time constant changed on a field
-                return matches6003( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches6003(apiDiff) ? Result.matched() : Result.notMatched();
             case 6004: // field type changed
-                return matches6004( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches6004(apiDiff) ? Result.matched() : Result.notMatched();
             case 6005: // field now non-final
-                return matches6005( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches6005(apiDiff) ? Result.matched() : Result.notMatched();
             case 6006: // field now final
-                return matches6006( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches6006(apiDiff) ? Result.matched() : Result.notMatched();
             case 6007: // field now non-static
-                return matches6007( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches6007(apiDiff) ? Result.matched() : Result.notMatched();
             case 6008: // field now static
-                return matches6008( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches6008(apiDiff) ? Result.matched() : Result.notMatched();
             case 6009: // field more accessible
-                return matches6009( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches6009(apiDiff) ? Result.matched() : Result.notMatched();
             case 6010: // field less accessible
-                return matches6010( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches6010(apiDiff) ? Result.matched() : Result.notMatched();
             case 6011: // removed a constant field
-                return matches6011( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches6011(apiDiff) ? Result.matched() : Result.notMatched();
             case 7000: // method now in superclass
-                return matches7000( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches7000(apiDiff) ? Result.matched() : Result.notMatched();
             case 7001: // method now in interface
-                return matches7001( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches7001(apiDiff) ? Result.matched() : Result.notMatched();
             case 7002: // method removed
-                return matches7002( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches7002(apiDiff) ? Result.matched() : Result.notMatched();
             case 7003: // Method Overide Removed
-                return matches7003( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches7003(apiDiff) ? Result.matched() : Result.notMatched();
             case 7004: // Method Argument Count Changed
-                return matches7004( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches7004(apiDiff) ? Result.matched() : Result.notMatched();
             case 7005: // Method Argument Type changed
-                return Result.deferred( getDifferentiatorFor7005( apiDiff ) );
+                return Result.deferred(getDifferentiatorFor7005(apiDiff));
             case 7006: // Method Return Type changed
-                return matches7006( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches7006(apiDiff) ? Result.matched() : Result.notMatched();
             case 7007: // Method has been Deprecated
-                return matches7007( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches7007(apiDiff) ? Result.matched() : Result.notMatched();
             case 7008: // Method has been Undeprecated
-                return matches7008( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches7008(apiDiff) ? Result.matched() : Result.notMatched();
             case 7009: // Method is now Less Accessible
-                return matches7009( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches7009(apiDiff) ? Result.matched() : Result.notMatched();
             case 7010: // Method is now More Accessible
-                return matches7010( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches7010(apiDiff) ? Result.matched() : Result.notMatched();
             case 7011: // Method Added
-                return matches7011( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches7011(apiDiff) ? Result.matched() : Result.notMatched();
             case 7012: // Method Added to Interface
-                return matches7012( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches7012(apiDiff) ? Result.matched() : Result.notMatched();
             case 7013: // Abstract Method Added to Class
-                return matches7013( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches7013(apiDiff) ? Result.matched() : Result.notMatched();
             case 7014: // Method now final
-                return matches7014( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches7014(apiDiff) ? Result.matched() : Result.notMatched();
             case 7015: // Method now non-final
-                return matches7015( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches7015(apiDiff) ? Result.matched() : Result.notMatched();
             case 8000: // Class added
                 return Result.matched();
             case 8001: // Class removed
                 return Result.matched();
             case 10000:
-                return matches10000( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches10000(apiDiff) ? Result.matched() : Result.notMatched();
             case 10001:
-                return matches10001( apiDiff ) ? Result.matched() : Result.notMatched();
+                return matches10001(apiDiff) ? Result.matched() : Result.notMatched();
             default:
                 return Result.notMatched();
         }
     }
 
-    public boolean resolveDefferedMatches( List<ApiDifference> defferedApiDifferences )
-    {
-        if ( differenceType == 7005 )
-        {
-            return matches7005( defferedApiDifferences );
-        }
-        else
-        {
+    public boolean resolveDefferedMatches(List<ApiDifference> defferedApiDifferences) {
+        if (differenceType == 7005) {
+            return matches7005(defferedApiDifferences);
+        } else {
             return false;
         }
     }
 
     @Override
-    public String toString()
-    {
-        return "Difference[differenceType=" + differenceType + ", className=" + className + ", field=" + field + ", method=" + method + ", from=" + from + ", to=" + to + "]";
+    public String toString() {
+        return "Difference[differenceType=" + differenceType + ", className=" + className + ", field=" + field
+                + ", method=" + method + ", from=" + from + ", to=" + to + "]";
     }
 
     /**
      * Added interface to the set of implemented interfaces
      */
-    private boolean matches4000( ApiDifference apiDiff )
-    {
-        throwIfMissing( false, false, false, true );
+    private boolean matches4000(ApiDifference apiDiff) {
+        throwIfMissing(false, false, false, true);
 
-        String newIface = getArgs( apiDiff )[0];
-        newIface = newIface.replace( '.', '/' );
+        String newIface = getArgs(apiDiff)[0];
+        newIface = newIface.replace('.', '/');
 
-        return SelectorUtils.matchPath( to, newIface, "/", true );
+        return SelectorUtils.matchPath(to, newIface, "/", true);
     }
 
     /**
      * Removed interface from the set of implemented interfaces
      */
-    private boolean matches4001( ApiDifference apiDiff )
-    {
-        throwIfMissing( false, false, false, true );
+    private boolean matches4001(ApiDifference apiDiff) {
+        throwIfMissing(false, false, false, true);
 
-        String removedIface = getArgs( apiDiff )[0];
-        removedIface = removedIface.replace( '.', '/' );
+        String removedIface = getArgs(apiDiff)[0];
+        removedIface = removedIface.replace('.', '/');
 
-        return SelectorUtils.matchPath( to, removedIface, "/", true );
+        return SelectorUtils.matchPath(to, removedIface, "/", true);
     }
 
     /**
      * Added class to the set of superclasses
      */
-    private boolean matches5000( ApiDifference apiDiff )
-    {
-        throwIfMissing( false, false, false, true );
+    private boolean matches5000(ApiDifference apiDiff) {
+        throwIfMissing(false, false, false, true);
 
-        String newSuperclass = getArgs( apiDiff )[0];
-        newSuperclass = newSuperclass.replace( '.', '/' );
+        String newSuperclass = getArgs(apiDiff)[0];
+        newSuperclass = newSuperclass.replace('.', '/');
 
-        return SelectorUtils.matchPath( to, newSuperclass, "/", true );
+        return SelectorUtils.matchPath(to, newSuperclass, "/", true);
     }
 
     /**
      * Removed class from the set of superclasses
      */
-    private boolean matches5001( ApiDifference apiDiff )
-    {
-        throwIfMissing( false, false, false, true );
+    private boolean matches5001(ApiDifference apiDiff) {
+        throwIfMissing(false, false, false, true);
 
-        String removedSuperclass = getArgs( apiDiff )[0];
-        removedSuperclass = removedSuperclass.replace( '.', '/' );
+        String removedSuperclass = getArgs(apiDiff)[0];
+        removedSuperclass = removedSuperclass.replace('.', '/');
 
-        return SelectorUtils.matchPath( to, removedSuperclass, "/", true );
+        return SelectorUtils.matchPath(to, removedSuperclass, "/", true);
     }
 
     /**
      * added field
      */
-    private boolean matches6000( ApiDifference apiDiff )
-    {
-        throwIfMissing( true, false, false, false );
-        return SelectorUtils.matchPath( field, apiDiff.getAffectedField() );
+    private boolean matches6000(ApiDifference apiDiff) {
+        throwIfMissing(true, false, false, false);
+        return SelectorUtils.matchPath(field, apiDiff.getAffectedField());
     }
 
     /**
      * removed field
      */
-    private boolean matches6001( ApiDifference apiDiff )
-    {
-        throwIfMissing( true, false, false, false );
-        return SelectorUtils.matchPath( field, apiDiff.getAffectedField() );
+    private boolean matches6001(ApiDifference apiDiff) {
+        throwIfMissing(true, false, false, false);
+        return SelectorUtils.matchPath(field, apiDiff.getAffectedField());
     }
 
     /**
      * field value no longer a compile-time constant
      */
-    private boolean matches6002( ApiDifference apiDiff )
-    {
-        throwIfMissing( true, false, false, false );
-        return SelectorUtils.matchPath( field, apiDiff.getAffectedField() );
+    private boolean matches6002(ApiDifference apiDiff) {
+        throwIfMissing(true, false, false, false);
+        return SelectorUtils.matchPath(field, apiDiff.getAffectedField());
     }
 
     /**
      * value of the compile-time constant changed on a field
      */
-    private boolean matches6003( ApiDifference apiDiff )
-    {
-        throwIfMissing( true, false, false, false );
-        return SelectorUtils.matchPath( field, apiDiff.getAffectedField() );
+    private boolean matches6003(ApiDifference apiDiff) {
+        throwIfMissing(true, false, false, false);
+        return SelectorUtils.matchPath(field, apiDiff.getAffectedField());
     }
 
     /**
      * field type changed
      */
-    private boolean matches6004( ApiDifference apiDiff )
-    {
-        throwIfMissing( true, false, true, true );
+    private boolean matches6004(ApiDifference apiDiff) {
+        throwIfMissing(true, false, true, true);
 
-        if ( !SelectorUtils.matchPath( field, apiDiff.getAffectedField() ) )
-        {
+        if (!SelectorUtils.matchPath(field, apiDiff.getAffectedField())) {
             return false;
         }
 
-        String[] args = getArgs( apiDiff );
+        String[] args = getArgs(apiDiff);
         String diffFrom = args[0];
         String diffTo = args[1];
 
-        return SelectorUtils.matchPath( from, diffFrom ) && SelectorUtils.matchPath( to, diffTo );
+        return SelectorUtils.matchPath(from, diffFrom) && SelectorUtils.matchPath(to, diffTo);
     }
 
     /**
      * field now non-final
      */
-    private boolean matches6005( ApiDifference apiDiff )
-    {
-        throwIfMissing( true, false, false, false );
-        return SelectorUtils.matchPath( field, apiDiff.getAffectedField() );
+    private boolean matches6005(ApiDifference apiDiff) {
+        throwIfMissing(true, false, false, false);
+        return SelectorUtils.matchPath(field, apiDiff.getAffectedField());
     }
 
     /**
      * field now final
      */
-    private boolean matches6006( ApiDifference apiDiff )
-    {
-        throwIfMissing( true, false, false, false );
-        return SelectorUtils.matchPath( field, apiDiff.getAffectedField() );
+    private boolean matches6006(ApiDifference apiDiff) {
+        throwIfMissing(true, false, false, false);
+        return SelectorUtils.matchPath(field, apiDiff.getAffectedField());
     }
 
     /**
      * field now non-static
      */
-    private boolean matches6007( ApiDifference apiDiff )
-    {
-        throwIfMissing( true, false, false, false );
-        return SelectorUtils.matchPath( field, apiDiff.getAffectedField() );
+    private boolean matches6007(ApiDifference apiDiff) {
+        throwIfMissing(true, false, false, false);
+        return SelectorUtils.matchPath(field, apiDiff.getAffectedField());
     }
 
     /**
      * field now static
      */
-    private boolean matches6008( ApiDifference apiDiff )
-    {
-        throwIfMissing( true, false, false, false );
-        return SelectorUtils.matchPath( field, apiDiff.getAffectedField() );
+    private boolean matches6008(ApiDifference apiDiff) {
+        throwIfMissing(true, false, false, false);
+        return SelectorUtils.matchPath(field, apiDiff.getAffectedField());
     }
 
     /**
      * field more accessible
      */
-    private boolean matches6009( ApiDifference apiDiff )
-    {
-        throwIfMissing( true, false, false, false );
-        return SelectorUtils.matchPath( field, apiDiff.getAffectedField() );
+    private boolean matches6009(ApiDifference apiDiff) {
+        throwIfMissing(true, false, false, false);
+        return SelectorUtils.matchPath(field, apiDiff.getAffectedField());
     }
 
     /**
      * field less accessible
      */
-    private boolean matches6010( ApiDifference apiDiff )
-    {
-        throwIfMissing( true, false, false, false );
-        return SelectorUtils.matchPath( field, apiDiff.getAffectedField() );
+    private boolean matches6010(ApiDifference apiDiff) {
+        throwIfMissing(true, false, false, false);
+        return SelectorUtils.matchPath(field, apiDiff.getAffectedField());
     }
 
     /**
      * removed a constant field
      */
-    private boolean matches6011( ApiDifference apiDiff )
-    {
-        throwIfMissing( true, false, false, false );
-        return SelectorUtils.matchPath( field, apiDiff.getAffectedField() );
+    private boolean matches6011(ApiDifference apiDiff) {
+        throwIfMissing(true, false, false, false);
+        return SelectorUtils.matchPath(field, apiDiff.getAffectedField());
     }
 
     /**
      * method now in superclass
      */
-    private boolean matches7000( ApiDifference apiDiff )
-    {
-        throwIfMissing( false, true, false, false );
-        return SelectorUtils.matchPath( method, removeVisibilityFromMethodSignature( apiDiff ) );
+    private boolean matches7000(ApiDifference apiDiff) {
+        throwIfMissing(false, true, false, false);
+        return SelectorUtils.matchPath(method, removeVisibilityFromMethodSignature(apiDiff));
     }
 
     /**
      * method now in interface
      */
-    private boolean matches7001( ApiDifference apiDiff )
-    {
-        throwIfMissing( false, true, false, false );
-        return SelectorUtils.matchPath( method, removeVisibilityFromMethodSignature( apiDiff ) );
+    private boolean matches7001(ApiDifference apiDiff) {
+        throwIfMissing(false, true, false, false);
+        return SelectorUtils.matchPath(method, removeVisibilityFromMethodSignature(apiDiff));
     }
 
     /**
      * method removed
      */
-    private boolean matches7002( ApiDifference apiDiff )
-    {
-        throwIfMissing( false, true, false, false );
-        return SelectorUtils.matchPath( method, removeVisibilityFromMethodSignature( apiDiff ) );
+    private boolean matches7002(ApiDifference apiDiff) {
+        throwIfMissing(false, true, false, false);
+        return SelectorUtils.matchPath(method, removeVisibilityFromMethodSignature(apiDiff));
     }
 
     /**
      * Method Overide Removed
      */
-    private boolean matches7003( ApiDifference apiDiff )
-    {
-        throwIfMissing( false, true, false, false );
-        return SelectorUtils.matchPath( method, removeVisibilityFromMethodSignature( apiDiff ) );
+    private boolean matches7003(ApiDifference apiDiff) {
+        throwIfMissing(false, true, false, false);
+        return SelectorUtils.matchPath(method, removeVisibilityFromMethodSignature(apiDiff));
     }
 
     /**
      * Method Argument Count Changed
      */
-    private boolean matches7004( ApiDifference apiDiff )
-    {
-        throwIfMissing( false, true, false, false );
-        return SelectorUtils.matchPath( method, removeVisibilityFromMethodSignature( apiDiff ) );
+    private boolean matches7004(ApiDifference apiDiff) {
+        throwIfMissing(false, true, false, false);
+        return SelectorUtils.matchPath(method, removeVisibilityFromMethodSignature(apiDiff));
     }
 
-    private Object getDifferentiatorFor7005( ApiDifference apiDiff )
-    {
+    private Object getDifferentiatorFor7005(ApiDifference apiDiff) {
         return apiDiff.getAffectedClass() + apiDiff.getAffectedMethod();
     }
 
     /**
      * Method Argument Type changed
      */
-    private boolean matches7005( List<ApiDifference> apiDiffs )
-    {
-        throwIfMissing( false, true, false, true );
+    private boolean matches7005(List<ApiDifference> apiDiffs) {
+        throwIfMissing(false, true, false, true);
 
-        ApiDifference firstDiff = apiDiffs.get( 0 );
-        String methodSig = removeVisibilityFromMethodSignature( firstDiff );
-        if ( !SelectorUtils.matchPath( method, methodSig ) )
-        {
+        ApiDifference firstDiff = apiDiffs.get(0);
+        String methodSig = removeVisibilityFromMethodSignature(firstDiff);
+        if (!SelectorUtils.matchPath(method, methodSig)) {
             return false;
         }
 
-        String newMethodSig = getNewMethodSignature( methodSig, apiDiffs );
-        return SelectorUtils.matchPath( to, newMethodSig );
+        String newMethodSig = getNewMethodSignature(methodSig, apiDiffs);
+        return SelectorUtils.matchPath(to, newMethodSig);
     }
 
-    public static String getNewMethodSignature( String methodSig, List<ApiDifference> apiDiffs )
-    {
-      String newMethodSig = methodSig;
-      for ( ApiDifference apiDiff : apiDiffs )
-      {
-          String[] args = getArgs( apiDiff );
+    public static String getNewMethodSignature(String methodSig, List<ApiDifference> apiDiffs) {
+        String newMethodSig = methodSig;
+        for (ApiDifference apiDiff : apiDiffs) {
+            String[] args = getArgs(apiDiff);
 
-          // 1-based
-          int idx = Integer.parseInt( args[0] ) - 1;
-          String diffNewType = args[1];
+            // 1-based
+            int idx = Integer.parseInt(args[0]) - 1;
+            String diffNewType = args[1];
 
-          // construct the new full method signature
-          newMethodSig = replaceNthArgumentType( newMethodSig, idx, diffNewType );
-      }
-      return newMethodSig;
+            // construct the new full method signature
+            newMethodSig = replaceNthArgumentType(newMethodSig, idx, diffNewType);
+        }
+        return newMethodSig;
     }
 
     /**
      * Method Return Type changed
      */
-    private boolean matches7006( ApiDifference apiDiff )
-    {
-        throwIfMissing( false, true, false, true );
+    private boolean matches7006(ApiDifference apiDiff) {
+        throwIfMissing(false, true, false, true);
 
-        String methodSig = removeVisibilityFromMethodSignature( apiDiff );
-        if ( !SelectorUtils.matchPath( method, methodSig ) )
-        {
+        String methodSig = removeVisibilityFromMethodSignature(apiDiff);
+        if (!SelectorUtils.matchPath(method, methodSig)) {
             return false;
         }
 
-        String newRetType = getArgs( apiDiff )[0];
+        String newRetType = getArgs(apiDiff)[0];
 
-        return SelectorUtils.matchPath( to, newRetType );
+        return SelectorUtils.matchPath(to, newRetType);
     }
 
     /**
      * Method has been Deprecated
      */
-    private boolean matches7007( ApiDifference apiDiff )
-    {
-        throwIfMissing( false, true, false, false );
-        return SelectorUtils.matchPath( method, removeVisibilityFromMethodSignature( apiDiff ) );
+    private boolean matches7007(ApiDifference apiDiff) {
+        throwIfMissing(false, true, false, false);
+        return SelectorUtils.matchPath(method, removeVisibilityFromMethodSignature(apiDiff));
     }
 
     /**
      * Method has been Undeprecated
      */
-    private boolean matches7008( ApiDifference apiDiff )
-    {
-        throwIfMissing( false, true, false, false );
-        return SelectorUtils.matchPath( method, removeVisibilityFromMethodSignature( apiDiff ) );
+    private boolean matches7008(ApiDifference apiDiff) {
+        throwIfMissing(false, true, false, false);
+        return SelectorUtils.matchPath(method, removeVisibilityFromMethodSignature(apiDiff));
     }
 
     /**
      * Method is now Less Accessible
      */
-    private boolean matches7009( ApiDifference apiDiff )
-    {
-        throwIfMissing( false, true, false, false );
-        return SelectorUtils.matchPath( method, removeVisibilityFromMethodSignature( apiDiff ) );
+    private boolean matches7009(ApiDifference apiDiff) {
+        throwIfMissing(false, true, false, false);
+        return SelectorUtils.matchPath(method, removeVisibilityFromMethodSignature(apiDiff));
     }
 
     /**
      * Method is now More Accessible
      */
-    private boolean matches7010( ApiDifference apiDiff )
-    {
-        throwIfMissing( false, true, false, false );
-        return SelectorUtils.matchPath( method, removeVisibilityFromMethodSignature( apiDiff ) );
+    private boolean matches7010(ApiDifference apiDiff) {
+        throwIfMissing(false, true, false, false);
+        return SelectorUtils.matchPath(method, removeVisibilityFromMethodSignature(apiDiff));
     }
 
     /**
      * Method Added
      */
-    private boolean matches7011( ApiDifference apiDiff )
-    {
-        throwIfMissing( false, true, false, false );
-        return SelectorUtils.matchPath( method, removeVisibilityFromMethodSignature( apiDiff ) );
+    private boolean matches7011(ApiDifference apiDiff) {
+        throwIfMissing(false, true, false, false);
+        return SelectorUtils.matchPath(method, removeVisibilityFromMethodSignature(apiDiff));
     }
 
     /**
      * Method Added to Interface
      */
-    private boolean matches7012( ApiDifference apiDiff )
-    {
-        throwIfMissing( false, true, false, false );
-        return SelectorUtils.matchPath( method, removeVisibilityFromMethodSignature( apiDiff ) );
+    private boolean matches7012(ApiDifference apiDiff) {
+        throwIfMissing(false, true, false, false);
+        return SelectorUtils.matchPath(method, removeVisibilityFromMethodSignature(apiDiff));
     }
 
     /**
      * Abstract Method Added to Class
      */
-    private boolean matches7013( ApiDifference apiDiff )
-    {
-        throwIfMissing( false, true, false, false );
-        return SelectorUtils.matchPath( method, removeVisibilityFromMethodSignature( apiDiff ) );
+    private boolean matches7013(ApiDifference apiDiff) {
+        throwIfMissing(false, true, false, false);
+        return SelectorUtils.matchPath(method, removeVisibilityFromMethodSignature(apiDiff));
     }
 
     /**
      * Method now final
      */
-    private boolean matches7014( ApiDifference apiDiff )
-    {
-        throwIfMissing( false, true, false, false );
-        return SelectorUtils.matchPath( method, removeVisibilityFromMethodSignature( apiDiff ) );
+    private boolean matches7014(ApiDifference apiDiff) {
+        throwIfMissing(false, true, false, false);
+        return SelectorUtils.matchPath(method, removeVisibilityFromMethodSignature(apiDiff));
     }
 
     /**
      * Method now non-final
      */
-    private boolean matches7015( ApiDifference apiDiff )
-    {
-        throwIfMissing( false, true, false, false );
-        return SelectorUtils.matchPath( method, removeVisibilityFromMethodSignature( apiDiff ) );
+    private boolean matches7015(ApiDifference apiDiff) {
+        throwIfMissing(false, true, false, false);
+        return SelectorUtils.matchPath(method, removeVisibilityFromMethodSignature(apiDiff));
     }
 
     /**
      * Class format version increased
      */
-    private boolean matches10000( ApiDifference apiDiff )
-    {
-        throwIfMissing( false, false, true, true );
+    private boolean matches10000(ApiDifference apiDiff) {
+        throwIfMissing(false, false, true, true);
 
         int fromVersion = 0;
         int toVersion = 0;
-        try
-        {
-            fromVersion = Integer.parseInt( from );
-        }
-        catch ( NumberFormatException e )
-        {
-            throw new IllegalArgumentException( "Failed to parse the \"from\" parameter as a number for " + this );
+        try {
+            fromVersion = Integer.parseInt(from);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Failed to parse the \"from\" parameter as a number for " + this);
         }
 
-        try
-        {
-            toVersion = Integer.parseInt( to );
-        }
-        catch ( NumberFormatException e )
-        {
-            throw new IllegalArgumentException( "Failed to parse the \"to\" parameter as a number for " + this );
+        try {
+            toVersion = Integer.parseInt(to);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Failed to parse the \"to\" parameter as a number for " + this);
         }
 
-        String[] args = getArgs( apiDiff );
+        String[] args = getArgs(apiDiff);
 
-        int reportedOld = Integer.parseInt( args[0] );
-        int reportedNew = Integer.parseInt( args[1] );
+        int reportedOld = Integer.parseInt(args[0]);
+        int reportedNew = Integer.parseInt(args[1]);
 
         return fromVersion == reportedOld && toVersion == reportedNew;
     }
@@ -868,146 +771,120 @@ public class Difference
     /**
      * Class format version decreased
      */
-    private boolean matches10001( ApiDifference apiDiff )
-    {
-        throwIfMissing( false, false, true, true );
+    private boolean matches10001(ApiDifference apiDiff) {
+        throwIfMissing(false, false, true, true);
 
         int fromVersion = 0;
         int toVersion = 0;
-        try
-        {
-            fromVersion = Integer.parseInt( from );
-        }
-        catch ( NumberFormatException e )
-        {
-            throw new IllegalArgumentException( "Failed to parse the \"from\" parameter as a number for " + this );
+        try {
+            fromVersion = Integer.parseInt(from);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Failed to parse the \"from\" parameter as a number for " + this);
         }
 
-        try
-        {
-            toVersion = Integer.parseInt( to );
-        }
-        catch ( NumberFormatException e )
-        {
-            throw new IllegalArgumentException( "Failed to parse the \"to\" parameter as a number for " + this );
+        try {
+            toVersion = Integer.parseInt(to);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Failed to parse the \"to\" parameter as a number for " + this);
         }
 
-        String[] args = getArgs( apiDiff );
+        String[] args = getArgs(apiDiff);
 
-        int reportedOld = Integer.parseInt( args[0] );
-        int reportedNew = Integer.parseInt( args[1] );
+        int reportedOld = Integer.parseInt(args[0]);
+        int reportedNew = Integer.parseInt(args[1]);
 
         return fromVersion == reportedOld && toVersion == reportedNew;
     }
 
-    private static String[] getArgs( ApiDifference apiDiff )
-    {
-        String args = apiDiff.getReport( ARGS_EXTRACTOR );
-        return args.split( "&" );
+    private static String[] getArgs(ApiDifference apiDiff) {
+        String args = apiDiff.getReport(ARGS_EXTRACTOR);
+        return args.split("&");
     }
 
-    private void throwIfMissing( boolean field, boolean method, boolean from, boolean to )
-    {
-        boolean doThrow =
-            ( field && this.field == null ) || ( method && this.method == null ) || ( from && this.from == null )
-                || ( to && this.to == null );
+    private void throwIfMissing(boolean field, boolean method, boolean from, boolean to) {
+        boolean doThrow = (field && this.field == null)
+                || (method && this.method == null)
+                || (from && this.from == null)
+                || (to && this.to == null);
 
-        if ( doThrow )
-        {
-            StringBuilder message = new StringBuilder( "The following parameters are missing: " );
-            if ( field && this.field == null )
-            {
-                message.append( "field, " );
+        if (doThrow) {
+            StringBuilder message = new StringBuilder("The following parameters are missing: ");
+            if (field && this.field == null) {
+                message.append("field, ");
             }
 
-            if ( method && this.method == null )
-            {
-                message.append( "method, " );
+            if (method && this.method == null) {
+                message.append("method, ");
             }
 
-            if ( from && this.from == null )
-            {
-                message.append( "from, " );
+            if (from && this.from == null) {
+                message.append("from, ");
             }
 
-            if ( to && this.to == null )
-            {
-                message.append( "to, " );
+            if (to && this.to == null) {
+                message.append("to, ");
             }
 
-            message.replace( message.length() - 2, message.length(), "" );
+            message.replace(message.length() - 2, message.length(), "");
 
-            message.append( " on " ).append( this );
+            message.append(" on ").append(this);
 
-            throw new IllegalArgumentException( message.toString() );
+            throw new IllegalArgumentException(message.toString());
         }
     }
 
-    private static String replaceNthArgumentType( String signature, int idx, String newType )
-    {
-        int openParIdx = signature.indexOf( '(' );
-        int closeParIdx = signature.indexOf( ')' );
+    private static String replaceNthArgumentType(String signature, int idx, String newType) {
+        int openParIdx = signature.indexOf('(');
+        int closeParIdx = signature.indexOf(')');
 
-        if ( openParIdx < 0 || closeParIdx < 0 )
-        {
-            throw new IllegalArgumentException( "Invalid method signature found in the API difference report: "
-                + signature );
+        if (openParIdx < 0 || closeParIdx < 0) {
+            throw new IllegalArgumentException(
+                    "Invalid method signature found in the API difference report: " + signature);
         }
 
         StringBuilder bld = new StringBuilder();
-        bld.append( signature, 0, openParIdx ).append( '(' );
+        bld.append(signature, 0, openParIdx).append('(');
 
         int commaIdx = openParIdx + 1;
         int paramIdx = 0;
-        while ( true )
-        {
-            int nextCommaIdx = signature.indexOf( ',', commaIdx );
+        while (true) {
+            int nextCommaIdx = signature.indexOf(',', commaIdx);
 
-            if ( nextCommaIdx < 0 )
-            {
+            if (nextCommaIdx < 0) {
                 break;
             }
 
-            String type = paramIdx == idx ? newType : signature.substring( commaIdx, nextCommaIdx );
+            String type = paramIdx == idx ? newType : signature.substring(commaIdx, nextCommaIdx);
 
-            bld.append( type.trim() );
-            bld.append( ", " );
+            bld.append(type.trim());
+            bld.append(", ");
 
             commaIdx = nextCommaIdx + 1;
             paramIdx++;
-
         }
 
-        if ( paramIdx == idx )
-        {
-            bld.append( newType );
-        }
-        else
-        {
-            bld.append( signature, commaIdx + 1, closeParIdx );
+        if (paramIdx == idx) {
+            bld.append(newType);
+        } else {
+            bld.append(signature, commaIdx + 1, closeParIdx);
         }
 
-        bld.append( ")" );
+        bld.append(")");
 
         return bld.toString();
     }
 
-    private String removeVisibilityFromMethodSignature( ApiDifference apiDiff )
-    {
+    private String removeVisibilityFromMethodSignature(ApiDifference apiDiff) {
         String methodSig = apiDiff.getAffectedMethod();
-        if ( methodSig == null )
-        {
+        if (methodSig == null) {
             return null;
         }
 
-        int spaceIdx = methodSig.indexOf( ' ' );
-        if ( spaceIdx < 0 )
-        {
+        int spaceIdx = methodSig.indexOf(' ');
+        if (spaceIdx < 0) {
             return methodSig;
-        }
-        else
-        {
-            return methodSig.substring( spaceIdx + 1 );
+        } else {
+            return methodSig.substring(spaceIdx + 1);
         }
     }
 }

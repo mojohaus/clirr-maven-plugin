@@ -16,7 +16,6 @@ package org.codehaus.mojo.clirr;
  * limitations under the License.
  */
 
-
 /**
  * Check for compatibility with previous version without forking the project
  *
@@ -25,8 +24,6 @@ package org.codehaus.mojo.clirr;
  * @phase verify
  * @since 2.3
  */
-public class ClirrCheckNoForkMojo
-    extends AbstractClirrCheckMojo
-{
-   // no op
+public class ClirrCheckNoForkMojo extends AbstractClirrCheckMojo {
+    // no op
 }

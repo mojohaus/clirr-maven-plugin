@@ -16,8 +16,18 @@ package org.codehaus.mojo.clirr;
  * limitations under the License.
  */
 
-import net.sf.clirr.core.Severity;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
 
+import net.sf.clirr.core.Severity;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
@@ -41,17 +51,6 @@ import org.codehaus.plexus.i18n.I18N;
 import org.codehaus.plexus.util.PathTool;
 import org.codehaus.plexus.util.StringUtils;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-
 /**
  * Generate a report from the Clirr output.
  *
@@ -59,10 +58,7 @@ import java.util.ResourceBundle;
  * @goal clirr
  * @execute phase="compile"
  */
-public class ClirrReport
-    extends AbstractClirrMojo
-    implements MavenReport
-{
+public class ClirrReport extends AbstractClirrMojo implements MavenReport {
     /**
      * Specifies the directory where the report will be generated.
      *
@@ -110,184 +106,138 @@ public class ClirrReport
      */
     private I18N i18n;
 
-    public String getCategoryName()
-    {
+    public String getCategoryName() {
         return MavenReport.CATEGORY_PROJECT_REPORTS;
     }
 
-    public void setReportOutputDirectory( File file )
-    {
+    public void setReportOutputDirectory(File file) {
         outputDirectory = file;
     }
 
-    public File getReportOutputDirectory()
-    {
+    public File getReportOutputDirectory() {
         return outputDirectory;
     }
 
-    public boolean isExternalReport()
-    {
+    public boolean isExternalReport() {
         return false;
     }
 
-    private Artifact getSkinArtifactFile()
-        throws MojoFailureException, MojoExecutionException
-    {
+    private Artifact getSkinArtifactFile() throws MojoFailureException, MojoExecutionException {
         Skin skin = Skin.getDefaultSkin();
 
         String version = skin.getVersion();
         Artifact artifact;
-        try
-        {
-            if ( version == null )
-            {
+        try {
+            if (version == null) {
                 version = Artifact.RELEASE_VERSION;
             }
-            VersionRange versionSpec = VersionRange.createFromVersionSpec( version );
-            artifact = factory.createDependencyArtifact( skin.getGroupId(), skin.getArtifactId(), versionSpec, "jar",
-                                                         null, null );
+            VersionRange versionSpec = VersionRange.createFromVersionSpec(version);
+            artifact = factory.createDependencyArtifact(
+                    skin.getGroupId(), skin.getArtifactId(), versionSpec, "jar", null, null);
 
-            resolver.resolve( artifact, project.getRemoteArtifactRepositories(), localRepository );
-        }
-        catch ( InvalidVersionSpecificationException e )
-        {
-            throw new MojoFailureException( "The skin version '" + version + "' is not valid: " + e.getMessage() );
-        }
-        catch ( ArtifactResolutionException e )
-        {
-            throw new MojoExecutionException( "Unable to find skin", e );
-        }
-        catch ( ArtifactNotFoundException e )
-        {
-            throw new MojoFailureException( "The skin does not exist: " + e.getMessage() );
+            resolver.resolve(artifact, project.getRemoteArtifactRepositories(), localRepository);
+        } catch (InvalidVersionSpecificationException e) {
+            throw new MojoFailureException("The skin version '" + version + "' is not valid: " + e.getMessage());
+        } catch (ArtifactResolutionException e) {
+            throw new MojoExecutionException("Unable to find skin", e);
+        } catch (ArtifactNotFoundException e) {
+            throw new MojoFailureException("The skin does not exist: " + e.getMessage());
         }
 
         return artifact;
     }
 
     @Override
-    protected void doExecute()
-        throws MojoExecutionException, MojoFailureException
-    {
-        if ( !canGenerateReport() )
-        {
+    protected void doExecute() throws MojoExecutionException, MojoFailureException {
+        if (!canGenerateReport()) {
             return;
         }
 
         // TODO: push to a helper? Could still be improved by taking more of the site information from the site plugin
-        try
-        {
+        try {
             DecorationModel model = new DecorationModel();
-            model.setBody( new Body() );
+            model.setBody(new Body());
             Map<String, String> attributes = new HashMap<>();
-            attributes.put( "outputEncoding", "UTF-8" );
+            attributes.put("outputEncoding", "UTF-8");
             Locale locale = Locale.getDefault();
-            SiteRenderingContext siteContext = siteRenderer.createContextForSkin( getSkinArtifactFile(), attributes,
-                                                                                  model, getName( locale ), locale );
+            SiteRenderingContext siteContext = siteRenderer.createContextForSkin(
+                    getSkinArtifactFile(), attributes, model, getName(locale), locale);
 
-            RenderingContext context = new RenderingContext( outputDirectory, getOutputName() + ".html" );
+            RenderingContext context = new RenderingContext(outputDirectory, getOutputName() + ".html");
 
-            SiteRendererSink sink = new SiteRendererSink( context );
-            generate( sink, locale );
+            SiteRendererSink sink = new SiteRendererSink(context);
+            generate(sink, locale);
 
             outputDirectory.mkdirs();
 
-            FileOutputStream stream = new FileOutputStream(new File( outputDirectory, getOutputName() + ".html" ));
+            FileOutputStream stream = new FileOutputStream(new File(outputDirectory, getOutputName() + ".html"));
 
-            Writer writer = new OutputStreamWriter( stream, StandardCharsets.UTF_8 );
+            Writer writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8);
 
-            siteRenderer.generateDocument( writer, sink, siteContext );
+            siteRenderer.generateDocument(writer, sink, siteContext);
 
-            siteRenderer.copyResources( siteContext, new File( project.getBasedir(), "src/site/resources" ),
-                                        outputDirectory );
-        }
-        catch (RendererException | MavenReportException | IOException e )
-        {
+            siteRenderer.copyResources(
+                    siteContext, new File(project.getBasedir(), "src/site/resources"), outputDirectory);
+        } catch (RendererException | MavenReportException | IOException e) {
             throw new MojoExecutionException(
-                "An error has occurred in " + getName( Locale.ENGLISH ) + " report generation.", e );
+                    "An error has occurred in " + getName(Locale.ENGLISH) + " report generation.", e);
         }
     }
 
-    public void generate( Sink sink, Locale locale )
-        throws MavenReportException
-    {
-        if ( !canGenerateReport() )
-        {
-            getLog().info( "Not generating report as there are no sources to compare" );
-        }
-        else
-        {
-            doReport( sink, locale );
+    public void generate(Sink sink, Locale locale) throws MavenReportException {
+        if (!canGenerateReport()) {
+            getLog().info("Not generating report as there are no sources to compare");
+        } else {
+            doReport(sink, locale);
         }
     }
 
-    private void doReport( Sink sink, Locale locale )
-        throws MavenReportException
-    {
-        Severity minSeverity = convertSeverity( this.minSeverity );
-        ResourceBundle bundle = getBundle( locale );
-        if ( minSeverity == null )
-        {
-            getLog().warn( bundle.getString( "report.clirr.error.invalid.minseverity" ) + ": '" + this
-                .minSeverity + "'." );
+    private void doReport(Sink sink, Locale locale) throws MavenReportException {
+        Severity minSeverity = convertSeverity(this.minSeverity);
+        ResourceBundle bundle = getBundle(locale);
+        if (minSeverity == null) {
+            getLog().warn(bundle.getString("report.clirr.error.invalid.minseverity") + ": '" + this.minSeverity + "'.");
         }
 
-        if ( !htmlReport && xmlOutputFile == null && textOutputFile == null && !logResults )
-        {
-            getLog().error( bundle.getString( "report.clirr.error.noreports" ) );
-        }
-        else
-        {
+        if (!htmlReport && xmlOutputFile == null && textOutputFile == null && !logResults) {
+            getLog().error(bundle.getString("report.clirr.error.noreports"));
+        } else {
             ClirrDiffListener listener;
-            try
-            {
-                listener = executeClirr( minSeverity );
-            }
-            catch ( MissingPreviousException e )
-            {
-                getLog().error( bundle.getString( "report.clirr.error.nopredecessor" ) );
+            try {
+                listener = executeClirr(minSeverity);
+            } catch (MissingPreviousException e) {
+                getLog().error(bundle.getString("report.clirr.error.nopredecessor"));
                 return;
-            }
-            catch ( MojoExecutionException e )
-            {
-                throw new MavenReportException( e.getMessage(), e );
-            }
-            catch ( MojoFailureException e )
-            {
-                throw new MavenReportException( e.getMessage() );
+            } catch (MojoExecutionException e) {
+                throw new MavenReportException(e.getMessage(), e);
+            } catch (MojoFailureException e) {
+                throw new MavenReportException(e.getMessage());
             }
 
-            if ( htmlReport )
-            {
-                ClirrReportGenerator generator = new ClirrReportGenerator( sink, i18n, bundle, locale );
+            if (htmlReport) {
+                ClirrReportGenerator generator = new ClirrReportGenerator(sink, i18n, bundle, locale);
 
-                generator.setEnableSeveritySummary( showSummary );
+                generator.setEnableSeveritySummary(showSummary);
 
-                generator.setMinSeverity( minSeverity );
+                generator.setMinSeverity(minSeverity);
 
-                generator.setCurrentVersion( project.getVersion() );
+                generator.setCurrentVersion(project.getVersion());
 
-                if ( comparisonVersion != null )
-                {
-                    generator.setComparisonVersion( comparisonVersion );
+                if (comparisonVersion != null) {
+                    generator.setComparisonVersion(comparisonVersion);
                 }
 
-                if ( linkXRef )
-                {
+                if (linkXRef) {
                     String relativePath =
-                        PathTool.getRelativePath( outputDirectory.getAbsolutePath(), xrefLocation.getAbsolutePath() );
-                    if ( StringUtils.isEmpty( relativePath ) )
-                    {
+                            PathTool.getRelativePath(outputDirectory.getAbsolutePath(), xrefLocation.getAbsolutePath());
+                    if (StringUtils.isEmpty(relativePath)) {
                         relativePath = ".";
                     }
                     relativePath = relativePath + "/" + xrefLocation.getName();
-                    if ( xrefLocation.exists() )
-                    {
+                    if (xrefLocation.exists()) {
                         // XRef was already generated by manual execution of a lifecycle binding
-                        generator.setXrefLocation( relativePath );
-                    }
-                    else
-                    {
+                        generator.setXrefLocation(relativePath);
+                    } else {
                         // Not yet generated - check if the report is on its way
                         for (Object o : project.getReportPlugins()) {
                             ReportPlugin report = (ReportPlugin) o;
@@ -299,64 +249,49 @@ public class ClirrReport
                         }
                     }
 
-                    if ( generator.getXrefLocation() == null )
-                    {
-                        getLog().warn( "Unable to locate Source XRef to link to - DISABLED" );
+                    if (generator.getXrefLocation() == null) {
+                        getLog().warn("Unable to locate Source XRef to link to - DISABLED");
                     }
                 }
-                generator.generateReport( listener );
+                generator.generateReport(listener);
             }
         }
     }
 
-    public String getDescription( Locale locale )
-    {
-        return getBundle( locale ).getString( "report.clirr.description" );
+    public String getDescription(Locale locale) {
+        return getBundle(locale).getString("report.clirr.description");
     }
 
-    public String getName( Locale locale )
-    {
-        return getBundle( locale ).getString( "report.clirr.name" );
+    public String getName(Locale locale) {
+        return getBundle(locale).getString("report.clirr.name");
     }
 
-    public String getOutputName()
-    {
+    public String getOutputName() {
         return "clirr-report";
     }
 
-    private ResourceBundle getBundle( Locale locale )
-    {
-        return ResourceBundle.getBundle( "clirr-report", locale, getClass().getClassLoader() );
+    private ResourceBundle getBundle(Locale locale) {
+        return ResourceBundle.getBundle("clirr-report", locale, getClass().getClassLoader());
     }
 
-    public boolean canGenerateReport()
-    {
-        try
-        {
-            if ( skip )
-            {
-                getLog().info( "Skipping execution" );
+    public boolean canGenerateReport() {
+        try {
+            if (skip) {
+                getLog().info("Skipping execution");
                 return false;
             }
             return canGenerate();
-        }
-        catch ( MojoFailureException e )
-        {
-            getLog().error( "Can't generate Clirr report: " + e.getMessage() );
+        } catch (MojoFailureException e) {
+            getLog().error("Can't generate Clirr report: " + e.getMessage());
             return false;
-        }
-        catch ( MojoExecutionException e )
-        {
-            getLog().error( "Can't generate Clirr report: " + e.getMessage(), e );
+        } catch (MojoExecutionException e) {
+            getLog().error("Can't generate Clirr report: " + e.getMessage(), e);
             return false;
         }
     }
 
     // eventually, we must replace this with the o.a.m.d.s.Sink class as a parameter
-    public void generate( org.codehaus.doxia.sink.Sink sink, Locale locale )
-        throws MavenReportException
-    {
-        generate( (Sink) sink, locale );
-
+    public void generate(org.codehaus.doxia.sink.Sink sink, Locale locale) throws MavenReportException {
+        generate((Sink) sink, locale);
     }
 }

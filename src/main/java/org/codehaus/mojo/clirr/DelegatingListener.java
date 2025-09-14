@@ -16,34 +16,32 @@ package org.codehaus.mojo.clirr;
  * limitations under the License.
  */
 
-import net.sf.clirr.core.ApiDifference;
-import net.sf.clirr.core.DiffListener;
-import net.sf.clirr.core.Severity;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.sf.clirr.core.ApiDifference;
+import net.sf.clirr.core.DiffListener;
+import net.sf.clirr.core.Severity;
+
 /**
  * Delegates to a number of listeners, filtering by severity.
  *
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  */
-public class DelegatingListener
-    implements MojoDiffListener
-{
+public class DelegatingListener implements MojoDiffListener {
     private final List<DiffListener> listeners;
 
     private final Severity minSeverity;
 
     private final List<Difference> ignored;
 
-    private Map<Difference, Map<Object, List<ApiDifference>>> deferredMatchesPerDifference = new HashMap<Difference, Map<Object, List<ApiDifference>>>();
+    private Map<Difference, Map<Object, List<ApiDifference>>> deferredMatchesPerDifference =
+            new HashMap<Difference, Map<Object, List<ApiDifference>>>();
 
-    public DelegatingListener( List<DiffListener> listeners, Severity minSeverity, List<Difference> ignored )
-    {
+    public DelegatingListener(List<DiffListener> listeners, Severity minSeverity, List<Difference> ignored) {
         this.listeners = listeners == null ? Collections.<DiffListener>emptyList() : listeners;
 
         this.minSeverity = minSeverity;
@@ -51,90 +49,68 @@ public class DelegatingListener
         this.ignored = ignored == null ? Collections.<Difference>emptyList() : ignored;
     }
 
-    public void start()
-    {
+    public void start() {
         deferredMatchesPerDifference.clear();
 
-        for ( DiffListener listener : listeners )
-        {
+        for (DiffListener listener : listeners) {
             listener.start();
         }
     }
 
-    public void reportDiff( ApiDifference apiDifference )
-    {
-        if ( ( minSeverity == null || minSeverity.compareTo( apiDifference.getMaximumSeverity() ) <= 0 ) )
-        {
-            Difference reasonToIgnoreDiff = getReasonToIgnoreDiff( apiDifference );
-            if ( reasonToIgnoreDiff == null )
-            {
+    public void reportDiff(ApiDifference apiDifference) {
+        if ((minSeverity == null || minSeverity.compareTo(apiDifference.getMaximumSeverity()) <= 0)) {
+            Difference reasonToIgnoreDiff = getReasonToIgnoreDiff(apiDifference);
+            if (reasonToIgnoreDiff == null) {
                 reportDiff_(apiDifference);
-            }
-            else
-            {
+            } else {
                 reportIgnoredDiff(apiDifference, reasonToIgnoreDiff);
             }
         }
     }
 
-    private void reportDiff_(ApiDifference apiDifference)
-    {
-        for ( DiffListener listener : listeners )
-        {
-            listener.reportDiff( apiDifference );
+    private void reportDiff_(ApiDifference apiDifference) {
+        for (DiffListener listener : listeners) {
+            listener.reportDiff(apiDifference);
         }
     }
 
-    public void reportIgnoredDiff( ApiDifference ignoredDiff, Difference reason )
-    {
-        for ( DiffListener listener : listeners )
-        {
-            if ( listener instanceof MojoDiffListener )
-            {
+    public void reportIgnoredDiff(ApiDifference ignoredDiff, Difference reason) {
+        for (DiffListener listener : listeners) {
+            if (listener instanceof MojoDiffListener) {
                 MojoDiffListener l = (MojoDiffListener) listener;
-                l.reportIgnoredDiff( ignoredDiff, reason );
+                l.reportIgnoredDiff(ignoredDiff, reason);
             }
         }
     }
 
-    public void stop()
-    {
-        //process the deferred matches now
-        for ( Map.Entry<Difference, Map<Object, List<ApiDifference>>> perDifferenceEntry : deferredMatchesPerDifference.entrySet() )
-        {
+    public void stop() {
+        // process the deferred matches now
+        for (Map.Entry<Difference, Map<Object, List<ApiDifference>>> perDifferenceEntry :
+                deferredMatchesPerDifference.entrySet()) {
             Difference diff = perDifferenceEntry.getKey();
             Map<Object, List<ApiDifference>> diffsPerId = perDifferenceEntry.getValue();
 
-            for ( List<ApiDifference> apiDiffs : diffsPerId.values() )
-            {
-                if ( !diff.resolveDefferedMatches( apiDiffs ) )
-                {
-                    for ( ApiDifference apiDiff : apiDiffs )
-                    {
+            for (List<ApiDifference> apiDiffs : diffsPerId.values()) {
+                if (!diff.resolveDefferedMatches(apiDiffs)) {
+                    for (ApiDifference apiDiff : apiDiffs) {
                         reportDiff_(apiDiff);
                     }
-                }
-                else
-                {
-                    for ( ApiDifference apiDiff : apiDiffs )
-                    {
+                } else {
+                    for (ApiDifference apiDiff : apiDiffs) {
                         reportIgnoredDiff(apiDiff, diff);
                     }
                 }
             }
         }
 
-        //and stop the underlying listeners
-        for ( DiffListener listener : listeners )
-        {
+        // and stop the underlying listeners
+        for (DiffListener listener : listeners) {
             listener.stop();
         }
     }
 
-    private Difference getReasonToIgnoreDiff( ApiDifference apiDiff )
-    {
-        if ( ignored == null )
-        {
+    private Difference getReasonToIgnoreDiff(ApiDifference apiDiff) {
+        if (ignored == null) {
             return null;
         }
 
@@ -142,19 +118,15 @@ public class DelegatingListener
         boolean matched = false;
 
         Difference reason = null;
-        for ( Difference difference : ignored )
-        {
-            if ( difference == null )
-            {
+        for (Difference difference : ignored) {
+            if (difference == null) {
                 continue;
             }
-            Difference.Result res = difference.matches( apiDiff );
+            Difference.Result res = difference.matches(apiDiff);
 
-            switch ( res.getCode() )
-            {
+            switch (res.getCode()) {
                 case Difference.Result.MATCHED:
-                    if ( reason == null )
-                    {
+                    if (reason == null) {
                         reason = difference;
                     }
                     matched = true;
@@ -163,23 +135,20 @@ public class DelegatingListener
                     break;
                 case Difference.Result.DEFERRED_MATCH:
                     Map<Object, List<ApiDifference>> diffsPerDifferentiator =
-                        deferredMatchesPerDifference.get( difference );
-                    if ( diffsPerDifferentiator == null )
-                    {
+                            deferredMatchesPerDifference.get(difference);
+                    if (diffsPerDifferentiator == null) {
                         diffsPerDifferentiator = new HashMap<Object, List<ApiDifference>>();
-                        deferredMatchesPerDifference.put( difference, diffsPerDifferentiator );
+                        deferredMatchesPerDifference.put(difference, diffsPerDifferentiator);
                     }
 
-                    List<ApiDifference> diffs = diffsPerDifferentiator.get( res.getDifferentiator() );
-                    if ( diffs == null )
-                    {
+                    List<ApiDifference> diffs = diffsPerDifferentiator.get(res.getDifferentiator());
+                    if (diffs == null) {
                         diffs = new ArrayList<ApiDifference>();
-                        diffsPerDifferentiator.put( res.getDifferentiator(), diffs );
+                        diffsPerDifferentiator.put(res.getDifferentiator(), diffs);
                     }
 
-                    diffs.add( apiDiff );
-                    if ( reason == null )
-                    {
+                    diffs.add(apiDiff);
+                    if (reason == null) {
                         reason = difference;
                     }
                     someDeferred = true;
@@ -187,9 +156,8 @@ public class DelegatingListener
             }
         }
 
-        if ( matched || someDeferred )
-        {
-          return reason;
+        if (matched || someDeferred) {
+            return reason;
         }
         return null;
     }

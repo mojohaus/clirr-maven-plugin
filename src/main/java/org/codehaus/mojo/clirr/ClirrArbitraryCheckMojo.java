@@ -16,6 +16,15 @@ package org.codehaus.mojo.clirr;
  * limitations under the License.
  */
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+
 import net.sf.clirr.core.ApiDifference;
 import net.sf.clirr.core.Checker;
 import net.sf.clirr.core.ClassFilter;
@@ -33,15 +42,6 @@ import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.codehaus.plexus.i18n.I18N;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-
 /**
  * Check for compatibility between two arbitrary artifact sets.
  *
@@ -51,9 +51,7 @@ import java.util.Set;
  * @phase verify
  * @execute phase="compile"
  */
-public class ClirrArbitraryCheckMojo
-    extends AbstractClirrMojo
-{
+public class ClirrArbitraryCheckMojo extends AbstractClirrMojo {
     /**
      * Whether to fail on errors.
      *
@@ -89,205 +87,157 @@ public class ClirrArbitraryCheckMojo
      */
     protected ArtifactSpecification[] newComparisonArtifacts;
 
-    protected void doExecute()
-        throws MojoExecutionException, MojoFailureException
-    {
-        if ( oldComparisonArtifacts == null || oldComparisonArtifacts.length == 0 )
-        {
-            getLog().info( "Missing required oldComparisonArtifacts" );
+    protected void doExecute() throws MojoExecutionException, MojoFailureException {
+        if (oldComparisonArtifacts == null || oldComparisonArtifacts.length == 0) {
+            getLog().info("Missing required oldComparisonArtifacts");
         }
 
-        if ( newComparisonArtifacts == null || newComparisonArtifacts.length == 0 )
-        {
-            getLog().info( "Missing required newComparisonArtifacts" );
+        if (newComparisonArtifacts == null || newComparisonArtifacts.length == 0) {
+            getLog().info("Missing required newComparisonArtifacts");
         }
 
         ClirrDiffListener listener;
-        try
-        {
-            listener = executeClirr( Severity.INFO );
-        }
-        catch ( MissingPreviousException e )
-        {
-            getLog().debug( e );
-            getLog().info( "No previous version was found. Use 'comparisonArtifacts'"
-                               + " for explicit configuration if you think this is wrong." );
+        try {
+            listener = executeClirr(Severity.INFO);
+        } catch (MissingPreviousException e) {
+            getLog().debug(e);
+            getLog().info("No previous version was found. Use 'comparisonArtifacts'"
+                    + " for explicit configuration if you think this is wrong.");
             return;
         }
 
         Locale locale = Locale.getDefault();
 
-        int errorCount = listener.getSeverityCount( Severity.ERROR );
-        if ( failOnError && errorCount > 0 )
-        {
-            log( listener, Severity.ERROR );
+        int errorCount = listener.getSeverityCount(Severity.ERROR);
+        if (failOnError && errorCount > 0) {
+            log(listener, Severity.ERROR);
             String message;
-            if ( errorCount > 1 )
-            {
-                String[] args = new String[]{ String.valueOf( errorCount ) };
-                message = i18n.format( "clirr-report", locale, "check.clirr.failure.errors", args );
+            if (errorCount > 1) {
+                String[] args = new String[] {String.valueOf(errorCount)};
+                message = i18n.format("clirr-report", locale, "check.clirr.failure.errors", args);
+            } else {
+                message = i18n.getString("clirr-report", locale, "check.clirr.failure.error");
             }
-            else
-            {
-                message = i18n.getString( "clirr-report", locale, "check.clirr.failure.error" );
-            }
-            throw new MojoFailureException( message );
+            throw new MojoFailureException(message);
         }
 
-        int warningCount = listener.getSeverityCount( Severity.WARNING );
-        if ( failOnWarning && errorCount > 0 )
-        {
-            log( listener, Severity.WARNING );
+        int warningCount = listener.getSeverityCount(Severity.WARNING);
+        if (failOnWarning && errorCount > 0) {
+            log(listener, Severity.WARNING);
             String message;
-            if ( errorCount > 1 )
-            {
-                String[] args = new String[]{ String.valueOf( errorCount ) };
-                message = i18n.format( "clirr-report", locale, "check.clirr.failure.warnings", args );
+            if (errorCount > 1) {
+                String[] args = new String[] {String.valueOf(errorCount)};
+                message = i18n.format("clirr-report", locale, "check.clirr.failure.warnings", args);
+            } else {
+                message = i18n.getString("clirr-report", locale, "check.clirr.failure.warning");
             }
-            else
-            {
-                message = i18n.getString( "clirr-report", locale, "check.clirr.failure.warning" );
-            }
-            throw new MojoFailureException( message );
+            throw new MojoFailureException(message);
         }
 
-        int infoCount = listener.getSeverityCount( Severity.INFO );
+        int infoCount = listener.getSeverityCount(Severity.INFO);
         String[] args =
-            new String[]{ String.valueOf( errorCount ), String.valueOf( warningCount ), String.valueOf( infoCount ) };
-        getLog().info( i18n.format( "clirr-report", locale, "check.clirr.success", args ) );
+                new String[] {String.valueOf(errorCount), String.valueOf(warningCount), String.valueOf(infoCount)};
+        getLog().info(i18n.format("clirr-report", locale, "check.clirr.success", args));
     }
 
-    private void log( ClirrDiffListener listener, Severity severity )
-    {
-        if ( !logResults )
-        {
-            LogDiffListener l = new LogDiffListener( getLog() );
-            for ( Iterator i = listener.getApiDifferences().iterator(); i.hasNext(); )
-            {
+    private void log(ClirrDiffListener listener, Severity severity) {
+        if (!logResults) {
+            LogDiffListener l = new LogDiffListener(getLog());
+            for (Iterator i = listener.getApiDifferences().iterator(); i.hasNext(); ) {
                 ApiDifference difference = (ApiDifference) i.next();
-                if ( difference.getMaximumSeverity().equals( severity ) )
-                {
-                    l.reportDiff( difference );
+                if (difference.getMaximumSeverity().equals(severity)) {
+                    l.reportDiff(difference);
                 }
             }
         }
     }
 
-    protected JavaType[] resolveClasses( ArtifactSpecification[] artifacts, ClassFilter classFilter )
-        throws MojoFailureException, MojoExecutionException
-    {
+    protected JavaType[] resolveClasses(ArtifactSpecification[] artifacts, ClassFilter classFilter)
+            throws MojoFailureException, MojoExecutionException {
         final Set artifactSet;
 
-        artifactSet = resolveArtifacts( artifacts );
+        artifactSet = resolveArtifacts(artifacts);
         Artifact a = null;
-        for ( Iterator iter = artifactSet.iterator(); iter.hasNext(); )
-        {
+        for (Iterator iter = artifactSet.iterator(); iter.hasNext(); ) {
             Artifact artifact = (Artifact) iter.next();
-            if ( a == null )
-            {
+            if (a == null) {
                 a = artifact;
             }
-            getLog().debug(
-                "Comparing to " + artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getVersion()
-                    + ":" + artifact.getClassifier() + ":" + artifact.getType() );
+            getLog().debug("Comparing to " + artifact.getGroupId() + ":" + artifact.getArtifactId() + ":"
+                    + artifact.getVersion() + ":" + artifact.getClassifier() + ":" + artifact.getType());
         }
 
-        try
-        {
-            for ( Iterator iter = artifactSet.iterator(); iter.hasNext(); )
-            {
+        try {
+            for (Iterator iter = artifactSet.iterator(); iter.hasNext(); ) {
                 Artifact artifact = (Artifact) iter.next();
-                resolver.resolve( artifact, project.getRemoteArtifactRepositories(), localRepository );
+                resolver.resolve(artifact, project.getRemoteArtifactRepositories(), localRepository);
             }
 
-            final List dependencies = getTransitiveDependencies( artifactSet );
+            final List dependencies = getTransitiveDependencies(artifactSet);
 
-            ClassLoader origDepCL = createClassLoader( dependencies, artifactSet );
+            ClassLoader origDepCL = createClassLoader(dependencies, artifactSet);
             final File[] files = new File[artifactSet.size()];
             int i = 0;
-            for ( Iterator iter = artifactSet.iterator(); iter.hasNext(); )
-            {
+            for (Iterator iter = artifactSet.iterator(); iter.hasNext(); ) {
                 Artifact artifact = (Artifact) iter.next();
-                files[i++] = new File( localRepository.getBasedir(), localRepository.pathOf( artifact ) );
+                files[i++] = new File(localRepository.getBasedir(), localRepository.pathOf(artifact));
             }
-            return BcelTypeArrayBuilder.createClassSet( files, origDepCL, classFilter );
-        }
-        catch ( ProjectBuildingException e )
-        {
-            throw new MojoExecutionException( "Failed to build project for previous artifact: " + e.getMessage(), e );
-        }
-        catch ( InvalidDependencyVersionException e )
-        {
-            throw new MojoExecutionException( e.getMessage(), e );
-        }
-        catch ( ArtifactResolutionException e )
-        {
-            throw new MissingPreviousException( "Error resolving previous version: " + e.getMessage(), e );
-        }
-        catch ( ArtifactNotFoundException e )
-        {
-            throw new MojoExecutionException( "Error finding previous version: " + e.getMessage(), e );
-        }
-        catch ( MalformedURLException e )
-        {
-            throw new MojoExecutionException( "Error creating classloader for previous version's classes", e );
+            return BcelTypeArrayBuilder.createClassSet(files, origDepCL, classFilter);
+        } catch (ProjectBuildingException e) {
+            throw new MojoExecutionException("Failed to build project for previous artifact: " + e.getMessage(), e);
+        } catch (InvalidDependencyVersionException e) {
+            throw new MojoExecutionException(e.getMessage(), e);
+        } catch (ArtifactResolutionException e) {
+            throw new MissingPreviousException("Error resolving previous version: " + e.getMessage(), e);
+        } catch (ArtifactNotFoundException e) {
+            throw new MojoExecutionException("Error finding previous version: " + e.getMessage(), e);
+        } catch (MalformedURLException e) {
+            throw new MojoExecutionException("Error creating classloader for previous version's classes", e);
         }
     }
 
-    protected ClirrDiffListener executeClirr( Severity minSeverity )
-        throws MojoExecutionException, MojoFailureException
-    {
+    protected ClirrDiffListener executeClirr(Severity minSeverity) throws MojoExecutionException, MojoFailureException {
         ClirrDiffListener listener = new ClirrDiffListener();
 
-        ClassFilter classFilter = new ClirrClassFilter( includes, excludes );
+        ClassFilter classFilter = new ClirrClassFilter(includes, excludes);
 
-        JavaType[] origClasses = resolveClasses( oldComparisonArtifacts, classFilter );
+        JavaType[] origClasses = resolveClasses(oldComparisonArtifacts, classFilter);
 
-        JavaType[] currentClasses = resolveClasses( newComparisonArtifacts, classFilter );
+        JavaType[] currentClasses = resolveClasses(newComparisonArtifacts, classFilter);
 
         // Create a Clirr checker and execute
         Checker checker = new Checker();
 
         List listeners = new ArrayList();
 
-        listeners.add( listener );
+        listeners.add(listener);
 
-        if ( xmlOutputFile != null )
-        {
-            try
-            {
-                listeners.add( new XmlDiffListener( xmlOutputFile.getAbsolutePath() ) );
-            }
-            catch ( IOException e )
-            {
-                throw new MojoExecutionException( "Error adding '" + xmlOutputFile + "' for output: " + e.getMessage(),
-                                                  e );
+        if (xmlOutputFile != null) {
+            try {
+                listeners.add(new XmlDiffListener(xmlOutputFile.getAbsolutePath()));
+            } catch (IOException e) {
+                throw new MojoExecutionException(
+                        "Error adding '" + xmlOutputFile + "' for output: " + e.getMessage(), e);
             }
         }
 
-        if ( textOutputFile != null )
-        {
-            try
-            {
-                listeners.add( new PlainDiffListener( textOutputFile.getAbsolutePath() ) );
-            }
-            catch ( IOException e )
-            {
-                throw new MojoExecutionException( "Error adding '" + textOutputFile + "' for output: " + e.getMessage(),
-                                                  e );
+        if (textOutputFile != null) {
+            try {
+                listeners.add(new PlainDiffListener(textOutputFile.getAbsolutePath()));
+            } catch (IOException e) {
+                throw new MojoExecutionException(
+                        "Error adding '" + textOutputFile + "' for output: " + e.getMessage(), e);
             }
         }
 
-        if ( logResults )
-        {
-            listeners.add( new LogDiffListener( getLog() ) );
+        if (logResults) {
+            listeners.add(new LogDiffListener(getLog()));
         }
 
-        checker.addDiffListener( new DelegatingListener( listeners, minSeverity, getAllIgnored() ) );
+        checker.addDiffListener(new DelegatingListener(listeners, minSeverity, getAllIgnored()));
 
-        checker.reportDiffs( origClasses, currentClasses );
+        checker.reportDiffs(origClasses, currentClasses);
 
         return listener;
     }
-
 }

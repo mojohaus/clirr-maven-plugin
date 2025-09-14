@@ -19,8 +19,7 @@ package org.codehaus.mojo.clirr;
 /**
  * An artifact specification.
  */
-public class ArtifactSpecification
-{
+public class ArtifactSpecification {
     /**
      * The artifacts groupID.
      */
@@ -51,8 +50,7 @@ public class ArtifactSpecification
      *
      * @return the group id
      */
-    public String getGroupId()
-    {
+    public String getGroupId() {
         return groupId;
     }
 
@@ -61,8 +59,7 @@ public class ArtifactSpecification
      *
      * @param groupId the new group id
      */
-    public void setGroupId( String groupId )
-    {
+    public void setGroupId(String groupId) {
         this.groupId = groupId;
     }
 
@@ -71,8 +68,7 @@ public class ArtifactSpecification
      *
      * @return the artifact id
      */
-    public String getArtifactId()
-    {
+    public String getArtifactId() {
         return artifactId;
     }
 
@@ -81,8 +77,7 @@ public class ArtifactSpecification
      *
      * @param artifactId the new artifact id
      */
-    public void setArtifactId( String artifactId )
-    {
+    public void setArtifactId(String artifactId) {
         this.artifactId = artifactId;
     }
 
@@ -91,8 +86,7 @@ public class ArtifactSpecification
      *
      * @return the version
      */
-    public String getVersion()
-    {
+    public String getVersion() {
         return version;
     }
 
@@ -101,8 +95,7 @@ public class ArtifactSpecification
      *
      * @param version the new version
      */
-    public void setVersion( String version )
-    {
+    public void setVersion(String version) {
         this.version = version;
     }
 
@@ -111,8 +104,7 @@ public class ArtifactSpecification
      *
      * @return the classifier
      */
-    public String getClassifier()
-    {
+    public String getClassifier() {
         return classifier;
     }
 
@@ -121,8 +113,7 @@ public class ArtifactSpecification
      *
      * @param classifier the new classifier
      */
-    public void setClassifier( String classifier )
-    {
+    public void setClassifier(String classifier) {
         this.classifier = classifier;
     }
 
@@ -131,8 +122,7 @@ public class ArtifactSpecification
      *
      * @return the type
      */
-    public String getType()
-    {
+    public String getType() {
         return type;
     }
 
@@ -141,8 +131,7 @@ public class ArtifactSpecification
      *
      * @param type the new type
      */
-    public void setType( String type )
-    {
+    public void setType(String type) {
         this.type = type;
     }
 }

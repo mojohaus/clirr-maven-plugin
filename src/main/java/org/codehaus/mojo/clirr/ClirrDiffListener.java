@@ -16,10 +16,6 @@ package org.codehaus.mojo.clirr;
  * limitations under the License.
  */
 
-import net.sf.clirr.core.ApiDifference;
-import net.sf.clirr.core.DiffListenerAdapter;
-import net.sf.clirr.core.Severity;
-
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -27,15 +23,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.sf.clirr.core.ApiDifference;
+import net.sf.clirr.core.DiffListenerAdapter;
+import net.sf.clirr.core.Severity;
+
 /**
  * Listen to the Clirr events.
  *
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  */
-public class ClirrDiffListener
-    extends DiffListenerAdapter
-    implements MojoDiffListener
-{
+public class ClirrDiffListener extends DiffListenerAdapter implements MojoDiffListener {
     /**
      * The list of differences that occurred.
      */
@@ -48,71 +45,58 @@ public class ClirrDiffListener
     /**
      * The number messages for each severity.
      */
-    private Map<Severity, Integer> counts = new HashMap<Severity, Integer>( 3 );
+    private Map<Severity, Integer> counts = new HashMap<Severity, Integer>(3);
 
     @Override
-    public void reportDiff( ApiDifference apiDifference )
-    {
-        incrementCount( apiDifference.getMaximumSeverity(), counts );
+    public void reportDiff(ApiDifference apiDifference) {
+        incrementCount(apiDifference.getMaximumSeverity(), counts);
 
-        apiDifferences.add( apiDifference );
+        apiDifferences.add(apiDifference);
     }
 
-    public void reportIgnoredDiff( ApiDifference ignoredDiff, Difference reason )
-    {
-        List<ApiDifference> diffs = ignoredApiDifferences.get( reason );
-        if ( diffs == null ) {
+    public void reportIgnoredDiff(ApiDifference ignoredDiff, Difference reason) {
+        List<ApiDifference> diffs = ignoredApiDifferences.get(reason);
+        if (diffs == null) {
             diffs = new LinkedList<ApiDifference>();
-            ignoredApiDifferences.put( reason, diffs );
+            ignoredApiDifferences.put(reason, diffs);
         }
-        diffs.add( ignoredDiff );
+        diffs.add(ignoredDiff);
     }
 
     @Override
-    public void stop()
-    {
-        Collections.sort( apiDifferences, new Comparator<ApiDifference>()
-        {
-            public int compare( ApiDifference d1, ApiDifference d2 )
-            {
+    public void stop() {
+        Collections.sort(apiDifferences, new Comparator<ApiDifference>() {
+            public int compare(ApiDifference d1, ApiDifference d2) {
                 // compare maximum severities - order highest to lowest.
-                return d2.getMaximumSeverity().compareTo( d1.getMaximumSeverity() );
+                return d2.getMaximumSeverity().compareTo(d1.getMaximumSeverity());
             }
-        } );
+        });
     }
 
-    private void incrementCount( Severity sev, Map<Severity, Integer> counts )
-    {
-        if ( sev != null )
-        {
-            int count = getCount( counts, sev );
-            counts.put( sev, count + 1 );
+    private void incrementCount(Severity sev, Map<Severity, Integer> counts) {
+        if (sev != null) {
+            int count = getCount(counts, sev);
+            counts.put(sev, count + 1);
         }
     }
 
-    private int getCount( Map<Severity, Integer> counts, Severity sev )
-    {
-        Integer count = counts.get( sev );
-        if ( count == null )
-        {
+    private int getCount(Map<Severity, Integer> counts, Severity sev) {
+        Integer count = counts.get(sev);
+        if (count == null) {
             count = 0;
         }
         return count.intValue();
     }
 
-    public List<ApiDifference> getApiDifferences()
-    {
-        return Collections.unmodifiableList( apiDifferences );
+    public List<ApiDifference> getApiDifferences() {
+        return Collections.unmodifiableList(apiDifferences);
     }
 
-    public Map<Difference, List<ApiDifference>> getIgnoredApiDifferences()
-    {
-      return Collections.unmodifiableMap( ignoredApiDifferences);
+    public Map<Difference, List<ApiDifference>> getIgnoredApiDifferences() {
+        return Collections.unmodifiableMap(ignoredApiDifferences);
     }
 
-    public int getSeverityCount( Severity severity )
-    {
-        return getCount( counts, severity );
+    public int getSeverityCount(Severity severity) {
+        return getCount(counts, severity);
     }
-
 }

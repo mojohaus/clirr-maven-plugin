@@ -17,9 +17,7 @@ import net.sf.clirr.core.MessageTranslator;
  * @author Lukas Krejci
  * @since 2.6
  */
-public class TypeRevealingXmlDiffListener
-    implements DiffListener
-{
+public class TypeRevealingXmlDiffListener implements DiffListener {
     private static final String DIFFREPORT = "diffreport";
 
     private static final String DIFFERENCE = "difference";
@@ -28,42 +26,34 @@ public class TypeRevealingXmlDiffListener
 
     private final PrintStream out;
 
-    public TypeRevealingXmlDiffListener( String outFile )
-        throws FileNotFoundException
-    {
-        out = new PrintStream( new FileOutputStream( outFile ) );
+    public TypeRevealingXmlDiffListener(String outFile) throws FileNotFoundException {
+        out = new PrintStream(new FileOutputStream(outFile));
     }
 
-    public void reportDiff( ApiDifference difference )
-    {
-        out.print( "  <" + DIFFERENCE );
-        out.print( " type=\"" + difference.getMessage().getId() + "\"" );
-        out.print( " binseverity=\"" + difference.getBinaryCompatibilitySeverity() + "\"" );
-        out.print( " srcseverity=\"" + difference.getSourceCompatibilitySeverity() + "\"" );
-        out.print( " class=\"" + difference.getAffectedClass() + "\"" );
-        if ( difference.getAffectedMethod() != null )
-        {
-            out.print( " method=\"" + difference.getAffectedMethod() + "\"" );
+    public void reportDiff(ApiDifference difference) {
+        out.print("  <" + DIFFERENCE);
+        out.print(" type=\"" + difference.getMessage().getId() + "\"");
+        out.print(" binseverity=\"" + difference.getBinaryCompatibilitySeverity() + "\"");
+        out.print(" srcseverity=\"" + difference.getSourceCompatibilitySeverity() + "\"");
+        out.print(" class=\"" + difference.getAffectedClass() + "\"");
+        if (difference.getAffectedMethod() != null) {
+            out.print(" method=\"" + difference.getAffectedMethod() + "\"");
         }
-        if ( difference.getAffectedField() != null )
-        {
-            out.print( " field=\"" + difference.getAffectedField() + "\"" );
+        if (difference.getAffectedField() != null) {
+            out.print(" field=\"" + difference.getAffectedField() + "\"");
         }
-        out.print( ">" );
-        out.print( difference.getReport( translator ) ); // TODO: XML escapes??
-        out.println( "</" + DIFFERENCE + '>' );
+        out.print(">");
+        out.print(difference.getReport(translator)); // TODO: XML escapes??
+        out.println("</" + DIFFERENCE + '>');
     }
 
-    public void start()
-    {
-        out.println( "<?xml version=\"1.0\"?>" );
-        out.println( '<' + DIFFREPORT + '>' );
+    public void start() {
+        out.println("<?xml version=\"1.0\"?>");
+        out.println('<' + DIFFREPORT + '>');
     }
 
-
-    public void stop()
-    {
-        out.println( "</" + DIFFREPORT + '>' );
+    public void stop() {
+        out.println("</" + DIFFREPORT + '>');
         out.close();
     }
 }

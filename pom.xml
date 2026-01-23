@@ -127,7 +127,7 @@
     <mavenVersion>2.2.1</mavenVersion>
     <mojo.java.target>8</mojo.java.target>
     <sitePluginVersion>3.7.1</sitePluginVersion>
-    <bcelVersion>6.11.0</bcelVersion>
+    <bcelVersion>6.12.0</bcelVersion>
   </properties>
 
   <dependencies>

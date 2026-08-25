@@ -1,0 +1,70 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.codehaus.mojo.clirr</groupId>
+  <artifactId>MCLIRR-98</artifactId>
+  <version>2.0</version>
+  <packaging>jar</packaging>
+
+  <name>MCLIRR-98</name>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>@sitePluginVersion@</version>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>clirr-maven-plugin</artifactId>
+        <version>@project.version@</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <comparisonVersion>1.0</comparisonVersion>
+          <textOutputFile>${project.build.directory}/clirr-check-results.txt</textOutputFile>
+          <xmlOutputFile>${project.build.directory}/clirr-check-results.xml</xmlOutputFile>
+          <ignored>
+            <difference>
+              <className>Changed</className>
+              <method>Changed(java.lang.Integer)</method>
+              <differenceType>7005</differenceType>
+              <to>Changed(java.lang.String)</to>
+              <justification>just because</justification>
+            </difference>
+            <difference>
+              <className>Changed</className>
+              <method>void setValue(java.lang.String)</method>
+              <differenceType>7005</differenceType>
+              <to>void setValue(java.lang.Double)</to>
+              <justification>just because</justification>
+            </difference>
+          </ignored>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <reporting>
+    <excludeDefaults>true</excludeDefaults>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>clirr-maven-plugin</artifactId>
+        <version>@project.version@</version>
+      </plugin>
+    </plugins>
+  </reporting>
+</project>

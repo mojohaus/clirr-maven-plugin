@@ -226,6 +226,22 @@
     </pluginManagement>
   </build>
 
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <!-- Mojo classes still carry legacy @goal/@phase/@parameter javadoc tags for the
+               java-javadoc extractor (see pluginManagement above); modern javadoc tools treat
+               those as unknown-tag errors, so don't let the javadoc report fail the site build
+               over them. -->
+          <failOnError>false</failOnError>
+        </configuration>
+      </plugin>
+    </plugins>
+  </reporting>
+
   <profiles>
     <profile>
       <id>run-its</id>

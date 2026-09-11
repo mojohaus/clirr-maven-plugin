@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html","k":"18"},{"l":"org.codehaus.mojo.clirr"},{"l":"org.codehaus.mojo.clirr_maven_plugin"}];updateSearchResults();
